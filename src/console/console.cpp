@@ -31,13 +31,11 @@ CConsole::CConsole() : m_OwnConsole(false) {
 
 	SetConsoleCtrlHandler(MyConsoleCtrlHandler, TRUE);
 	RemoveMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
-	const int in = _open_osfhandle(INT_PTR(GetStdHandle(STD_INPUT_HANDLE)), _O_TEXT);
-	const int out = _open_osfhandle(INT_PTR(GetStdHandle(STD_OUTPUT_HANDLE)), _O_TEXT);
-	m_OldStdin = *stdin;
-	m_OldStdout = *stdout;
 
-	*stdin = *_fdopen(in, "r");
-	*stdout = *_fdopen(out, "w");
+	FILE *tmp;
+	freopen_s(&tmp, "conout$", "w", stdout);
+	freopen_s(&tmp, "conout$", "w", stderr);
+	freopen_s(&tmp, "CONIN$", "r", stdin);
 
 	// Redirect std::cout to the same location as stdout, otherwise you it won't appear on the console.
 	sb = std::cout.rdbuf(&obuf);
@@ -48,10 +46,6 @@ CConsole::CConsole() : m_OwnConsole(false) {
 CConsole::~CConsole() {
 	if (m_OwnConsole) {
 		std::cout.rdbuf(sb);
-		fclose(stdout);
-		fclose(stdin);
-		*stdout = m_OldStdout;
-		*stdin = m_OldStdin;
 		SetConsoleCtrlHandler(MyConsoleCtrlHandler, FALSE);
 		FreeConsole();
 	}
