@@ -8,6 +8,7 @@
 #include "console/console.h"
 #include "threading/queue.h"
 #include "http/http.h"
+#include "vr/vr.h"
 
 #include <thread>
 #include <list>
@@ -56,7 +57,8 @@ namespace pd2hook
 		CREATE_NORMAL_CALLABLE_SIGNATURE(lua_setfield, void, "\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x10\x56\x8B\x75\x08\x57\xFF\x75", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, const char*)
 		CREATE_NORMAL_CALLABLE_SIGNATURE(lua_createtable, void, "\x56\x8B\x74\x24\x08\x8B\x4E\x08\x8B\x41\x14\x3B\x41\x18\x72\x07\x8B\xCE\xE8\x00\x00\x00\x00\x8B\x44\x24\x10\x85\xC0\x74\x12\x83", "xxxxxxxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, int, int)
 		CREATE_NORMAL_CALLABLE_SIGNATURE(lua_insert, void, "\x8B\x4C\x24\x08\x56\x57\x85\xC9\x7E\x21\x8B\x54\x24\x0C\x8D\x71", "xxxxxxxxxxxxxxxx", 0, lua_State*, int)
-		CREATE_NORMAL_CALLABLE_SIGNATURE(lua_replace, void, "\x56\x57\x8B\x7C\x24\x10\x81\xFF\xEE\xD8\xFF\xFF\x75\x16\x8B\x4C\x24\x0C\x5F\x8B\x41\x14\x8D\x71\x14\x8B\x40\xF8\x83\x06\xF8\x89", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int)
+		// Missing? We don't need it anyway.
+		//CREATE_NORMAL_CALLABLE_SIGNATURE(lua_replace, void, "\x56\x57\x8B\x7C\x24\x10\x81\xFF\xEE\xD8\xFF\xFF\x75\x16\x8B\x4C\x24\x0C\x5F\x8B\x41\x14\x8D\x71\x14\x8B\x40\xF8\x83\x06\xF8\x89", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int)
 		CREATE_NORMAL_CALLABLE_SIGNATURE(lua_remove, void, "\x8B\x4C\x24\x08\x56\x57\x85\xC9\x7E\x21\x8B\x7C\x24\x0C\x8B\x47\x10\x8B\x57\x14\x8D\x77\x14\x8D\x04\xC8\x83\xC0\xF8\x3B\xC2\x72", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int)
 		CREATE_NORMAL_CALLABLE_SIGNATURE(lua_newstate, lua_State*, "\x53\x8B\x5C\x24\x0C\x55\x8B\x6C\x24\x0C\x56\x57\x68\x40\x10\x00\x00\x6A\x00\x6A\x00\x53\xFF\xD5\x8B\xF0\x83\xC4\x10\x8D\x7E\x30", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_Alloc, void*)
 		CREATE_NORMAL_CALLABLE_SIGNATURE(lua_close, void, "\x8B\x44\x24\x04\x53\x56\x57\x8B\x78\x08\x8B\x77\x74\x56\xE8", "xxxxxxxxxxxxxxx", 0, lua_State*)
@@ -90,7 +92,7 @@ namespace pd2hook
 	CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_unref, void, "\x53\x8B\x5C\x24\x10\x85\xDB\x78\x67\x56\x8B\x74\x24\x0C\x57\x8B", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, int);
 	CREATE_CALLABLE_CLASS_SIGNATURE(do_game_update, void*, "\x56\xFF\x74\x24\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxx????xxx", 0, int*, int*)
 		CREATE_CALLABLE_CLASS_SIGNATURE(luaL_newstate, int, "\x53\x56\x33\xDB\x57\x8B\xF1\x39\x5C\x24\x18\x0F", "xxxxxxxxxxxx", 0, char, char, int)
-		CREATE_CALLABLE_CLASS_SIGNATURE(luaL_newstate_vr, int, "\x8B\x44\x24\x0C\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68\xE0\x87\x7E", "xxxxxxxxxxxxxxxx", 0, char, char, int)
+		CREATE_CALLABLE_CLASS_SIGNATURE(luaL_newstate_vr, int, "\x8B\x44\x24\x0C\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68\x30\x84\x7E", "xxxxxxxxxxxxxxxx", 0, char, char, int)
 
 		// lua c-functions
 
@@ -579,6 +581,11 @@ namespace pd2hook
 		return 1;
 	}
 
+	void load_vr_globals(lua_State *L)
+	{
+		
+	}
+
 	int updates = 0;
 	std::thread::id main_thread_id;
 
@@ -664,6 +671,11 @@ namespace pd2hook
 		};
 		luaI_openlib(L, "blt", bltLib, 0);
 
+		if (vrMode)
+		{
+			load_vr_globals(L);
+		}
+
 		int result;
 		PD2HOOK_LOG_LOG("Initiating Hook");
 
@@ -698,20 +710,21 @@ namespace pd2hook
 
 	void InitiateStates()
 	{
+		// Set up logging first, so we can see messages from the signature search process
+		std::ifstream infile("mods/developer.txt");
+		if (infile.good()) {
+			gbl_mConsole = new CConsole();
+		}
+
 		main_thread_id = std::this_thread::get_id();
 
 		SignatureSearch::Search();
+		// VRManager::GetInstance(); // TODO only if VR
 
 		FuncDetour* gameUpdateDetour = new FuncDetour((void**)&do_game_update, do_game_update_new);
 		FuncDetour* newStateDetour = new FuncDetour((void**)&luaL_newstate, luaL_newstate_new);
 		FuncDetour* newStateDetourVr = new FuncDetour((void**)&luaL_newstate_vr, luaL_newstate_new_vr);
 		FuncDetour* luaCloseDetour = new FuncDetour((void**)&lua_close, luaF_close);
-
-		std::ifstream infile("mods/developer.txt");
-		if(infile.good())
-		{
-			gbl_mConsole = new CConsole();
-		}
 	}
 
 	void DestroyStates()
