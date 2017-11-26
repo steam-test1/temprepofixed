@@ -277,6 +277,24 @@ namespace pd2hook
 		return 1;
 	}
 
+	int luaF_isvrhookloaded(lua_State* L) {
+		lua_pushboolean(L, VRManager::GetInstance()->IsLoaded());
+		return 1;
+	}
+
+	int luaF_gethmdbrand(lua_State* L) {
+		std::string hmd = VRManager::GetInstance()->GetHMDBrand();
+		lua_pushstring(L, hmd.c_str());
+		return 1;
+	}
+
+	int luaF_getbuttonstate(lua_State* L) {
+		int id = lua_tonumber(L, -1);
+		lua_remove(L, -1);
+		lua_pushboolean(L, VRManager::GetInstance()->IsExtraButtonPressed(id));
+		return 1;
+	}
+
 	int luaH_getcontents(lua_State* L, bool files)
 	{
 		size_t len;
@@ -583,7 +601,14 @@ namespace pd2hook
 
 	void load_vr_globals(lua_State *L)
 	{
-		
+		luaL_Reg vrLib[] = {
+			{ "getvrstate", luaF_getvrstate },
+			{ "isvrhookloaded", luaF_isvrhookloaded },
+			{ "gethmdbrand", luaF_gethmdbrand },
+			{ "getbuttonstate", luaF_getbuttonstate },
+			{ NULL, NULL }
+		};
+		luaI_openlib(L, "blt_vr", vrLib, 0);
 	}
 
 	int updates = 0;
@@ -666,7 +691,6 @@ namespace pd2hook
 		luaL_Reg bltLib[] = {
 			{ "ispcallforced", luaF_ispcallforced },
 			{ "forcepcalls", luaF_forcepcalls },
-			{ "getvrstate", luaF_getvrstate },
 			{ NULL, NULL }
 		};
 		luaI_openlib(L, "blt", bltLib, 0);
@@ -719,7 +743,7 @@ namespace pd2hook
 		main_thread_id = std::this_thread::get_id();
 
 		SignatureSearch::Search();
-		// VRManager::GetInstance(); // TODO only if VR
+		VRManager::CheckAndLoad();
 
 		FuncDetour* gameUpdateDetour = new FuncDetour((void**)&do_game_update, do_game_update_new);
 		FuncDetour* newStateDetour = new FuncDetour((void**)&luaL_newstate, luaL_newstate_new);
