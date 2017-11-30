@@ -29,6 +29,13 @@ namespace pd2hook {
 		func = (VR_GetGenericInterface_t)GetProcAddress(api, "VR_GetGenericInterface");
 
 		FuncDetour* gameUpdateDetour = new FuncDetour((void**)&func, VR_GetGenericInterface_hook);
+
+#ifdef INJECTABLE_BLT
+		// We will be too late to get the SteamVR call, so load it ourselves
+		// FIXME this doesn't seem to work, but it at least prevents crashes
+		EVRInitError err;
+		func(IVRSystem_Version, &err);
+#endif
 	}
 
 	VRManager::~VRManager() {
@@ -53,15 +60,15 @@ namespace pd2hook {
 		return std::string(name, len - 1); // SteamVR includes null, std::string doesn't.
 	}
 
-	bool VRManager::IsExtraButtonPressed(int hand) {
+	int VRManager::GetButtonsStatus(int hand) {
+		if (steamvr == NULL) return 0;
+
 		VRControllerState_t state;
 		ETrackedControllerRole role = hand == 1 ? TrackedControllerRole_LeftHand : TrackedControllerRole_RightHand;
 		int id = steamvr->GetTrackedDeviceIndexForControllerRole(role);
 		steamvr->GetControllerState(id, &state, sizeof(VRControllerState_t));
 
-		uint64_t mask = ButtonMaskFromId(k_EButton_A);
-
-		return state.ulButtonPressed && mask;
+		return state.ulButtonPressed;
 	}
 
 	VRManager* VRManager::GetInstance() {

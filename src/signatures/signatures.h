@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#ifdef SIG_INCLUDE_MAIN
 #define CREATE_CALLABLE_SIGNATURE(name, retn, signature, mask, offset, ...) \
 	typedef retn(__fastcall *name ## ptr)(__VA_ARGS__); \
 	name ## ptr name = NULL; \
@@ -24,6 +25,13 @@
 	_asm add esp, 4 \
 	lua_setfield(L, LUA_GLOBALSINDEX, name); \
 	_asm add esp, 4
+#else
+
+// If we're not being included directly from InitiateState.cpp, only declare, not define, variables
+#define CREATE_NORMAL_CALLABLE_SIGNATURE(name, retn, signature, mask, offset, ...) \
+	typedef retn(*name ## ptr)(__VA_ARGS__); \
+	extern name ## ptr name;
+#endif
 
 struct SignatureF {
 	const char* funcname;

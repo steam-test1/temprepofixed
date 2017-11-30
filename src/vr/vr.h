@@ -16,7 +16,7 @@ public:
 
 	std::string GetHMDBrand();
 
-	bool IsExtraButtonPressed(int id);
+	int GetButtonsStatus(int hand);
 
 	static VRManager* VRManager::GetInstance();
 

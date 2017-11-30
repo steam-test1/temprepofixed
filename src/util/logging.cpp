@@ -1,4 +1,5 @@
 #include "util/util.h"
+#include "debug/debug.h"
 
 #include <ctime>
 #include <fstream>
@@ -137,6 +138,9 @@ void LoggerImpl::close()
 void LoggerImpl::log(const Message_t& msg)
 {
 	std::lock_guard<std::mutex> lock(GetLoggerMutex());
+
+	DebugConnection::Log(msg);
+
 	if (!mIsOpen)
 	{
 		return;

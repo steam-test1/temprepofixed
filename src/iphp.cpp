@@ -1,3 +1,5 @@
+#ifndef INJECTABLE_BLT
+
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 #include "InitState.h"
@@ -2735,3 +2737,4 @@ extern "C" __declspec(naked) void __stdcall __E__266__()
 		}
 	}
 
+#endif
