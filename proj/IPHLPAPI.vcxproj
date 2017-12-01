@@ -82,7 +82,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\console\console.cpp" />
+    <ClCompile Include="..\src\debug\debug.cpp" />
     <ClCompile Include="..\src\http\http.cpp" />
+    <ClCompile Include="..\src\injectloader.cpp" />
     <ClCompile Include="..\src\iphp.cpp" />
     <ClCompile Include="..\src\InitiateState.cpp" />
     <ClCompile Include="..\src\signatures\signatures.cpp" />
@@ -91,14 +93,19 @@
     <ClCompile Include="..\src\util\files.cpp" />
     <ClCompile Include="..\src\util\logging.cpp" />
     <ClCompile Include="..\src\util\util.cpp" />
+    <ClCompile Include="..\src\vr\vr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\console\console.h" />
+    <ClInclude Include="..\src\debug\debug.h" />
     <ClInclude Include="..\src\http\http.h" />
     <ClInclude Include="..\src\InitState.h" />
+    <ClInclude Include="..\src\signatures\sigdef.h" />
     <ClInclude Include="..\src\signatures\signatures.h" />
     <ClInclude Include="..\src\threading\queue.h" />
     <ClInclude Include="..\src\util\util.h" />
+    <ClInclude Include="..\src\vr\openvr.h" />
+    <ClInclude Include="..\src\vr\vr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
