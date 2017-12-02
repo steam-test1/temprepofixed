@@ -36,3 +36,19 @@ towards and away from you have differnt pitches).
 - `setposition(x,y,z)`: Sets the position in 3D space of the player.
 - `setvelocity(x,y,z)`: Sets the velocity of the player. As per audio sources, this is used for the doppler effect.
 - `setorientation(x,y,z, x,y,z)`: Sets the orientation of the player, with a forward-up vector pair.
+
+# Sample
+
+```
+blt.xaudio.setup()
+
+local buff = blt.xaudio.loadbuffer(ModPath .. "test.ogg")
+
+local src = blt.xaudio.newsource()
+src:setbuffer(buff)
+src:setposition(-1, 0, 0)
+src:play()
+
+blt.xaudio.listener:setposition(-2, 0, 0)
+blt.xaudio.listener:setorientation(1, 0, 0,  0, 1, 0)
+```
