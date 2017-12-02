@@ -13,6 +13,7 @@
 #include "http/http.h"
 #include "vr/vr.h"
 #include "debug/debug.h"
+#include "xaudio/xaudio.h"
 
 #include <thread>
 #include <list>
@@ -580,6 +581,9 @@ namespace pd2hook
 		}
 
 		DebugConnection::AddGlobals(L);
+#ifdef ENABLE_XAUDIO
+		XAudio::Register(L);
+#endif
 
 		int result;
 		PD2HOOK_LOG_LOG("Initiating Hook");

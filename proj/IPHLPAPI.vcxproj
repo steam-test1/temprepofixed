@@ -72,12 +72,12 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CURL_STATICLIB;AL_LIBTYPE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>iphp.def</ModuleDefinitionFile>
-      <AdditionalDependencies>detours.lib;libcurl_a.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcryptoMT.lib;libcurl_a.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -88,14 +88,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CURL_STATICLIB;AL_LIBTYPE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>iphp.def</ModuleDefinitionFile>
-      <AdditionalDependencies>libcryptoMT.lib;libcurl_a.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcryptoMT.lib;libcurl_a.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "C:\Users\Administrator\Static\Build\Payday-2-BLT\proj\Release\IPHLPAPI.dll" "C:\Program Files (x86)\Steam\steamapps\common\PAYDAY 2\IPHLPAPI.dll" /y</Command>
@@ -112,7 +112,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>CURL_STATICLIB;INJECTABLE_BLT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CURL_STATICLIB;AL_LIBTYPE_STATIC;INJECTABLE_BLT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -120,7 +120,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <AdditionalDependencies>libcryptoMT.lib;libcurl_a.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcryptoMT.lib;libcurl_a.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -137,6 +137,8 @@
     <ClCompile Include="..\src\util\logging.cpp" />
     <ClCompile Include="..\src\util\util.cpp" />
     <ClCompile Include="..\src\vr\vr.cpp" />
+    <ClCompile Include="..\src\xaudio\stb_vorbis.c" />
+    <ClCompile Include="..\src\xaudio\XAudio.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\console\console.h" />
@@ -149,6 +151,8 @@
     <ClInclude Include="..\src\util\util.h" />
     <ClInclude Include="..\src\vr\openvr.h" />
     <ClInclude Include="..\src\vr\vr.h" />
+    <ClInclude Include="..\src\xaudio\stb_vorbis.h" />
+    <ClInclude Include="..\src\xaudio\XAudio.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
