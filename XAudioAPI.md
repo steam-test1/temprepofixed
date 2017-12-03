@@ -13,20 +13,29 @@ However, in other parts they will. Use meters as your standard unit.
 `blt.xaudio`:
 - `setup()`: Run this to start XAudio. Without it, IDK exactly what will
 happen, but the game will very likely crash. Calling this multiple times is not an issue.
+- `issetup()`: `true` if the audio API has been setup, otherwise `false`.
 - `loadbuffer(filename...)`: Create (or load, if cached) buffers containing the contents of
 the specified OGG files.
 - `newsource([num])`: Creates an audio source. By default this does not have any sounds connected. You
 may optionally specify a number of sources to create, and they will be returned as individual arguments.
+- `setworldscale(scale)`: Sets a world scale. All positions passed in are divided by this value.
+- `getworldscale()`: Gets the current world scale.
 
 Buffer:
-- `close()`: Closes this buffer. Probably a bit buggy, I haven't yet tested it. If you don't close it, the
-buffer will be reused if you later request the same file and will automatically be closed when the game exits.
+- `close([force])`: Closes this buffer. Probably a bit buggy, I haven't yet tested it. If you don't close it, the
+buffer will be reused if you later request the same file and will automatically be closed when the game exits. If the
+`force` parameter is supplied, it must be a boolean. And if it's `true`, the buffer will be unloaded (assuming there is
+not another instance of the object open). If not specified or `false`, the buffer will remain cached to speed up loading
+for when the source is next loaded.
 
 Audio Source:
 - `close()`: Closes this audio source. Probably a bit buggy, I haven't yet tested it. If you don't close it, it will
 automatically be destroyed when the game exits.
 - `setbuffer(buffer)`: Sets this source to play whatever audio is contained by the specified buffer.
 - `play()`: Play this audio source.
+- `pause()`: Pauses this audio source.
+- `stop()`: Stops this audio source.
+- `getstate()`: One of `playing`, `paused`, `stopped`, or `other`. More states will be added when streaming is implemented.
 - `setposition(x,y,z)`: Sets the position of this audio source in 3D space.
 - `setvelocity(x,y,z)`: Sets the velocity of this audio source. This is solely used for applying the doppler effect (stuff moving
 towards and away from you have differnt pitches).
