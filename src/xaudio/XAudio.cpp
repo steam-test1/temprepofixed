@@ -16,10 +16,11 @@
 
 using namespace std;
 
-#define WORLD_VEC(L, ix, iy, iz) \
-(lua_tonumber(L, ix) / world_scale), \
-(lua_tonumber(L, iy) / world_scale), \
-(lua_tonumber(L, iz) / world_scale)
+#define WORLD_VEC_CUSTOMSCALE(scale, L, ix, iy, iz) \
+(lua_tonumber(L, ix) / scale), \
+(lua_tonumber(L, iy) / scale), \
+(lua_tonumber(L, iz) / scale)
+#define WORLD_VEC(L, ix, iy, iz) WORLD_VEC_CUSTOMSCALE(world_scale, L, ix, iy, iz)
 
 namespace pd2hook {
 	double world_scale = 1;
@@ -296,8 +297,8 @@ namespace pd2hook {
 			// TODO we can use the listener property in L.1
 
 			ALfloat orientation[6] = {
-				WORLD_VEC(L, 2, 3, 4), // Forward vector
-				WORLD_VEC(L, 5, 6, 7)  // Up vector
+				WORLD_VEC_CUSTOMSCALE(1, L, 2, 3, 4), // Forward vector
+				WORLD_VEC_CUSTOMSCALE(1, L, 5, 6, 7)  // Up vector
 			};
 
 			alListenerfv(AL_ORIENTATION, orientation);
