@@ -11,6 +11,8 @@ namespace pd2hook {
 
 		map<string, xabuffer::XABuffer*> openBuffers;
 		vector<xasource::XASource*> openSources;
+
+		bool is_setup = false;
 	};
 
 	using namespace xaudio;
@@ -54,6 +56,11 @@ namespace pd2hook {
 			return 1;
 		}
 		lua_pushboolean(L, true);
+		return 1;
+	}
+
+	static int lX_issetup(lua_State *L) {
+		lua_pushboolean(L, is_setup);
 		return 1;
 	}
 
@@ -120,6 +127,7 @@ namespace pd2hook {
 
 	XAudio* XAudio::GetXAudioInstance() {
 		static XAudio audio;
+		is_setup = true;
 		return &audio;
 	}
 
@@ -167,6 +175,7 @@ namespace pd2hook {
 		// blt.xaudio table
 		luaL_Reg lib[] = {
 			{ "setup", lX_setup },
+			{ "issetup", lX_issetup },
 			{ "loadbuffer", xabuffer::lX_loadbuffer },
 			{ "newsource", xasource::lX_new_source },
 			{ "getworldscale", lX_getworldscale },
