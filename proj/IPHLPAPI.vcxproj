@@ -139,6 +139,7 @@
     <ClCompile Include="..\src\vr\vr.cpp" />
     <ClCompile Include="..\src\xaudio\stb_vorbis.c" />
     <ClCompile Include="..\src\xaudio\XABuffer.cpp" />
+    <ClCompile Include="..\src\xaudio\XAListener.cpp" />
     <ClCompile Include="..\src\xaudio\XASource.cpp" />
     <ClCompile Include="..\src\xaudio\XAudio.cpp" />
   </ItemGroup>
