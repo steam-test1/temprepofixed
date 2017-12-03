@@ -46,28 +46,26 @@ namespace pd2hook {
 
 				// Load the contents of the buffer
 
-				ALenum format;
-				ALvoid *data;
-				ALsizei size;
-				ALsizei freq;
-
 				int vorbisLen, channels, sampleRate;
-				short *vorbis;
+				short *data;
 
 				vorbisLen = stb_vorbis_decode_filename(filename.c_str(),
 					&channels,
 					&sampleRate,
-					&vorbis);
+					&data);
 
 				// Copy the file into our buffer
 				// TODO do this in the background
 				ALenum error;
 				alBufferData(buffers[i],
 					channels == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16,
-					vorbis,
-					vorbisLen * sizeof(short),
+					data,
+					vorbisLen * sizeof(short) * channels,
 					sampleRate
 				);
+
+				free(data);
+
 				if ((error = alGetError()) != AL_NO_ERROR) {
 					throw "alBufferData buffer 0 : " + error;
 				}

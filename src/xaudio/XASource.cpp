@@ -4,7 +4,6 @@
 #ifdef ENABLE_XAUDIO
 
 #include "XAudioInternal.h"
-#include "stb_vorbis.h"
 
 namespace pd2hook {
 	using namespace pd2hook::xaudio;
