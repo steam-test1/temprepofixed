@@ -44,57 +44,6 @@ namespace pd2hook {
 		open = false;
 	}
 
-	namespace xalistener {
-		static void set_vector_property(lua_State *L, ALenum type) {
-			// TODO we can use the listener property in L.1
-
-			alListener3f(
-				type,
-				WORLD_VEC(L, 2, 3, 4)
-			);
-		}
-
-		static int XAListener_set_position(lua_State *L) {
-			set_vector_property(L, AL_POSITION);
-			return 0;
-		}
-
-		static int XAListener_set_velocity(lua_State *L) {
-			set_vector_property(L, AL_VELOCITY);
-			return 0;
-		}
-
-		static int XAListener_set_orientation(lua_State *L) {
-			// TODO we can use the listener property in L.1
-
-			ALfloat orientation[6] = {
-				WORLD_VEC_CUSTOMSCALE(1, L, 2, 3, 4), // Forward vector
-				WORLD_VEC_CUSTOMSCALE(1, L, 5, 6, 7)  // Up vector
-			};
-
-			alListenerfv(AL_ORIENTATION, orientation);
-
-			return 0;
-		}
-
-		static void lua_register(lua_State *L) {
-			// blt.xaudio.listener table
-			luaL_Reg lib[] = {
-				{ "setposition", xalistener::XAListener_set_position },
-				{ "setvelocity", xalistener::XAListener_set_velocity },
-				{ "setorientation", xalistener::XAListener_set_orientation },
-				{ NULL, NULL }
-			};
-
-			// Make a new table and populate it with XAudio stuff
-			lua_newtable(L);
-			luaI_openlib(L, NULL, lib, 0);
-
-			// Put that table into the BLT table, calling it XAudio. This removes said table from the stack.
-			lua_setfield(L, -2, "listener");
-		}
-	};
-
 	static int lX_setup(lua_State *L) {
 		try {
 			XAudio::GetXAudioInstance();
@@ -197,6 +146,9 @@ namespace pd2hook {
 			{ "close", xasource::XASource_close },
 			{ "setbuffer", xasource::XASource_set_buffer },
 			{ "play", xasource::XASource_play },
+			{ "pause", xasource::XASource_pause },
+			{ "stop", xasource::XASource_stop },
+			{ "getstate", xasource::XASource_get_state },
 			{ "setposition", xasource::XASource_set_position },
 			{ "setvelocity", xasource::XASource_set_velocity },
 			{ "setdirection", xasource::XASource_set_direction },
@@ -231,6 +183,8 @@ namespace pd2hook {
 
 		// Add the blt.xaudio.listener table
 		xalistener::lua_register(L);
+		// Put listener into xaudio
+		lua_setfield(L, -2, "listener");
 
 		// Put that table into the BLT table, calling it XAudio. This removes said table from the stack.
 		lua_setfield(L, -2, "xaudio");

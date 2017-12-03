@@ -84,10 +84,20 @@ namespace pd2hook {
 		int XASource_close(lua_State *L);
 		int XASource_set_buffer(lua_State *L);
 		int XASource_play(lua_State *L);
+		int XASource_pause(lua_State *L);
+		int XASource_stop(lua_State *L);
+		int XASource_get_state(lua_State *L);
 
 		int XASource_set_position(lua_State *L);
 		int XASource_set_velocity(lua_State *L);
 		int XASource_set_direction(lua_State *L);
+	};
+
+	namespace xalistener {
+		int XAListener_set_velocity(lua_State *L);
+		int XAListener_set_position(lua_State *L);
+		int XAListener_set_orientation(lua_State *L);
+		void lua_register(lua_State *L);
 	};
 };
 

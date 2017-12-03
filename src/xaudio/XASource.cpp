@@ -87,6 +87,50 @@ namespace pd2hook {
 		return 0;
 	}
 
+	int xasource::XASource_pause(lua_State *L) {
+		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		// TODO validate 'valid' flag
+
+		alSourcePause(xthis->Handle(L));
+		// TODO error checking
+
+		return 0;
+	}
+
+	int xasource::XASource_stop(lua_State *L) {
+		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		// TODO validate 'valid' flag
+
+		alSourceStop(xthis->Handle(L));
+		// TODO error checking
+
+		return 0;
+	}
+
+	int xasource::XASource_get_state(lua_State *L) {
+		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		// TODO validate 'valid' flag
+
+		ALint state;
+		alGetSourcei(xthis->Handle(L), AL_SOURCE_STATE, &state);
+		// TODO error checking
+
+		if (state == AL_PLAYING) {
+			lua_pushstring(L, "playing");
+		}
+		else if (state == AL_PAUSED) {
+			lua_pushstring(L, "paused");
+		}
+		else if (state == AL_STOPPED) {
+			lua_pushstring(L, "stopped");
+		}
+		else {
+			lua_pushstring(L, "other");
+		}
+
+		return 1;
+	}
+
 	static void set_vector_property(lua_State *L, ALenum type) {
 		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
 		// TODO validate 'valid' flag
