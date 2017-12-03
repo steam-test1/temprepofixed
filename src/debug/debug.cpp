@@ -2,7 +2,7 @@
 #include <ws2tcpip.h>
 #include <atlstr.h>
 #include <sstream>
-#include <iostream>
+#include <fstream>
 
 #include "debug.h"
 #include "signatures/sigdef.h"
@@ -97,22 +97,22 @@ namespace pd2hook {
 				}
 
 				string params = CW2A(szArglist[i + 1]);
-				auto i = 0;
-				auto pos = params.find(":");
-				string host = params.substr(0, pos);
-				auto npos = params.find(":", pos + 1);
-				string port = params.substr(pos + 1, npos - pos - 1);
-				string key = params.substr(npos + 1);
-
-				try {
-					Connect(host, std::stoi(port), key);
-				}
-				catch (string msg) {
-					PD2HOOK_LOG_ERROR("While initializing debug connection: " + msg);
-				}
+				ConnectFromParameters(params);
 
 				// PD2HOOK_LOG_LOG("debug params: '" + host + "' . '" + port + "' . '" + key + "'");
 			}
+		}
+
+		const string debugfile_name = "remote-debug.conf";
+		std::ifstream infile(debugfile_name);
+		if (infile.good()) {
+			string line;
+			getline(infile, line);
+			infile.close();
+
+			DeleteFileA(debugfile_name.c_str());
+
+			ConnectFromParameters(line);
 		}
 
 		// Free memory allocated for CommandLineToArgvW arguments.
@@ -393,6 +393,22 @@ return true
 		//printf("Skipping %d with %d bytes\n", type, buffer.size());
 
 		return false;
+	}
+
+	void DebugConnection::ConnectFromParameters(std::string params) {
+		auto i = 0;
+		auto pos = params.find(":");
+		string host = params.substr(0, pos);
+		auto npos = params.find(":", pos + 1);
+		string port = params.substr(pos + 1, npos - pos - 1);
+		string key = params.substr(npos + 1);
+
+		try {
+			Connect(host, std::stoi(port), key);
+		}
+		catch (string msg) {
+			PD2HOOK_LOG_ERROR("While initializing debug connection: " + msg);
+		}
 	}
 
 	void DebugConnection::Connect(string host, int port, string key) {
