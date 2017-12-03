@@ -4,7 +4,9 @@
 
 #ifdef ENABLE_XAUDIO
 
-#include <AL/alc.h>
+// So we don't have to include the OpenAL headers now
+typedef struct ALCdevice_struct ALCdevice;
+typedef struct ALCcontext_struct ALCcontext;
 
 namespace pd2hook {
 

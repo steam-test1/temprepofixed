@@ -138,6 +138,8 @@
     <ClCompile Include="..\src\util\util.cpp" />
     <ClCompile Include="..\src\vr\vr.cpp" />
     <ClCompile Include="..\src\xaudio\stb_vorbis.c" />
+    <ClCompile Include="..\src\xaudio\XABuffer.cpp" />
+    <ClCompile Include="..\src\xaudio\XASource.cpp" />
     <ClCompile Include="..\src\xaudio\XAudio.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +155,7 @@
     <ClInclude Include="..\src\vr\vr.h" />
     <ClInclude Include="..\src\xaudio\stb_vorbis.h" />
     <ClInclude Include="..\src\xaudio\XAudio.h" />
+    <ClInclude Include="..\src\xaudio\XAudioInternal.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
