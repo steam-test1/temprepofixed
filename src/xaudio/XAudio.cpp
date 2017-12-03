@@ -17,11 +17,59 @@
 using namespace std;
 
 namespace pd2hook {
+	class XAResource {
+	public:
+		XAResource(ALuint alhandle) : alhandle(alhandle) {}
+		ALuint Handle() {
+			return alhandle;
+		}
+		void Employ() {
+			usecount++;
+		}
+		void Discard(bool force) {
+			usecount--;
+
+			if (force && usecount <= 0) {
+				Close();
+			}
+		}
+		void Close() {
+			if (!valid) return;
+			valid = false;
+			alDeleteBuffers(1, &alhandle);
+		}
+	private:
+		const ALuint alhandle;
+		bool valid = true;
+		int usecount = 0;
+	};
+
+	class XALuaHandle {
+	public:
+		XALuaHandle(XAResource *resource) : resource(resource) {
+			resource->Employ();
+		}
+		ALuint Handle(lua_State *L) {
+			if (!open) luaL_error(L, "Cannot use closed resource!");
+			return resource->Handle();
+		}
+		void Close(bool force) {
+			if (!open) return;
+
+			resource->Discard(force);
+			open = false;
+		}
+		bool Ready() {
+			return open;
+		}
+	private:
+		XAResource *resource;
+		bool open = true;
+	};
 
 	namespace xabuffer {
-		static struct XABuffer {
-			bool valid;
-			ALuint albuffer;
+		class XABuffer : public XAResource {
+			using XAResource::XAResource;
 		};
 
 		map<string, XABuffer*> openBuffers;
@@ -48,16 +96,12 @@ namespace pd2hook {
 				string filename = filenames[i];
 
 				if (openBuffers.count(filename)) {
-					XABuffer **ptr = (XABuffer**)lua_newuserdata(L, sizeof(XABuffer*));
-					*ptr = openBuffers[filename];
+					*(XALuaHandle*)lua_newuserdata(L, sizeof(XALuaHandle)) = XALuaHandle(openBuffers[filename]);
 					// TODO don't create buffers for cached stuff
 				}
 				else {
-					XABuffer **ptr = (XABuffer**)lua_newuserdata(L, sizeof(XABuffer*));
-					XABuffer *buff = new XABuffer();
-					*ptr = buff;
-					buff->valid = true;
-					buff->albuffer = buffers[i];
+					XABuffer *buff = new XABuffer(buffers[i]);
+					*(XALuaHandle*)lua_newuserdata(L, sizeof(XALuaHandle)) = XALuaHandle(buff);
 
 					openBuffers[filename] = buff;
 
@@ -101,18 +145,15 @@ namespace pd2hook {
 		static int XABuffer_close(lua_State *L) {
 			// TODO check userdata
 
-			XABuffer *buff = *(XABuffer**)lua_touserdata(L, 1);
-			buff->valid = false;
-			alDeleteBuffers(1, &buff->albuffer);
+			((XALuaHandle*)lua_touserdata(L, 1))->Close(lua_toboolean(L, 2));
 
 			return 0;
 		}
 	};
 
 	namespace xasource {
-		static struct XASource {
-			bool valid;
-			ALuint alsource;
+		class XASource : public XAResource {
+			using XAResource::XAResource;
 		};
 
 		vector<XASource*> openSources;
@@ -140,12 +181,8 @@ namespace pd2hook {
 			}
 
 			for (size_t i = 0; i < count; i++) {
-				XASource **ptr = (XASource**)lua_newuserdata(L, sizeof(XASource*));
-				XASource *buff = new XASource();
-				*ptr = buff;
-
-				buff->valid = true;
-				buff->alsource = sources[i];
+				XASource *buff = new XASource(sources[i]);
+				*(XALuaHandle*)lua_newuserdata(L, sizeof(XALuaHandle)) = XALuaHandle(buff);
 
 				// Set the metatable
 				luaL_getmetatable(L, "XAudio.source");
@@ -158,20 +195,15 @@ namespace pd2hook {
 		static int XASource_close(lua_State *L) {
 			// TODO check userdata
 
-			XASource *buff = *(XASource**)lua_touserdata(L, 1);
-			buff->valid = false;
-			alDeleteSources(1, &buff->alsource);
-			buff->alsource = -1; // Hopefully crash if it gets used
+			((XALuaHandle*)lua_touserdata(L, 1))->Close(true);
 
-			// TODO remove from openSources
-
-			// TODO how do we go about deleting buff, if it's in use as another userdata object?
+			// TODO remove from openSources when applicable
 
 			return 0;
 		}
 
 		static int XASource_set_buffer(lua_State *L) {
-			XASource *xthis = *(XASource**)lua_touserdata(L, 1);
+			XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
 			// TODO validate 'valid' flag
 
 			bool nil = lua_isnil(L, 2);
@@ -180,13 +212,13 @@ namespace pd2hook {
 				buffid = 0; // NULL Buffer - basically, no audio
 			}
 			else {
-				xabuffer::XABuffer *buff = *(xabuffer::XABuffer**)lua_touserdata(L, 2);
+				XALuaHandle *buff = (XALuaHandle*) lua_touserdata(L, 2);
 				// TODO validate 'valid' flag
-				buffid = buff->albuffer;
+				buffid = buff->Handle(L);
 			}
 
 			// Attach buffer 0 to source 
-			alSourcei(xthis->alsource, AL_BUFFER, buffid);
+			alSourcei(xthis->Handle(L), AL_BUFFER, buffid);
 			ALenum error;
 			if ((error = alGetError()) != AL_NO_ERROR) {
 				throw string("alSourcei AL_BUFFER 0 : " + error);
@@ -196,17 +228,17 @@ namespace pd2hook {
 		}
 
 		static int XASource_play(lua_State *L) {
-			XASource *xthis = *(XASource**)lua_touserdata(L, 1);
+			XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
 			// TODO validate 'valid' flag
 
-			alSourcePlay(xthis->alsource);
+			alSourcePlay(xthis->Handle(L));
 			// TODO error checking
 
 			return 0;
 		}
 
 		static void set_vector_property(lua_State *L, ALenum type) {
-			XASource *xthis = *(XASource**)lua_touserdata(L, 1);
+			XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
 			// TODO validate 'valid' flag
 
 			ALfloat x = lua_tonumber(L, 2);
@@ -214,7 +246,7 @@ namespace pd2hook {
 			ALfloat z = lua_tonumber(L, 4);
 
 			alSource3f(
-				xthis->alsource,
+				xthis->Handle(L),
 				type,
 				x,
 				y,
@@ -341,9 +373,7 @@ namespace pd2hook {
 		// Delete all sources
 		// Do this first, otherwise buffers might not be deleted properly
 		for (auto source : xasource::openSources) {
-			if (source->valid) {
-				alDeleteSources(1, &source->alsource);
-			}
+			source->Close();
 
 			delete source;
 		}
@@ -356,9 +386,7 @@ namespace pd2hook {
 		for (auto const& pair : xabuffer::openBuffers) {
 			xabuffer::XABuffer *buff = pair.second;
 
-			if (buff->valid) {
-				alDeleteBuffers(1, &buff->albuffer);
-			}
+			buff->Close();
 
 			delete buff;
 		}
