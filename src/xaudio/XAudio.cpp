@@ -16,7 +16,14 @@
 
 using namespace std;
 
+#define WORLD_VEC(L, ix, iy, iz) \
+(lua_tonumber(L, ix) / world_scale), \
+(lua_tonumber(L, iy) / world_scale), \
+(lua_tonumber(L, iz) / world_scale)
+
 namespace pd2hook {
+	double world_scale = 1;
+
 	class XAResource {
 	public:
 		XAResource(ALuint alhandle) : alhandle(alhandle) {}
@@ -241,16 +248,10 @@ namespace pd2hook {
 			XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
 			// TODO validate 'valid' flag
 
-			ALfloat x = lua_tonumber(L, 2);
-			ALfloat y = lua_tonumber(L, 3);
-			ALfloat z = lua_tonumber(L, 4);
-
 			alSource3f(
 				xthis->Handle(L),
 				type,
-				x,
-				y,
-				z
+				WORLD_VEC(L, 2, 3, 4)
 			);
 		}
 
@@ -275,15 +276,9 @@ namespace pd2hook {
 		static void set_vector_property(lua_State *L, ALenum type) {
 			// TODO we can use the listener property in L.1
 
-			ALfloat x = lua_tonumber(L, 2);
-			ALfloat y = lua_tonumber(L, 3);
-			ALfloat z = lua_tonumber(L, 4);
-
 			alListener3f(
 				type,
-				x,
-				y,
-				z
+				WORLD_VEC(L, 2, 3, 4)
 			);
 		}
 
@@ -300,19 +295,9 @@ namespace pd2hook {
 		static int XAListener_set_orientation(lua_State *L) {
 			// TODO we can use the listener property in L.1
 
-			// Forward vector
-			ALfloat xfwd = lua_tonumber(L, 2);
-			ALfloat yfwd = lua_tonumber(L, 3);
-			ALfloat zfwd = lua_tonumber(L, 4);
-
-			// Up vector
-			ALfloat xup = lua_tonumber(L, 5);
-			ALfloat yup = lua_tonumber(L, 6);
-			ALfloat zup = lua_tonumber(L, 7);
-
 			ALfloat orientation[6] = {
-				xfwd, yfwd, zfwd,
-				xup, yup, zup
+				WORLD_VEC(L, 2, 3, 4), // Forward vector
+				WORLD_VEC(L, 5, 6, 7)  // Up vector
 			};
 
 			alListenerfv(AL_ORIENTATION, orientation);
@@ -349,6 +334,16 @@ namespace pd2hook {
 		}
 		lua_pushboolean(L, true);
 		return 1;
+	}
+
+	static int lX_getworldscale(lua_State *L) {
+		lua_pushnumber(L, world_scale);
+		return 1;
+	}
+
+	static int lX_setworldscale(lua_State *L) {
+		world_scale = lua_tonumber(L, 1);
+		return 0;
 	}
 
 	XAudio::XAudio() {
@@ -450,6 +445,8 @@ namespace pd2hook {
 			{ "setup", lX_setup },
 			{ "loadbuffer", xabuffer::lX_loadbuffer },
 			{ "newsource", xasource::lX_new_source },
+			{ "getworldscale", lX_getworldscale },
+			{ "setworldscale", lX_setworldscale },
 			{ NULL, NULL }
 		};
 
