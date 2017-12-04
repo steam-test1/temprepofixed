@@ -157,6 +157,27 @@ namespace pd2hook {
 		set_vector_property(L, AL_DIRECTION);
 		return 0;
 	}
+
+	int xasource::XASource_get_gain(lua_State * L) {
+		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		// TODO validate 'valid' flag
+
+		ALfloat value;
+		alGetSourcef(xthis->Handle(L), AL_GAIN, &value);
+		lua_pushnumber(L, value);
+
+		return 1;
+	}
+
+	int xasource::XASource_set_gain(lua_State * L) {
+		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
+		// TODO validate 'valid' flag
+
+		ALfloat value = lua_tonumber(L, 2);
+		alSourcef(xthis->Handle(L), AL_GAIN, value);
+
+		return 0;
+	}
 };
 
 #endif

@@ -160,6 +160,9 @@ namespace pd2hook {
 			{ "setposition", xasource::XASource_set_position },
 			{ "setvelocity", xasource::XASource_set_velocity },
 			{ "setdirection", xasource::XASource_set_direction },
+
+			{ "getgain", xasource::XASource_get_gain },
+			{ "setgain", xasource::XASource_set_gain },
 			{ NULL, NULL }
 		};
 

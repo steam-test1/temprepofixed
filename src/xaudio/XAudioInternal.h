@@ -101,12 +101,17 @@ namespace pd2hook {
 		int XASource_set_position(lua_State *L);
 		int XASource_set_velocity(lua_State *L);
 		int XASource_set_direction(lua_State *L);
+
+		int XASource_get_gain(lua_State *L);
+		int XASource_set_gain(lua_State *L);
 	};
 
 	namespace xalistener {
 		int XAListener_set_velocity(lua_State *L);
 		int XAListener_set_position(lua_State *L);
 		int XAListener_set_orientation(lua_State *L);
+		int XAListener_get_gain(lua_State *L);
+		int XAListener_set_gain(lua_State *L);
 		void lua_register(lua_State *L);
 	};
 };
