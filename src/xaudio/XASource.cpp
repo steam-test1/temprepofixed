@@ -9,14 +9,15 @@ namespace pd2hook {
 	using namespace pd2hook::xaudio;
 
 	int xasource::lX_new_source(lua_State *L) {
+		ALERR;
+
 		int count = lua_gettop(L) == 0 ? 1 : lua_tointeger(L, 1);
 		lua_settop(L, 0);
 
 		ALuint sources[32];
 
 		if (count > 32) {
-			PD2HOOK_LOG_LOG("Attempted to create more than 32 ALsources in a single call!");
-			return 0;
+			XAERR("Attempted to create more than 32 ALsources in a single call!");
 		}
 
 		// Generate Sources 
@@ -25,10 +26,7 @@ namespace pd2hook {
 		// TODO expand stack to ensure we can't crash
 
 		// Error reporting
-		ALenum error;
-		if ((error = alGetError()) != AL_NO_ERROR) {
-			throw "alGenSources 1 : " + error;
-		}
+		ALERR;
 
 		for (size_t i = 0; i < count; i++) {
 			XASource *buff = new XASource(sources[i]);
@@ -53,6 +51,8 @@ namespace pd2hook {
 	}
 
 	int xasource::XASource_set_buffer(lua_State *L) {
+		ALERR;
+
 		XALuaHandle *xthis = (XALuaHandle*)lua_touserdata(L, 1);
 		// TODO validate 'valid' flag
 
@@ -69,10 +69,7 @@ namespace pd2hook {
 
 		// Attach buffer 0 to source 
 		alSourcei(xthis->Handle(L), AL_BUFFER, buffid);
-		ALenum error;
-		if ((error = alGetError()) != AL_NO_ERROR) {
-			throw string("alSourcei AL_BUFFER 0 : " + error);
-		}
+		ALERR;
 
 		return 0;
 	}
@@ -82,7 +79,7 @@ namespace pd2hook {
 		// TODO validate 'valid' flag
 
 		alSourcePlay(xthis->Handle(L));
-		// TODO error checking
+		ALERR;
 
 		return 0;
 	}
@@ -92,7 +89,7 @@ namespace pd2hook {
 		// TODO validate 'valid' flag
 
 		alSourcePause(xthis->Handle(L));
-		// TODO error checking
+		ALERR;
 
 		return 0;
 	}
@@ -102,7 +99,7 @@ namespace pd2hook {
 		// TODO validate 'valid' flag
 
 		alSourceStop(xthis->Handle(L));
-		// TODO error checking
+		ALERR;
 
 		return 0;
 	}
@@ -113,7 +110,7 @@ namespace pd2hook {
 
 		ALint state;
 		alGetSourcei(xthis->Handle(L), AL_SOURCE_STATE, &state);
-		// TODO error checking
+		ALERR;
 
 		if (state == AL_PLAYING) {
 			lua_pushstring(L, "playing");

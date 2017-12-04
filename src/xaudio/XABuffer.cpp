@@ -10,13 +10,14 @@ namespace pd2hook {
 	using namespace xaudio;
 
 	int xabuffer::lX_loadbuffer(lua_State *L) {
+		ALERR;
+
 		int count = lua_gettop(L);
 
 		ALuint buffers[32];
 
 		if (count > 32) {
-			PD2HOOK_LOG_LOG("Attempted to create more than 32 ALbuffers in a single call!");
-			return 0;
+			XAERR("Attempted to create more than 32 ALbuffers in a single call!");
 		}
 
 		vector<string> filenames;
@@ -27,6 +28,8 @@ namespace pd2hook {
 		lua_settop(L, 0);
 
 		alGenBuffers(count, buffers);
+		ALERR;
+
 		for (size_t i = 0; i < count; i++) {
 			string filename = filenames[i];
 
@@ -66,9 +69,7 @@ namespace pd2hook {
 
 				free(data);
 
-				if ((error = alGetError()) != AL_NO_ERROR) {
-					throw "alBufferData buffer 0 : " + error;
-				}
+				ALERR;
 			}
 		}
 

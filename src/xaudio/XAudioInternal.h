@@ -22,6 +22,15 @@ using namespace std;
 (lua_tonumber(L, iz) / scale)
 #define WORLD_VEC(L, ix, iy, iz) WORLD_VEC_CUSTOMSCALE(xaudio::world_scale, L, ix, iy, iz)
 
+#define XAERR(str) luaL_error(L, "XAudio Error at %s:%d : %s", __FILE__, __LINE__, string(str).c_str()); throw "luaL_error returned."
+#define ALERR { \
+	if(!xaudio::is_setup) PD2HOOK_LOG_WARN("XAudio Warning: blt.xaudio.setup() has not been called!"); \
+	ALenum error; \
+	if ((error = alGetError()) != AL_NO_ERROR) { \
+		XAERR("alGenSources 1 : " + to_string(error)); \
+	} \
+}
+
 namespace pd2hook {
 	namespace xasource {
 		class XASource;
@@ -64,6 +73,7 @@ namespace pd2hook {
 		extern map<string, xabuffer::XABuffer*> openBuffers;
 		extern vector<xasource::XASource*> openSources;
 		extern double world_scale;
+		extern bool is_setup;
 	};
 
 	namespace xabuffer {
