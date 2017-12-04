@@ -121,6 +121,9 @@ namespace pd2hook {
 		else if (state == AL_STOPPED) {
 			lua_pushstring(L, "stopped");
 		}
+		else if (state == AL_INITIAL) {
+			lua_pushstring(L, "initial");
+		}
 		else {
 			lua_pushstring(L, "other");
 		}
