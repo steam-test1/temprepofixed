@@ -4,6 +4,7 @@
 *.tlog
 proj/Release/*
 proj/Debug/*
+proj/InjectorDLL/*
 
 # VS user specific files
 proj/IPHLPAPI.sdf
@@ -11,6 +12,12 @@ proj/IPHLPAPI.v12.suo
 proj/IPHLPAPI.vcxproj.filters
 proj/IPHLPAPI.vcxproj.user
 proj/IPHLPAPI.opensdf
+
+# VS2017 files
+proj/.vs
+
+# VS Solution
+proj/IPHLPAPI.sln
 
 # Library includes (excluding detours)
 incl/curl/*
