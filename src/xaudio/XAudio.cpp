@@ -17,6 +17,22 @@ namespace pd2hook {
 
 	using namespace xaudio;
 
+	static void reset_cleanup() {
+		// When changing heists, we don't need old sounds anymore.
+
+		// Delete all sources.
+		// Do this first, otherwise buffers might not be deleted properly
+		for (auto source : openSources) {
+			source->Close();
+
+			delete source;
+		}
+
+		// To remove dangling pointers
+		// Should not be used again, but just to be safe
+		openSources.clear();
+	}
+
 	// XAResource
 	void XAResource::Discard(bool force) {
 		usecount--;
@@ -67,6 +83,11 @@ namespace pd2hook {
 		return 1;
 	}
 
+	static int lX_reset(lua_State *L) {
+		reset_cleanup();
+		return 0;
+	}
+
 	static int lX_getworldscale(lua_State *L) {
 		lua_pushnumber(L, world_scale);
 		return 1;
@@ -97,16 +118,7 @@ namespace pd2hook {
 		PD2HOOK_LOG_LOG("Closing OpenAL XAudio API");
 
 		// Delete all sources
-		// Do this first, otherwise buffers might not be deleted properly
-		for (auto source : openSources) {
-			source->Close();
-
-			delete source;
-		}
-
-		// To remove dangling pointers
-		// Should not be used again, but just to be safe
-		openSources.clear();
+		reset_cleanup();
 
 		// Delete all buffers
 		for (auto const& pair : openBuffers) {
@@ -182,6 +194,7 @@ namespace pd2hook {
 		luaL_Reg lib[] = {
 			{ "setup", lX_setup },
 			{ "issetup", lX_issetup },
+			{ "reset", lX_reset },
 			{ "loadbuffer", xabuffer::lX_loadbuffer },
 			{ "newsource", xasource::lX_new_source },
 			{ "getworldscale", lX_getworldscale },
