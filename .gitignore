@@ -25,6 +25,7 @@ incl/inftrees.h
 incl/trees.h
 incl/zconf.h
 incl/zlib.h
+incl/AL/
 
 # Library libs (excluding detours)
 lib/engines/*
@@ -33,4 +34,7 @@ lib/libcurl_a_debug.lib
 lib/libeay32.*
 lib/ssleay32.*
 lib/zlib.*
+lib/libssl*
+lib/libcrypto*
+lib/OpenAL32.lib
 
