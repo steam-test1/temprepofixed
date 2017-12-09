@@ -27,7 +27,7 @@ using namespace std;
 	if(!xaudio::is_setup) PD2HOOK_LOG_WARN("XAudio Warning: blt.xaudio.setup() has not been called!"); \
 	ALenum error; \
 	if ((error = alGetError()) != AL_NO_ERROR) { \
-		XAERR("alGenSources 1 : " + to_string(error)); \
+		XAERR("alErr : " + to_string(error)); \
 	} \
 }
 
