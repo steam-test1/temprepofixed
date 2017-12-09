@@ -44,6 +44,7 @@ namespace pd2hook {
 		// TODO check userdata
 
 		((XALuaHandle*)lua_touserdata(L, 1))->Close(true);
+		ALERR;
 
 		// TODO remove from openSources when applicable
 
@@ -140,6 +141,7 @@ namespace pd2hook {
 			type,
 			WORLD_VEC(L, 2, 3, 4)
 		);
+		ALERR;
 	}
 
 	int xasource::XASource_set_position(lua_State *L) {
@@ -165,6 +167,7 @@ namespace pd2hook {
 		ALfloat value;
 		alGetSourcef(xthis->Handle(L), AL_GAIN, &value);
 		lua_pushnumber(L, value);
+		ALERR;
 
 		return 1;
 	}
@@ -175,6 +178,7 @@ namespace pd2hook {
 
 		ALfloat value = lua_tonumber(L, 2);
 		alSourcef(xthis->Handle(L), AL_GAIN, value);
+		ALERR;
 
 		return 0;
 	}

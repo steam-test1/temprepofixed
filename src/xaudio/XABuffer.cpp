@@ -80,6 +80,7 @@ namespace pd2hook {
 		// TODO check userdata
 
 		((XALuaHandle*)lua_touserdata(L, 1))->Close(lua_toboolean(L, 2));
+		ALERR;
 
 		return 0;
 	}
