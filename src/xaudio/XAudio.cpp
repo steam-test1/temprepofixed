@@ -28,7 +28,10 @@ namespace pd2hook {
 	void XAResource::Close() {
 		if (!valid) return;
 		valid = false;
-		alDeleteBuffers(1, &alhandle);
+
+		// Actually close the resource
+		// dependent on type
+		ALClose();
 	}
 
 	// XALuaHandle

@@ -9,6 +9,10 @@
 namespace pd2hook {
 	using namespace xaudio;
 
+	void xabuffer::XABuffer::ALClose() {
+		alDeleteBuffers(1, &alhandle);
+	}
+
 	int xabuffer::lX_loadbuffer(lua_State *L) {
 		ALERR;
 

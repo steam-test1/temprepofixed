@@ -51,8 +51,10 @@ namespace pd2hook {
 			}
 			void Discard(bool force);
 			void Close();
-		private:
+		protected:
+			virtual void ALClose() = 0;
 			const ALuint alhandle;
+		private:
 			bool valid = true;
 			int usecount = 0;
 		};
@@ -79,6 +81,7 @@ namespace pd2hook {
 	namespace xabuffer {
 		class XABuffer : public xaudio::XAResource {
 			using xaudio::XAResource::XAResource;
+			virtual void ALClose();
 		};
 
 		int lX_loadbuffer(lua_State *L);
@@ -88,6 +91,7 @@ namespace pd2hook {
 	namespace xasource {
 		class XASource : public xaudio::XAResource {
 			using xaudio::XAResource::XAResource;
+			virtual void ALClose();
 		};
 
 		int lX_new_source(lua_State *L);

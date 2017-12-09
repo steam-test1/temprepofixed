@@ -8,6 +8,10 @@
 namespace pd2hook {
 	using namespace pd2hook::xaudio;
 
+	void xasource::XASource::ALClose() {
+		alDeleteSources(1, &alhandle);
+	}
+
 	int xasource::lX_new_source(lua_State *L) {
 		ALERR;
 
