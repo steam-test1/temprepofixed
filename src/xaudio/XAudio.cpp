@@ -152,6 +152,8 @@ namespace pd2hook {
 		// Buffer metatable
 		luaL_Reg XABufferLib[] = {
 			{ "close", xabuffer::XABuffer_Close },
+			{ "getsamplecount", xabuffer::XABuffer_GetSampleCount },
+			{ "getsamplerate", xabuffer::XABuffer_GetSampleRate },
 			{ NULL, NULL }
 		};
 

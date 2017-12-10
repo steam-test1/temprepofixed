@@ -102,12 +102,22 @@ namespace pd2hook {
 
 	namespace xabuffer {
 		class XABuffer : public xaudio::XAResource {
-			using xaudio::XAResource::XAResource;
+		public:
+			XABuffer(ALuint handle, int sampleCount, int sampleRate)
+				: xaudio::XAResource::XAResource(handle), sampleCount(sampleCount), sampleRate(sampleRate) {}
+			double GetSampleCount() { return sampleCount; }
+			double GetSampleRate() { return sampleRate; }
+		protected:
 			virtual void ALClose();
+		private:
+			const int sampleCount;
+			const int sampleRate;
 		};
 
 		int lX_loadbuffer(lua_State *L);
-		XA_CLASS_LUA_METHOD_DEC(XABuffer, Close)
+		XA_CLASS_LUA_METHOD_DEC(XABuffer, Close);
+		XA_CLASS_LUA_METHOD_DEC(XABuffer, GetSampleCount);
+		XA_CLASS_LUA_METHOD_DEC(XABuffer, GetSampleRate);
 	};
 
 	namespace xasource {
@@ -117,7 +127,7 @@ namespace pd2hook {
 		};
 
 		int lX_new_source(lua_State *L);
-		XA_CLASS_LUA_METHOD_DEC(XASource, Close)
+		XA_CLASS_LUA_METHOD_DEC(XASource, Close);
 		int XASource_set_buffer(lua_State *L);
 		int XASource_play(lua_State *L);
 		int XASource_pause(lua_State *L);

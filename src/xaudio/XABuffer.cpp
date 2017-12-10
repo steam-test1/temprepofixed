@@ -42,21 +42,12 @@ namespace pd2hook {
 				// TODO don't create buffers for cached stuff
 			}
 			else {
-				XABuffer *buff = new XABuffer(buffers[i]);
-				*(XALuaHandle*)lua_newuserdata(L, sizeof(XALuaHandle)) = XALuaHandle(buff);
-
-				openBuffers[filename] = buff;
-
-				// Set the metatable
-				luaL_getmetatable(L, "XAudio.buffer");
-				lua_setmetatable(L, -2);
-
 				// Load the contents of the buffer
 
-				int vorbisLen, channels, sampleRate;
+				int samples, channels, sampleRate;
 				short *data;
 
-				vorbisLen = stb_vorbis_decode_filename(filename.c_str(),
+				samples = stb_vorbis_decode_filename(filename.c_str(),
 					&channels,
 					&sampleRate,
 					&data);
@@ -67,11 +58,22 @@ namespace pd2hook {
 				alBufferData(buffers[i],
 					channels == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16,
 					data,
-					vorbisLen * sizeof(short) * channels,
+					samples * sizeof(short) * channels,
 					sampleRate
 				);
 
 				free(data);
+
+				// Create the Lua object
+				XABuffer *buff = new XABuffer(buffers[i], samples, sampleRate);
+				*(XALuaHandle*)lua_newuserdata(L, sizeof(XALuaHandle)) = XALuaHandle(buff);
+
+				// Cache it
+				openBuffers[filename] = buff;
+
+				// Set the metatable
+				luaL_getmetatable(L, "XAudio.buffer");
+				lua_setmetatable(L, -2);
 
 				ALERR;
 			}
@@ -80,7 +82,9 @@ namespace pd2hook {
 		return count;
 	}
 
-	XA_CLASS_LUA_METHOD_VOID(xabuffer::XABuffer, Close)
+	XA_CLASS_LUA_METHOD_VOID(xabuffer::XABuffer, Close);
+	XA_CLASS_LUA_METHOD(xabuffer::XABuffer, GetSampleCount, integer);
+	XA_CLASS_LUA_METHOD(xabuffer::XABuffer, GetSampleRate, integer);
 };
 
 #endif
