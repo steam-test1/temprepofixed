@@ -151,7 +151,7 @@ namespace pd2hook {
 
 		// Buffer metatable
 		luaL_Reg XABufferLib[] = {
-			{ "close", xabuffer::XABuffer_close },
+			{ "close", xabuffer::XABuffer_Close },
 			{ NULL, NULL }
 		};
 
@@ -166,7 +166,7 @@ namespace pd2hook {
 
 		// Source metatable
 		luaL_Reg XASourceLib[] = {
-			{ "close", xasource::XASource_close },
+			{ "close", xasource::XASource_Close },
 			{ "setbuffer", xasource::XASource_set_buffer },
 			{ "play", xasource::XASource_play },
 			{ "pause", xasource::XASource_pause },

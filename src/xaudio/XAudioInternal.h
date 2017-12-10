@@ -31,6 +31,27 @@ using namespace std;
 	} \
 }
 
+#define XA_CLASS_LUA_METHOD_DEC(klass, method) int klass ## _ ## method(lua_State *L);
+
+#define XA_CLASS_LUA_METHOD_BASE(klass, method) \
+int klass ## _ ## method(lua_State *L) { \
+	ALERR \
+	/* TODO: verify type */ \
+	xaudio::XALuaHandle *handle = (xaudio::XALuaHandle*)lua_touserdata(L, 1); \
+	klass *val = (klass*) handle->Resource(); \
+
+#define XA_CLASS_LUA_METHOD(klass, method, type) XA_CLASS_LUA_METHOD_BASE(klass, method) \
+	lua_push ## type(L, val->method()); \
+	ALERR \
+	return 1; \
+}
+
+#define XA_CLASS_LUA_METHOD_VOID(klass, method) XA_CLASS_LUA_METHOD_BASE(klass, method) \
+	val->method(); \
+	ALERR \
+	return 0; \
+}
+
 namespace pd2hook {
 	namespace xasource {
 		class XASource;
@@ -67,6 +88,7 @@ namespace pd2hook {
 			bool Ready() {
 				return open;
 			}
+			XAResource* Resource() { return resource; }
 		private:
 			XAResource *resource;
 			bool open = true;
@@ -85,7 +107,7 @@ namespace pd2hook {
 		};
 
 		int lX_loadbuffer(lua_State *L);
-		int XABuffer_close(lua_State *L);
+		XA_CLASS_LUA_METHOD_DEC(XABuffer, Close)
 	};
 
 	namespace xasource {
@@ -95,7 +117,7 @@ namespace pd2hook {
 		};
 
 		int lX_new_source(lua_State *L);
-		int XASource_close(lua_State *L);
+		XA_CLASS_LUA_METHOD_DEC(XASource, Close)
 		int XASource_set_buffer(lua_State *L);
 		int XASource_play(lua_State *L);
 		int XASource_pause(lua_State *L);

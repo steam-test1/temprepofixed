@@ -80,14 +80,7 @@ namespace pd2hook {
 		return count;
 	}
 
-	int xabuffer::XABuffer_close(lua_State *L) {
-		// TODO check userdata
-
-		((XALuaHandle*)lua_touserdata(L, 1))->Close(lua_toboolean(L, 2));
-		ALERR;
-
-		return 0;
-	}
+	XA_CLASS_LUA_METHOD_VOID(xabuffer::XABuffer, Close)
 };
 
 #endif

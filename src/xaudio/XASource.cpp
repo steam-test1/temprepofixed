@@ -44,16 +44,7 @@ namespace pd2hook {
 		return count;
 	}
 
-	int xasource::XASource_close(lua_State *L) {
-		// TODO check userdata
-
-		((XALuaHandle*)lua_touserdata(L, 1))->Close(true);
-		ALERR;
-
-		// TODO remove from openSources when applicable
-
-		return 0;
-	}
+	XA_CLASS_LUA_METHOD_VOID(xasource::XASource, Close)
 
 	int xasource::XASource_set_buffer(lua_State *L) {
 		ALERR;
