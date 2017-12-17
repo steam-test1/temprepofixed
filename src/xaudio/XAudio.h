@@ -1,7 +1,5 @@
 #pragma once
 
-#define ENABLE_XAUDIO
-
 #ifdef ENABLE_XAUDIO
 
 // So we don't have to include the OpenAL headers now
