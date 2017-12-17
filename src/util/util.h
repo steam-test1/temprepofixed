@@ -133,7 +133,11 @@ bool ExtractZIPArchive(const std::string& path, const std::string& extractPath);
 #define PD2HOOK_TRACE_FUNC_MSG(msg)
 #endif
 
-#define PD2HOOK_LOG_LEVEL(msg, level, file, line, color) do { \
+#define PD2HOOK_LOG_LEVEL(msg, level, file, line, ...) do { \
+	unsigned int color = 0; \
+	for (auto i : {__VA_ARGS__}) { \
+		color |= i; \
+	} \
 	auto& logger = pd2hook::Logging::Logger::Instance(); \
 	if(level >= logger.getLoggingLevel()) { \
 		if (color > 0x0000) \
@@ -146,11 +150,11 @@ bool ExtractZIPArchive(const std::string& path, const std::string& extractPath);
 		writer.write(logger); \
 	}} while (false);
 
-#define PD2HOOK_LOG_FUNC(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_FUNC, __FILE__, 0, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
-#define PD2HOOK_LOG_LOG(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_LOG, __FILE__, __LINE__, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
-#define PD2HOOK_LOG_LUA(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_LUA, NULL, -1, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
-#define PD2HOOK_LOG_WARN(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_WARN, __FILE__, __LINE__, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
-#define PD2HOOK_LOG_ERROR(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_ERROR, __FILE__, __LINE__, FOREGROUND_RED | FOREGROUND_INTENSITY)
+#define PD2HOOK_LOG_FUNC(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_FUNC, __FILE__, 0, FOREGROUND_BLUE, FOREGROUND_GREEN, FOREGROUND_INTENSITY)
+#define PD2HOOK_LOG_LOG(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_LOG, __FILE__, __LINE__, FOREGROUND_BLUE, FOREGROUND_GREEN, FOREGROUND_INTENSITY)
+#define PD2HOOK_LOG_LUA(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_LUA, NULL, -1, FOREGROUND_RED, FOREGROUND_BLUE, FOREGROUND_GREEN, FOREGROUND_INTENSITY)
+#define PD2HOOK_LOG_WARN(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_WARN, __FILE__, __LINE__, FOREGROUND_RED, FOREGROUND_GREEN, FOREGROUND_INTENSITY)
+#define PD2HOOK_LOG_ERROR(msg) PD2HOOK_LOG_LEVEL(msg, pd2hook::Logging::LogType::LOGGING_ERROR, __FILE__, __LINE__, FOREGROUND_RED, FOREGROUND_INTENSITY)
 #define PD2HOOK_LOG_EXCEPTION(e) PD2HOOK_LOG_WARN(e)
 
 #define PD2HOOK_DEBUG_CHECKPOINT PD2HOOK_LOG_LOG("Checkpoint")
@@ -162,12 +166,12 @@ namespace Logging
 inline FunctionLogger::FunctionLogger(const char *funcName, const char *file) :
 	mFile(file), mFuncName(funcName)
 {
-	PD2HOOK_LOG_LEVEL(">>> " << mFuncName, LogType::LOGGING_FUNC, mFile, 0, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	PD2HOOK_LOG_LEVEL(">>> " << mFuncName, LogType::LOGGING_FUNC, mFile, 0, FOREGROUND_RED, FOREGROUND_BLUE, FOREGROUND_GREEN);
 }
 
 inline FunctionLogger::~FunctionLogger()
 {
-	PD2HOOK_LOG_LEVEL("<<< " << mFuncName, LogType::LOGGING_FUNC, mFile, 0, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	PD2HOOK_LOG_LEVEL("<<< " << mFuncName, LogType::LOGGING_FUNC, mFile, 0, FOREGROUND_RED, FOREGROUND_BLUE, FOREGROUND_GREEN);
 }
 }
 }
