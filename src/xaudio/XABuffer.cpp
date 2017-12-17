@@ -10,6 +10,7 @@ namespace pd2hook {
 	using namespace xaudio;
 
 	void xabuffer::XABuffer::ALClose() {
+		openBuffers.erase(filename);
 		alDeleteBuffers(1, &alhandle);
 	}
 
@@ -69,7 +70,7 @@ namespace pd2hook {
 				free(data);
 
 				// Create the Lua object
-				XABuffer *buff = new XABuffer(buffers[i], samples, sampleRate);
+				XABuffer *buff = new XABuffer(buffers[i], filename, samples, sampleRate);
 				*(XALuaHandle*)lua_newuserdata(L, sizeof(XALuaHandle)) = XALuaHandle(buff);
 
 				// Cache it

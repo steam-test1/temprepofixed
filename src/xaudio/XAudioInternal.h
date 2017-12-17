@@ -103,8 +103,8 @@ namespace pd2hook {
 	namespace xabuffer {
 		class XABuffer : public xaudio::XAResource {
 		public:
-			XABuffer(ALuint handle, int sampleCount, int sampleRate)
-				: xaudio::XAResource::XAResource(handle), sampleCount(sampleCount), sampleRate(sampleRate) {}
+			XABuffer(ALuint handle, string filename, int sampleCount, int sampleRate)
+				: xaudio::XAResource::XAResource(handle), filename(filename), sampleCount(sampleCount), sampleRate(sampleRate) {}
 			double GetSampleCount() { return sampleCount; }
 			double GetSampleRate() { return sampleRate; }
 		protected:
@@ -112,6 +112,7 @@ namespace pd2hook {
 		private:
 			const int sampleCount;
 			const int sampleRate;
+			const string filename;
 		};
 
 		int lX_loadbuffer(lua_State *L);
