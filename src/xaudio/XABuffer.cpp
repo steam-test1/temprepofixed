@@ -76,12 +76,12 @@ namespace pd2hook {
 				// Cache it
 				openBuffers[filename] = buff;
 
-				// Set the metatable
-				luaL_getmetatable(L, "XAudio.buffer");
-				lua_setmetatable(L, -2);
-
 				ALERR;
 			}
+
+			// Set the metatable
+			luaL_getmetatable(L, "XAudio.buffer");
+			lua_setmetatable(L, -2);
 		}
 
 		return count;
