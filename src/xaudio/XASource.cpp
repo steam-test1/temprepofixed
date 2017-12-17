@@ -30,6 +30,7 @@ namespace pd2hook {
 		// TODO expand stack to ensure we can't crash
 
 		// Error reporting
+		if (alGetError() == AL_OUT_OF_MEMORY) luaL_error(L, "blt.xaudio.newsource: OutOfMemory - did you create more than 256 sources?");
 		ALERR;
 
 		for (size_t i = 0; i < count; i++) {

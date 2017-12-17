@@ -52,6 +52,10 @@ namespace pd2hook {
 					&sampleRate,
 					&data);
 
+				// Find the relevent errors
+				if (samples == -1) luaL_error(L, "blt.xaudio.loadbuffer: FileNotFound %s", filename.c_str());
+				if (samples == -2) luaL_error(L, "blt.xaudio.loadbuffer: OutOfMemory");
+
 				// Copy the file into our buffer
 				// TODO do this in the background
 				ALenum error;
