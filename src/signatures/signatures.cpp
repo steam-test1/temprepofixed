@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <map>
 #include <Windows.h>
 #include <tlhelp32.h>
 #include <Psapi.h>
@@ -8,7 +10,117 @@
 
 #include "signatures.h"
 
-MODULEINFO GetModuleInfo(std::string szModule)
+using std::string;
+using std::to_string;
+
+class SignatureCacheDB {
+public:
+	SignatureCacheDB(string filename) : filename(filename) {
+		std::ifstream infile(filename);
+		if (!infile.good()) {
+			PD2HOOK_LOG_WARN("Could not open signature cache file");
+			return;
+		}
+
+#define READ_BIN(var) infile.read((char*) &var, sizeof(var));
+
+		uint32_t revision;
+		READ_BIN(revision); // TODO if the file is EOF, exit
+		if (revision != CACHEDB_REVISION) {
+			// Using a differnt revision, can't safely use it.
+			// Not a big deal, just search properly for signatures this time.
+			PD2HOOK_LOG_WARN("Discarding signature cache data, different revision");
+			return;
+		}
+
+		uint32_t count;
+		READ_BIN(count); // TODO if the file is EOF, exit
+
+		for (size_t i = 0; i < count; i++)
+		{
+			uint32_t length;
+			READ_BIN(length);
+			if (length > BUFF_LEN) {
+				PD2HOOK_LOG_ERROR("Cannot read long signature name!");
+				locations.clear();
+				return;
+			}
+
+			char name[BUFF_LEN];
+			infile.read(name, length);
+			string name_str = string(name, length);
+
+			DWORD address;
+			READ_BIN(address);
+
+			locations[name_str] = address;
+		}
+
+#undef READ_BIN
+	}
+
+	DWORD GetAddress(string name) {
+		if (locations.count(name)) {
+			return locations[name];
+		}
+		else {
+			return -1;
+		}
+	}
+
+	void UpdateAddress(string name, DWORD address) {
+		if (name.length() > BUFF_LEN) {
+			string msg = "Cannot write long signature name!";
+			PD2HOOK_LOG_ERROR(msg);
+			throw msg;
+		}
+		locations[name] = address;
+	}
+
+	void Save() {
+		std::ofstream outfile(filename);
+		if (!outfile.good()) {
+			PD2HOOK_LOG_ERROR("Could not open signature cachefile for saving");
+			return;
+		}
+
+#define WRITE_BIN(var) outfile.write((char*) &var, sizeof(var))
+
+		uint32_t revision = CACHEDB_REVISION;
+		WRITE_BIN(revision);
+
+		uint32_t count = locations.size();
+		WRITE_BIN(count);
+
+		PD2HOOK_LOG_LOG(string("Saving ") + to_string(count) + string(" signatures"));
+
+		for (auto const &sig : locations)
+		{
+			// name length
+			uint32_t length = sig.first.length();
+			WRITE_BIN(length);
+
+			// name
+			outfile.write(sig.first.c_str(), length);
+
+			// address
+			DWORD address = sig.second;
+			WRITE_BIN(address);
+		}
+
+		PD2HOOK_LOG_LOG("Done saving signatures");
+
+#undef READ_BIN
+	}
+private:
+	const string filename;
+	std::map<string, DWORD> locations;
+
+	static const uint32_t CACHEDB_REVISION = 1;
+	static const uint32_t BUFF_LEN = 1024;
+};
+
+MODULEINFO GetModuleInfo(string szModule)
 {
 	MODULEINFO modinfo = { 0 };
 	HMODULE hModule = GetModuleHandle(szModule.c_str());
@@ -18,24 +130,47 @@ MODULEINFO GetModuleInfo(std::string szModule)
 	return modinfo;
 }
 
+static bool CheckSignature(const char* pattern, DWORD patternLength, const char* mask, DWORD base, DWORD size, DWORD i, DWORD *result) {
+	bool found = true;
+	for (DWORD j = 0; j < patternLength; j++) {
+		found &= mask[j] == '?' || pattern[j] == *(char*)(base + i + j);
+	}
+	if (found) {
+		// printf("Found %s: 0x%p\n", funcname, base + i);
+		*result = base + i;
+		return true;
+	}
 
-unsigned long FindPattern(char* module, const char* funcname, const char* pattern, const char* mask)
+	return false;
+}
+
+DWORD FindPattern(char* module, const char* funcname, const char* pattern, const char* mask, DWORD hint, bool *hintCorrect, DWORD *hintOut)
 {
+	*hintOut = NULL;
+
 	MODULEINFO mInfo = GetModuleInfo(module);
 	DWORD base = (DWORD)mInfo.lpBaseOfDll;
 	DWORD size = (DWORD)mInfo.SizeOfImage;
 	DWORD patternLength = (DWORD)strlen(mask);
+
+	if (hint >= 0 && hint < size - patternLength) {
+		DWORD result;
+		*hintCorrect = CheckSignature(pattern, patternLength, mask, base, size, hint, &result);
+		if (*hintCorrect) return result;
+	}
+	else {
+		*hintCorrect = false;
+	}
+
 	for (DWORD i = 0; i < size - patternLength; i++){
-		bool found = true;
-		for (DWORD j = 0; j < patternLength; j++){
-			found &= mask[j] == '?' || pattern[j] == *(char*)(base + i + j);
-		}
-		if (found) {
-//			printf("Found %s: 0x%p\n", funcname, base + i);
-			return base + i;
+		DWORD result;
+		bool correct = CheckSignature(pattern, patternLength, mask, base, size, i, &result);
+		if (correct) {
+			if (hintOut) *hintOut = i;
+			return result;
 		}
 	}
-	printf("Warning: Failed to locate function %s\n", funcname);
+	PD2HOOK_LOG_WARN(string("Failed to locate function ") + string(funcname));
 	return NULL;
 }
 
@@ -64,21 +199,50 @@ void SignatureSearch::Search(){
 		NULL, 0 // Extension is always .exe
 	);
 
+	string basename = filename;
+
 	// Add the .exe back on
 	strcat_s(filename, MAX_PATH, ".exe");
 
-	PD2HOOK_LOG_LOG(std::string("Scanning for signatures in %s.\n") + std::string(filename));
 	unsigned long ms_start = GetTickCount();
+	SignatureCacheDB cache(string("sigcache_") + basename + string(".db"));
+	PD2HOOK_LOG_LOG(string("Scanning for signatures in ") + string(filename));
 
+	int cacheMisses = 0;
 	std::vector<SignatureF>::iterator it;
 	for (it = allSignatures->begin(); it < allSignatures->end(); it++){
-		*((void**)it->address) = (void*)(FindPattern(filename, it->funcname, it->signature, it->mask) + it->offset);
+		string funcname = it->funcname;
+		DWORD hint = cache.GetAddress(funcname);
+
+		bool hintCorrect;
+		DWORD hintOut;
+		DWORD addr = (FindPattern(filename, it->funcname, it->signature, it->mask, hint, &hintCorrect, &hintOut) + it->offset);
+		*((void**)it->address) = (void*)addr;
+
+		if (addr == NULL) {
+			hintCorrect = true; // If the signature doesn't exist at all, it's not the cache's fault
+		} if (hint == -1) {
+			PD2HOOK_LOG_LOG(string("Sigcache hit failed for function ") + funcname);
+		} else if (!hintCorrect) {
+			PD2HOOK_LOG_WARN(string("Sigcache for function ") + funcname + string(" incorrect!"));
+		}
+
+		if (!hintCorrect) {
+			cache.UpdateAddress(funcname, hintOut);
+			cacheMisses++;
+		}
 	}
 
 	unsigned long ms_end = GetTickCount();
 
-	PD2HOOK_LOG_LOG(std::string("Scanned for ") + std::to_string(allSignatures->size()) + std::string(" signatures in ")
-		+ std::to_string((int)(ms_end - ms_start)) + std::string(" milliseconds\n"));
+	PD2HOOK_LOG_LOG(string("Scanned for ") + to_string(allSignatures->size()) + string(" signatures in ")
+		+ to_string((int)(ms_end - ms_start)) + string(" milliseconds with ") + to_string(cacheMisses)
+		+ string(" cache misses"));
+
+	if (cacheMisses > 0) {
+		PD2HOOK_LOG_LOG("Saving signature cache");
+		cache.Save();
+	}
 }
 
 
