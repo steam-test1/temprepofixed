@@ -71,6 +71,10 @@ namespace pd2hook {
 		ExitProcess(0);
 	}
 
+	bool DebugConnection::IsLoaded() {
+		return connection != NULL;
+	}
+
 	void DebugConnection::Initialize() {
 		LPWSTR *szArglist;
 		int nArgs;

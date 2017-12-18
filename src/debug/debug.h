@@ -6,6 +6,7 @@
 namespace pd2hook {
 	class DebugConnection {
 	public:
+		static bool IsLoaded();
 		static void Initialize();
 		static void Update(void* state);
 		static void AddGlobals(void* state);

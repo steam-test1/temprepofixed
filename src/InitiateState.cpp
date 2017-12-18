@@ -622,7 +622,16 @@ namespace pd2hook
 		// Set up logging first, so we can see messages from the signature search process
 #ifndef INJECTABLE_BLT
 		std::ifstream infile("mods/developer.txt");
-		if (infile.good())
+		std::string debug_mode;
+		if (infile.good()) {
+			debug_mode = "post"; // default value
+			infile >> debug_mode;
+		}
+		else {
+			debug_mode = "disabled";
+		}
+
+		if (debug_mode == "pre")
 #endif
 		gbl_mConsole = new CConsole();
 
@@ -630,6 +639,11 @@ namespace pd2hook
 
 		// Set up debugging right away, for log viewing
 		DebugConnection::Initialize();
+
+#ifndef INJECTABLE_BLT
+		if (debug_mode != "disabled" && gbl_mConsole == NULL && !DebugConnection::IsLoaded())
+			gbl_mConsole = new CConsole();
+#endif
 
 		SignatureSearch::Search();
 		VRManager::CheckAndLoad();
