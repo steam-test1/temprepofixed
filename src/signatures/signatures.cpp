@@ -4,6 +4,8 @@
 #include <Psapi.h>
 #include <detours.h>
 
+#include "util/util.h"
+
 #include "signatures.h"
 
 MODULEINFO GetModuleInfo(std::string szModule)
@@ -65,11 +67,18 @@ void SignatureSearch::Search(){
 	// Add the .exe back on
 	strcat_s(filename, MAX_PATH, ".exe");
 
-	printf("Scanning for signatures in %s.\n", filename);
+	PD2HOOK_LOG_LOG(std::string("Scanning for signatures in %s.\n") + std::string(filename));
+	unsigned long ms_start = GetTickCount();
+
 	std::vector<SignatureF>::iterator it;
 	for (it = allSignatures->begin(); it < allSignatures->end(); it++){
 		*((void**)it->address) = (void*)(FindPattern(filename, it->funcname, it->signature, it->mask) + it->offset);
 	}
+
+	unsigned long ms_end = GetTickCount();
+
+	PD2HOOK_LOG_LOG(std::string("Scanned for ") + std::to_string(allSignatures->size()) + std::string(" signatures in ")
+		+ std::to_string((int)(ms_end - ms_start)) + std::string(" milliseconds\n"));
 }
 
 
