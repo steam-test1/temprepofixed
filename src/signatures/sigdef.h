@@ -82,6 +82,10 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_unref, void, "\x53\x8B\x5C\x24\x10\x85\xDB
 CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_newmetatable, int, "\x8B\x54\x24\x08\x53\x56\x8B\x74\x24\x0C\x8B\xCA\x8B\x46\x08\x57", "xxxxxxxxxxxxxxxx", 0, lua_State*, const char*)
 CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_error, int, "\x8D\x44\x24\x0C\x50\xFF\x74\x24\x0C\xFF\x74\x24\x0C\xE8\x00\x00\x00\x00\x83\xC4\x0C\x50\xFF\x74\x24\x08\xE8", "xxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, const char*, ...)
 
+// TODO: Find address-less signatures
+CREATE_NORMAL_CALLABLE_SIGNATURE(node_from_xml, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\xD9\x43\x90\x00\x64\xA1\x00", "xxxxxxxxxxxxxxxx", 0, void*, char*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(try_open_base, int, "\xB8\x08\x9D\x8F\x00\xE8\x22\x7C\x45\x00\x81\xEC\x8C\x00\x00\x00", "xxxxxxxxxxxxxxxx", 0)
+
 #ifdef SIG_INCLUDE_MAIN
 CREATE_CALLABLE_CLASS_SIGNATURE(do_game_update, void*, "\x56\xFF\x74\x24\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxx????xxx", 0, int*, int*)
 CREATE_CALLABLE_CLASS_SIGNATURE(luaL_newstate, int, "\x53\x56\x33\xDB\x57\x8B\xF1\x39\x5C\x24\x18\x0F", "xxxxxxxxxxxx", 0, char, char, int)

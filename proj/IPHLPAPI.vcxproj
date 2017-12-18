@@ -17,7 +17,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}</ProjectGuid>
     <RootNamespace>IPHLPAPI</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -77,8 +77,12 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>iphp.def</ModuleDefinitionFile>
-      <AdditionalDependencies>libcryptoMT.lib;libcurl_a.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcrypto.lib;libcurl.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;wren_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Message>Copy DLL to PD2</Message>
+      <Command>copy "C:\Users\ZNix\source\repos\SuperBLT\proj\$(Configuration)\IPHLPAPI.dll" "C:\Users\ZNix\Static\steamcmd\steamapps\common\PAYDAY 2\IPHLPAPI.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -95,13 +99,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>iphp.def</ModuleDefinitionFile>
-      <AdditionalDependencies>libcryptoMT.lib;libcurl_a.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcrypto.lib;libcurl.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;wren_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "C:\Users\Administrator\Static\Build\Payday-2-BLT\proj\Release\IPHLPAPI.dll" "C:\Program Files (x86)\Steam\steamapps\common\PAYDAY 2\IPHLPAPI.dll" /y</Command>
+      <Command>copy "C:\Users\ZNix\source\repos\SuperBLT\proj\$(Configuration)\IPHLPAPI.dll" "C:\Users\ZNix\Static\steamcmd\steamapps\common\PAYDAY 2\IPHLPAPI.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy DLL to PD2 directory</Message>
+      <Message>Copy DLL to PD2</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='InjectorDLL|Win32'">
@@ -120,8 +124,14 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <AdditionalDependencies>libcryptoMT.lib;libcurl_a.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcrypto.lib;libcurl.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;wren_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\console\console.cpp" />
@@ -132,6 +142,9 @@
     <ClCompile Include="..\src\InitiateState.cpp" />
     <ClCompile Include="..\src\signatures\signatures.cpp" />
     <ClCompile Include="..\src\threading\threadqueue.cpp" />
+    <ClCompile Include="..\src\tweaker\wrenxml.cpp" />
+    <ClCompile Include="..\src\tweaker\tweakerhooks.cpp" />
+    <ClCompile Include="..\src\tweaker\xmltweaker.cpp" />
     <ClCompile Include="..\src\util\compression.cpp" />
     <ClCompile Include="..\src\util\files.cpp" />
     <ClCompile Include="..\src\util\logging.cpp" />
@@ -151,6 +164,8 @@
     <ClInclude Include="..\src\signatures\sigdef.h" />
     <ClInclude Include="..\src\signatures\signatures.h" />
     <ClInclude Include="..\src\threading\queue.h" />
+    <ClInclude Include="..\src\tweaker\xmltweaker.h" />
+    <ClInclude Include="..\src\tweaker\xmltweaker_internal.h" />
     <ClInclude Include="..\src\util\util.h" />
     <ClInclude Include="..\src\vr\openvr.h" />
     <ClInclude Include="..\src\vr\vr.h" />

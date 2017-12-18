@@ -14,6 +14,7 @@
 #include "vr/vr.h"
 #include "debug/debug.h"
 #include "xaudio/xaudio.h"
+#include "tweaker/xmltweaker.h"
 
 #include <thread>
 #include <list>
@@ -367,17 +368,17 @@ namespace pd2hook
 	}
 
 	int luaF_directoryhash(lua_State* L)
-	{ 
-		PD2HOOK_TRACE_FUNC; 
-		int n = lua_gettop(L); 
+	{
+		PD2HOOK_TRACE_FUNC;
+		int n = lua_gettop(L);
 
-		size_t length = 0; 
-		const char* filename = lua_tolstring(L, 1, &length); 
-		std::string hash = Util::GetDirectoryHash(filename); 
-		lua_pushlstring(L, hash.c_str(), hash.length()); 
+		size_t length = 0;
+		const char* filename = lua_tolstring(L, 1, &length);
+		std::string hash = Util::GetDirectoryHash(filename);
+		lua_pushlstring(L, hash.c_str(), hash.length());
 
-		return 1; 
-	} 
+		return 1;
+	}
 
 	int luaF_filehash(lua_State* L)
 	{
@@ -652,6 +653,9 @@ namespace pd2hook
 		FuncDetour* newStateDetour = new FuncDetour((void**)&luaL_newstate, luaL_newstate_new);
 		FuncDetour* newStateDetourVr = new FuncDetour((void**)&luaL_newstate_vr, luaL_newstate_new_vr);
 		FuncDetour* luaCloseDetour = new FuncDetour((void**)&lua_close, luaF_close);
+
+		FuncDetour* node_from_xmlDetour = new FuncDetour((void**)&node_from_xml, tweaker::node_from_xml_new);
+		FuncDetour* potentialPOIDetour = new FuncDetour((void**)&try_open_base, tweaker::try_open_base_hook);
 	}
 
 	void DestroyStates()

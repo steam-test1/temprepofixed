@@ -36,6 +36,7 @@ incl/AL/
 
 # Library libs (excluding detours)
 lib/engines/*
+lib/libcurl.*
 lib/libcurl_a.*
 lib/libcurl_a_debug.lib
 lib/libeay32.*
