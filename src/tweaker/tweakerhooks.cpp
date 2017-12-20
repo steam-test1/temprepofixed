@@ -45,6 +45,7 @@ void __declspec(naked) tweaker::node_from_xml_new() {
 
 static void __cdecl note_loaded_file_wrapper(unsigned long long ext, unsigned long long name) {
 	// printf("*VAL: %016llx, %016llx\n", name, ext);
+	tweaker::note_loaded_file(name, ext);
 }
 
 int __declspec(naked) tweaker::try_open_base_hook()

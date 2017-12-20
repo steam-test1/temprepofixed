@@ -11,6 +11,7 @@ extern "C" {
 
 using namespace std;
 using namespace pd2hook;
+using namespace tweaker;
 
 static WrenVM *vm = NULL;
 static unordered_set<char*> buffers;
@@ -48,7 +49,19 @@ WrenForeignMethodFn bindForeignMethod(
 	// Other modules...
 }
 
+idstring tweaker::last_loaded_name = NULL, tweaker::last_loaded_ext = NULL;
+void tweaker::note_loaded_file(idstring name, idstring ext) {
+	tweaker::last_loaded_name = name;
+	tweaker::last_loaded_ext = ext;
+}
+
 void* __cdecl tweaker::tweak_pd2_xml(char* text) {
+	// TODO better way to see if this isn't the actual file's name
+	if (tweaker::last_loaded_name == NULL) {
+		// PD2HOOK_LOG_LOG("Name unknown for parsed XML function")
+		return text;
+	}
+
 	if (vm == NULL) {
 		WrenConfiguration config;
 		wrenInitConfiguration(&config);
@@ -59,7 +72,8 @@ void* __cdecl tweaker::tweak_pd2_xml(char* text) {
 		WrenInterpretResult compileResult = wrenInterpret(vm, R"!(
 class BaseTweaker {
 	foreign static log(text)
-	static tweak(text) {
+	static tweak(name, ext, text) {
+		log("Loading %(name).%(ext)")
 		if(text.startsWith("<network>") && text.contains("sync_cs_grenade")) {
 			var from_txt = "\t\t\t<param type=\"int\" min=\"0\" max=\"600\"/>\r\n\t\t</message>"
 			var to_txt = "<param type=\"int\" min=\"0\" max=\"600\"/><param type=\"int\" min=\"0\" max=\"600\"/><param type=\"int\" min=\"0\" max=\"600\"/></message>"
@@ -75,14 +89,23 @@ class BaseTweaker {
 		if (compileResult != WREN_RESULT_SUCCESS) Sleep(20000);
 	}
 
-	wrenEnsureSlots(vm, 2);
+	wrenEnsureSlots(vm, 4);
 
 	wrenGetVariable(vm, "main", "BaseTweaker", 0);
 	WrenHandle* tweakerClass = wrenGetSlotHandle(vm, 0);
-	WrenHandle* sig = wrenMakeCallHandle(vm, "tweak(_)");
+	WrenHandle* sig = wrenMakeCallHandle(vm, "tweak(_,_,_)");
+
+	char hex[17]; // 16-chars long +1 for the null
 
 	wrenSetSlotHandle(vm, 0, tweakerClass);
-	wrenSetSlotString(vm, 1, text);
+
+	sprintf_s(hex, 17, "%016llx", tweaker::last_loaded_name);
+	wrenSetSlotString(vm, 1, hex);
+
+	sprintf_s(hex, 17, "%016llx", tweaker::last_loaded_ext);
+	wrenSetSlotString(vm, 2, hex);
+
+	wrenSetSlotString(vm, 3, text);
 
 	WrenInterpretResult result2 = wrenCall(vm, sig);
 
@@ -114,6 +137,10 @@ class BaseTweaker {
 			printf("*** %d called from .text:%08X\n", i, callers[i]);
 		Sleep(20000);
 	}*/
+
+	// Reset the name so we don't think we're parsing the file again
+	tweaker::last_loaded_name = NULL;
+	tweaker::last_loaded_ext = NULL;
 
 	return (char*)buffer;
 }
