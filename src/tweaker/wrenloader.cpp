@@ -25,6 +25,51 @@ static void log(WrenVM* vm)
 	PD2HOOK_LOG_LOG(string("[WREN] ") + text);
 }
 
+void io_listDirectory(WrenVM* vm) {
+	string filename = wrenGetSlotString(vm, 1);
+	bool dir = wrenGetSlotBool(vm, 2);
+	vector<string> files = Util::GetDirectoryContents(filename, dir);
+
+	wrenSetSlotNewList(vm, 0);
+
+	for (string const &file : files)
+	{
+		if (file == "." || file == "..") continue;
+
+		wrenSetSlotString(vm, 1, file.c_str());
+		wrenInsertInList(vm, 0, -1, 1);
+	}
+}
+
+void io_info(WrenVM* vm) {
+	const char* path = wrenGetSlotString(vm, 1);
+	DWORD dwAttrib = GetFileAttributesA(path);
+
+	if (dwAttrib == INVALID_FILE_ATTRIBUTES) {
+		wrenSetSlotString(vm, 0, "none");
+	}
+	else if (dwAttrib & FILE_ATTRIBUTE_DIRECTORY) {
+		wrenSetSlotString(vm, 0, "dir");
+	}
+	else {
+		wrenSetSlotString(vm, 0, "file");
+	}
+}
+
+void io_read(WrenVM *vm) {
+	string file = wrenGetSlotString(vm, 1);
+	string contents = Util::GetFileContents(file);
+	wrenSetSlotString(vm, 0, contents.c_str());
+}
+
+vector<string> import_todo;
+void io_dynamic_import(WrenVM *vm) {
+	// TODO do this properly
+	string module = wrenGetSlotString(vm, 1);
+	import_todo.push_back(module);
+	printf("Preparing: %s\n", module.c_str());
+}
+
 static WrenForeignMethodFn bindForeignMethod(
 	WrenVM* vm,
 	const char* module,
@@ -32,7 +77,7 @@ static WrenForeignMethodFn bindForeignMethod(
 	bool isStatic,
 	const char* signature)
 {
-	if (strcmp(module, "base/base") == 0)
+	if (strcmp(module, "base/native") == 0)
 	{
 		if (strcmp(className, "Logger") == 0)
 		{
@@ -41,6 +86,25 @@ static WrenForeignMethodFn bindForeignMethod(
 				return &log; // C function for Math.add(_,_).
 			}
 			// Other foreign methods on Math...
+		}
+		else if (strcmp(className, "IO") == 0)
+		{
+			if (isStatic && strcmp(signature, "listDirectory(_,_)") == 0)
+			{
+				return &io_listDirectory;
+			}
+			if (isStatic && strcmp(signature, "info(_)") == 0)
+			{
+				return &io_info;
+			}
+			if (isStatic && strcmp(signature, "read(_)") == 0)
+			{
+				return &io_read;
+			}
+			if (isStatic && strcmp(signature, "dynamic_import(_)") == 0)
+			{
+				return &io_dynamic_import;
+			}
 		}
 		// Other classes in main...
 	}
@@ -52,12 +116,7 @@ static WrenForeignMethodFn bindForeignMethod(
 static char* getModulePath(WrenVM* vm, const char* name)
 {
 	string xname = string("mods/") + string(name) + string(".wren");
-
-	ifstream ifs(xname);
-	if (!ifs.good()) {
-		return NULL;
-	}
-	string str((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
+	string str = Util::GetFileContents(xname);
 
 	size_t length = str.length() + 1;
 	char* output = (char*)malloc(length); // +1 for the null
@@ -81,6 +140,14 @@ const char* tweaker::transform_file(const char* text)
 		if (compileResult != WREN_RESULT_SUCCESS) Sleep(20000);
 	}
 
+	for (string const& module : import_todo) {
+		string line = string("import \"") + module + string("\"");
+		WrenInterpretResult compileResult = wrenInterpret(vm, line.c_str());
+		printf("Module Load: %d\n", compileResult);
+		if (compileResult != WREN_RESULT_SUCCESS) Sleep(20000);
+	}
+	import_todo.clear();
+
 	wrenEnsureSlots(vm, 4);
 
 	wrenGetVariable(vm, "base/base", "BaseTweaker", 0);
@@ -100,6 +167,7 @@ const char* tweaker::transform_file(const char* text)
 	wrenSetSlotString(vm, 3, text);
 
 	WrenInterpretResult result2 = wrenCall(vm, sig);
+	if (result2 != WREN_RESULT_SUCCESS) Sleep(20000); // TODO
 
 	wrenReleaseHandle(vm, tweakerClass);
 	wrenReleaseHandle(vm, sig);
