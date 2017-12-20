@@ -142,6 +142,7 @@
     <ClCompile Include="..\src\InitiateState.cpp" />
     <ClCompile Include="..\src\signatures\signatures.cpp" />
     <ClCompile Include="..\src\threading\threadqueue.cpp" />
+    <ClCompile Include="..\src\tweaker\wrenloader.cpp" />
     <ClCompile Include="..\src\tweaker\wrenxml.cpp" />
     <ClCompile Include="..\src\tweaker\tweakerhooks.cpp" />
     <ClCompile Include="..\src\tweaker\xmltweaker.cpp" />
