@@ -126,9 +126,13 @@ static WrenForeignMethodFn bindForeignMethod(
 	return NULL;
 }
 
-static char* getModulePath(WrenVM* vm, const char* name)
+static char* getModulePath(WrenVM* vm, const char* name_c)
 {
-	string xname = string("mods/") + string(name) + string(".wren");
+	string name = name_c;
+	string mod = name.substr(0, name.find_first_of('/'));
+	string file = name.substr(name.find_first_of('/') + 1);
+
+	string xname = string("mods/") + mod + "/wren/" + file + ".wren";
 	string str = Util::GetFileContents(xname);
 
 	size_t length = str.length() + 1;
