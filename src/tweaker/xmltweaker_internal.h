@@ -11,8 +11,6 @@ namespace pd2hook {
 		void* __cdecl tweak_pd2_xml(char* text);
 		void __cdecl free_tweaked_pd2_xml(char* text);
 
-		void note_loaded_file(idstring name, idstring ext);
-
 		/**
 		* Transforms the contents of the file
 		* the return result MUST be valid immediately after the call returns,
