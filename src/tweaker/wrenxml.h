@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_set>
+#include <map>
 
 #include "mxml.h"
 
@@ -11,12 +12,34 @@ extern "C" {
 namespace pd2hook {
 	namespace tweaker {
 		namespace wrenxml {
-			struct WXMLNode;
+			class WXMLNode;
+
+			class WXMLDocument {
+			public:
+				WXMLDocument(const char *text);
+				~WXMLDocument();
+				WXMLNode *GetRootNode() { return GetNode(root_node); }
+				WXMLNode *GetNode(mxml_node_t *node);
+			private:
+				mxml_node_t *root_node;
+				std::map<mxml_node_t*, WXMLNode*> nodes;
+
+				friend class WXMLNode;
+			};
 
 			// Note that having nodes open does not prevent the main object from being GC'd
-			struct WXMLNode {
-				WXMLNode *root;
+			class WXMLNode {
+			public:
+				WXMLDocument *root;
 				mxml_node_t *handle;
+				void Use() { usages++; }
+				void Release();
+			private:
+				WXMLNode(WXMLDocument *root, mxml_node_t *handle);
+
+				int usages;
+
+				friend class WXMLDocument;
 			};
 
 			WrenForeignMethodFn bind_wxml_method(
