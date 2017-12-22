@@ -204,6 +204,14 @@ static void XMLNode_text(WrenVM* vm) {
 	wrenSetSlotString(vm, 0, mxmlGetText(wxml->handle, NULL));
 }
 
+static void XMLNode_text_set(WrenVM* vm) {
+	THIS_WXML_NODE(vm);
+
+	XMLNODE_REQUIRE_TYPE(MXML_TEXT, name);
+
+	mxmlSetText(wxml->handle, NULL, wrenGetSlotString(vm, 1));
+}
+
 static void XMLNode_string(WrenVM* vm) {
 	THIS_WXML_NODE(vm);
 
@@ -223,6 +231,14 @@ static void XMLNode_name(WrenVM* vm) {
 	wrenSetSlotString(vm, 0, mxmlGetElement(wxml->handle));
 }
 
+static void XMLNode_name_set(WrenVM* vm) {
+	THIS_WXML_NODE(vm);
+
+	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
+
+	mxmlSetElement(wxml->handle, wrenGetSlotString(vm, 1));
+}
+
 static void XMLNode_attribute(WrenVM* vm) {
 	THIS_WXML_NODE(vm);
 
@@ -233,6 +249,22 @@ static void XMLNode_attribute(WrenVM* vm) {
 		wrenSetSlotString(vm, 0, value);
 	else
 		wrenSetSlotNull(vm, 0);
+}
+
+static void XMLNode_attribute_set(WrenVM* vm) {
+	THIS_WXML_NODE(vm);
+
+	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
+
+	const char *name = wrenGetSlotString(vm, 1);
+
+	if (wrenGetSlotType(vm, 2) == WREN_TYPE_NULL) {
+		mxmlElementDeleteAttr(wxml->handle, name);
+	}
+	else {
+		const char *value = wrenGetSlotString(vm, 2);
+		mxmlElementSetAttr(wxml->handle, name, value);
+	}
 }
 
 static void XMLNode_attribute_names(WrenVM* vm) {
@@ -301,14 +333,23 @@ WrenForeignMethodFn wrenxml::bind_wxml_method(
 			return XMLNode_ ## name; \
 		}
 
-		XMLNODE_CHECK_FUNC(z, type);
-		XMLNODE_CHECK_FUNC(z, text);
-		XMLNODE_CHECK_FUNC(z, string);
-		XMLNODE_CHECK_FUNC(z, name);
-		XMLNODE_CHECK_FUNC(z, attribute_names);
+#define XMLNODE_BI_FUNC(name) \
+		XMLNODE_CHECK_FUNC(, name) \
+		if (!is_static && signature == #name "=(_)") { \
+			return XMLNode_ ## name ## _set; \
+		}
+
+		XMLNODE_CHECK_FUNC(, type);
+		XMLNODE_BI_FUNC(text);
+		XMLNODE_CHECK_FUNC(, string);
+		XMLNODE_BI_FUNC(name);
+		XMLNODE_CHECK_FUNC(, attribute_names);
 
 		if (!is_static && signature == "[_]") {
 			return XMLNode_attribute;
+		}
+		if (!is_static && signature == "[_]=(_)") {
+			return XMLNode_attribute_set;
 		}
 
 		XMLNODE_FUNC_SET(XMLNODE_CHECK_FUNC);
