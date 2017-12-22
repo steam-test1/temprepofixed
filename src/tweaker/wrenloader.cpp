@@ -64,11 +64,13 @@ void io_read(WrenVM *vm) {
 	wrenSetSlotString(vm, 0, contents.c_str());
 }
 
-vector<string> import_todo;
 void io_dynamic_import(WrenVM *vm) {
 	// TODO do this properly
 	string module = wrenGetSlotString(vm, 1);
-	import_todo.push_back(module);
+
+	string line = string("import \"") + module + string("\"");
+	WrenInterpretResult compileResult = wrenInterpret(vm, line.c_str());
+	printf("Module Load: %d\n", compileResult);
 }
 
 static WrenForeignClassMethods bindForeignClass(
@@ -150,13 +152,6 @@ const char* tweaker::transform_file(const char* text)
 		WrenInterpretResult compileResult = wrenInterpret(vm, R"!( import "base/base" )!");
 		printf("Compile: %d\n", compileResult);
 	}
-
-	for (string const& module : import_todo) {
-		string line = string("import \"") + module + string("\"");
-		WrenInterpretResult compileResult = wrenInterpret(vm, line.c_str());
-		printf("Module Load: %d\n", compileResult);
-	}
-	import_todo.clear();
 
 	wrenEnsureSlots(vm, 4);
 
