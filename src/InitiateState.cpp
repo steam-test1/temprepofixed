@@ -649,6 +649,8 @@ namespace pd2hook
 		SignatureSearch::Search();
 		VRManager::CheckAndLoad();
 
+		if (node_from_xml == NULL) node_from_xml = node_from_xml_vr;
+
 		FuncDetour* gameUpdateDetour = new FuncDetour((void**)&do_game_update, do_game_update_new);
 		FuncDetour* newStateDetour = new FuncDetour((void**)&luaL_newstate, luaL_newstate_new);
 		FuncDetour* newStateDetourVr = new FuncDetour((void**)&luaL_newstate_vr, luaL_newstate_new_vr);
