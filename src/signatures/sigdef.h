@@ -84,7 +84,9 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_error, int, "\x8D\x44\x24\x0C\x50\xFF\x74\
 
 // TODO: Find address-less signatures
 CREATE_NORMAL_CALLABLE_SIGNATURE(node_from_xml, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\xD9\x43\x90\x00\x64\xA1\x00", "xxxxxxxxxxxxxxxx", 0, void*, char*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(try_open_base, int, "\xB8\x08\x9D\x8F\x00\xE8\x22\x7C\x45\x00\x81\xEC\x8C\x00\x00\x00", "xxxxxxxxxxxxxxxx", 0)
+
+// FIXME This isn't really actually a function - it's a blob that contains references to some of the variables we want.
+CREATE_NORMAL_CALLABLE_SIGNATURE(try_open_base, int, "\xB8\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x81\xEC\x8C\x00\x00\x00\x8B\x45\x14\xA3\x00\x00\x00\x00\x8B\x45\x18\xA3\x00\x00\x00\x00", "x????x????xxxxxxxxxx????xxxx????", 0)
 
 #ifdef SIG_INCLUDE_MAIN
 CREATE_CALLABLE_CLASS_SIGNATURE(do_game_update, void*, "\x56\xFF\x74\x24\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxx????xxx", 0, int*, int*)

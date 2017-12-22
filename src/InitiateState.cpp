@@ -655,7 +655,8 @@ namespace pd2hook
 		FuncDetour* luaCloseDetour = new FuncDetour((void**)&lua_close, luaF_close);
 
 		FuncDetour* node_from_xmlDetour = new FuncDetour((void**)&node_from_xml, tweaker::node_from_xml_new);
-		FuncDetour* potentialPOIDetour = new FuncDetour((void**)&try_open_base, tweaker::try_open_base_hook);
+
+		tweaker::init_xml_tweaker();
 	}
 
 	void DestroyStates()

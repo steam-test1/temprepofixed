@@ -158,10 +158,10 @@ const char* tweaker::transform_file(const char* text)
 
 	wrenSetSlotHandle(vm, 0, tweakerClass);
 
-	sprintf_s(hex, 17, "%016llx", tweaker::last_loaded_name);
+	sprintf_s(hex, 17, "%016llx", *tweaker::last_loaded_name);
 	wrenSetSlotString(vm, 1, hex);
 
-	sprintf_s(hex, 17, "%016llx", tweaker::last_loaded_ext);
+	sprintf_s(hex, 17, "%016llx", *tweaker::last_loaded_ext);
 	wrenSetSlotString(vm, 2, hex);
 
 	wrenSetSlotString(vm, 3, text);

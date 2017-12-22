@@ -15,20 +15,22 @@ using namespace tweaker;
 
 static unordered_set<char*> buffers;
 
-idstring tweaker::last_loaded_name = NULL, tweaker::last_loaded_ext = NULL;
-void tweaker::note_loaded_file(idstring name, idstring ext) {
-	tweaker::last_loaded_name = name;
-	tweaker::last_loaded_ext = ext;
+idstring *tweaker::last_loaded_name = NULL, *tweaker::last_loaded_ext = NULL;
+
+void tweaker::init_xml_tweaker() {
+	char *tmp;
+
+	tmp = (char*)try_open_base;
+	tmp += 0x26;
+	last_loaded_name = *((idstring**) tmp);
+
+	tmp = (char*)try_open_base;
+	tmp += 0x14;
+	last_loaded_ext = *((idstring**) tmp);
 }
 
 void* __cdecl tweaker::tweak_pd2_xml(char* text) {
-	// TODO better way to see if this isn't the actual file's name
-	if (tweaker::last_loaded_name == NULL) {
-		// PD2HOOK_LOG_LOG("Name unknown for parsed XML function")
-		return text;
-	}
-
-	const char* new_text = tweaker::transform_file(text);
+	const char* new_text = transform_file(text);
 	size_t length = strlen(new_text) + 1; // +1 for the null
 
 	char* buffer = (char*)malloc(length);
@@ -53,10 +55,6 @@ void* __cdecl tweaker::tweak_pd2_xml(char* text) {
 			printf("*** %d called from .text:%08X\n", i, callers[i]);
 		Sleep(20000);
 	}*/
-
-	// Reset the name so we don't think we're parsing the file again
-	tweaker::last_loaded_name = NULL;
-	tweaker::last_loaded_ext = NULL;
 
 	return (char*)buffer;
 }

@@ -42,36 +42,3 @@ void __declspec(naked) tweaker::node_from_xml_new() {
 		retn
 	}
 }
-
-static void __cdecl note_loaded_file_wrapper(unsigned long long ext, unsigned long long name) {
-	// printf("*VAL: %016llx, %016llx\n", name, ext);
-	tweaker::note_loaded_file(name, ext);
-}
-
-int __declspec(naked) tweaker::try_open_base_hook()
-{
-	__asm
-	{
-		// Save ecx and edx - if they are modified, the game crashes
-		push ecx
-		push edx
-
-		// Push 32 bytes of data
-		// int=4,long=8,longlong=16 - we use 2x longlong, thus 32
-
-		push[esp + 36] // 36 for the args + 8 for ecx/edx - 8 because the stack pointer hasn't advanced yet
-		push[esp + 36]
-		push[esp + 36]
-		push[esp + 36]
-
-		call note_loaded_file_wrapper
-
-		add esp, 16 // remove the four items we pushed onto the stack
-
-		// Restore ecx/edx
-		pop edx
-		pop ecx
-
-		jmp try_open_base
-	}
-}
