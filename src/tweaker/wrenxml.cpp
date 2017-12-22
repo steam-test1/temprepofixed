@@ -32,7 +32,8 @@ WXMLNode *wxml = (WXMLNode*)wrenGetSlotForeign(vm, 0); \
 if(wxml->root == NULL) { \
 	MessageBox(0, "Cannot use closed Wren XML Instance", "Wren Error", MB_OK); \
 	exit(1); \
-}
+} \
+mxml_node_t *handle = wxml->handle
 
 static char *					/* O - Allocated string */
 mxmlToAllocStringSafe(
@@ -189,19 +190,19 @@ static void finalizeXMLNode(void* data) {
 static void XMLNode_type(WrenVM* vm) {
 	THIS_WXML_NODE(vm);
 
-	wrenSetSlotDouble(vm, 0, mxmlGetType(wxml->handle));
+	wrenSetSlotDouble(vm, 0, mxmlGetType(handle));
 }
 
 #define XMLNODE_REQUIRE_TYPE(type, name) \
-if (mxmlGetType(wxml->handle) != type) \
-WXML_ERR("Can only perform ." #name " on " #type " nodes - ID:" + to_string(mxmlGetType(wxml->handle)));
+if (mxmlGetType(handle) != type) \
+WXML_ERR("Can only perform ." #name " on " #type " nodes - ID:" + to_string(mxmlGetType(handle)));
 
 static void XMLNode_text(WrenVM* vm) {
 	THIS_WXML_NODE(vm);
 
 	XMLNODE_REQUIRE_TYPE(MXML_TEXT, name);
 
-	wrenSetSlotString(vm, 0, mxmlGetText(wxml->handle, NULL));
+	wrenSetSlotString(vm, 0, mxmlGetText(handle, NULL));
 }
 
 static void XMLNode_text_set(WrenVM* vm) {
@@ -209,7 +210,7 @@ static void XMLNode_text_set(WrenVM* vm) {
 
 	XMLNODE_REQUIRE_TYPE(MXML_TEXT, name);
 
-	mxmlSetText(wxml->handle, NULL, wrenGetSlotString(vm, 1));
+	mxmlSetText(handle, NULL, wrenGetSlotString(vm, 1));
 }
 
 static void XMLNode_string(WrenVM* vm) {
@@ -218,7 +219,7 @@ static void XMLNode_string(WrenVM* vm) {
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, string);
 
 	mxmlSetWrapMargin(0);
-	char* str = mxmlToAllocStringSafe(wxml->handle, MXML_NO_CALLBACK);
+	char* str = mxmlToAllocStringSafe(handle, MXML_NO_CALLBACK);
 	wrenSetSlotString(vm, 0, str);
 	free(str);
 }
@@ -228,7 +229,7 @@ static void XMLNode_name(WrenVM* vm) {
 
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
 
-	wrenSetSlotString(vm, 0, mxmlGetElement(wxml->handle));
+	wrenSetSlotString(vm, 0, mxmlGetElement(handle));
 }
 
 static void XMLNode_name_set(WrenVM* vm) {
@@ -236,7 +237,7 @@ static void XMLNode_name_set(WrenVM* vm) {
 
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
 
-	mxmlSetElement(wxml->handle, wrenGetSlotString(vm, 1));
+	mxmlSetElement(handle, wrenGetSlotString(vm, 1));
 }
 
 static void XMLNode_attribute(WrenVM* vm) {
@@ -244,7 +245,7 @@ static void XMLNode_attribute(WrenVM* vm) {
 
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
 
-	const char *value = mxmlElementGetAttr(wxml->handle, wrenGetSlotString(vm, 1));
+	const char *value = mxmlElementGetAttr(handle, wrenGetSlotString(vm, 1));
 	if (value)
 		wrenSetSlotString(vm, 0, value);
 	else
@@ -259,11 +260,11 @@ static void XMLNode_attribute_set(WrenVM* vm) {
 	const char *name = wrenGetSlotString(vm, 1);
 
 	if (wrenGetSlotType(vm, 2) == WREN_TYPE_NULL) {
-		mxmlElementDeleteAttr(wxml->handle, name);
+		mxmlElementDeleteAttr(handle, name);
 	}
 	else {
 		const char *value = wrenGetSlotString(vm, 2);
-		mxmlElementSetAttr(wxml->handle, name, value);
+		mxmlElementSetAttr(handle, name, value);
 	}
 }
 
@@ -275,9 +276,9 @@ static void XMLNode_attribute_names(WrenVM* vm) {
 	wrenEnsureSlots(vm, 2);
 
 	wrenSetSlotNewList(vm, 0);
-	for (int i = 0; i < mxmlElementGetAttrCount(wxml->handle); i++) {
+	for (int i = 0; i < mxmlElementGetAttrCount(handle); i++) {
 		const char *name;
-		mxmlElementGetAttrByIndex(wxml->handle, i, &name);
+		mxmlElementGetAttrByIndex(handle, i, &name);
 		wrenSetSlotString(vm, 1, name);
 		wrenInsertInList(vm, 0, -1, 1);
 	}
@@ -286,7 +287,7 @@ static void XMLNode_attribute_names(WrenVM* vm) {
 #define XMLNODE_FUNC(getter, name) \
 static void XMLNode_ ## name(WrenVM* vm) { \
 	THIS_WXML_NODE(vm); \
-	mxml_node_t *node = mxmlGet ## getter(wxml->handle); \
+	mxml_node_t *node = mxmlGet ## getter(handle); \
 	if(node) { \
 		XMLNode_create(vm, wxml->root, node, 0); \
 	} \
