@@ -149,14 +149,12 @@ const char* tweaker::transform_file(const char* text)
 
 		WrenInterpretResult compileResult = wrenInterpret(vm, R"!( import "base/base" )!");
 		printf("Compile: %d\n", compileResult);
-		if (compileResult != WREN_RESULT_SUCCESS) Sleep(20000);
 	}
 
 	for (string const& module : import_todo) {
 		string line = string("import \"") + module + string("\"");
 		WrenInterpretResult compileResult = wrenInterpret(vm, line.c_str());
 		printf("Module Load: %d\n", compileResult);
-		if (compileResult != WREN_RESULT_SUCCESS) Sleep(20000);
 	}
 	import_todo.clear();
 
@@ -179,7 +177,6 @@ const char* tweaker::transform_file(const char* text)
 	wrenSetSlotString(vm, 3, text);
 
 	WrenInterpretResult result2 = wrenCall(vm, sig);
-	if (result2 != WREN_RESULT_SUCCESS) Sleep(20000); // TODO
 
 	wrenReleaseHandle(vm, tweakerClass);
 	wrenReleaseHandle(vm, sig);
