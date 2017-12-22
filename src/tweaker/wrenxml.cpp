@@ -199,7 +199,7 @@ WXML_ERR("Can only perform ." #name " on " #type " nodes - ID:" + to_string(mxml
 static void XMLNode_text(WrenVM* vm) {
 	THIS_WXML_NODE(vm);
 
-	XMLNODE_REQUIRE_TYPE(MXML_TEXT, name)
+	XMLNODE_REQUIRE_TYPE(MXML_TEXT, name);
 
 	wrenSetSlotString(vm, 0, mxmlGetText(wxml->handle, NULL));
 }
@@ -207,7 +207,7 @@ static void XMLNode_text(WrenVM* vm) {
 static void XMLNode_string(WrenVM* vm) {
 	THIS_WXML_NODE(vm);
 
-	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, string)
+	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, string);
 
 	mxmlSetWrapMargin(0);
 	char* str = mxmlToAllocStringSafe(wxml->handle, MXML_NO_CALLBACK);
@@ -218,7 +218,7 @@ static void XMLNode_string(WrenVM* vm) {
 static void XMLNode_name(WrenVM* vm) {
 	THIS_WXML_NODE(vm);
 
-	if (mxmlGetType(wxml->handle) != MXML_ELEMENT) WXML_ERR("Can only perform .name on element-type nodes - ID:" + to_string(mxmlGetType(wxml->handle)));
+	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
 
 	wrenSetSlotString(vm, 0, mxmlGetElement(wxml->handle));
 }
