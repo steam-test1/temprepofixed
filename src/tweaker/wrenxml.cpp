@@ -12,8 +12,6 @@ using namespace wrenxml;
 
 const char *MODULE = "base/native";
 
-static void finalizeXMLNode(void* data);
-
 #define WXML_ERR(err) { \
 	PD2HOOK_LOG_ERROR(err) \
 	MessageBox(0, "A WXML Error has occured - details are logged in the console", "WXML Error", MB_OK); \
@@ -29,7 +27,7 @@ if(!wxml->open) { \
 
 #define THIS_WXML_NODE(vm) \
 WXMLNode *wxml = (WXMLNode*)wrenGetSlotForeign(vm, 0); \
-if(wxml->root == NULL) { \
+if(wxml->handle == NULL) { \
 	MessageBox(0, "Cannot use closed Wren XML Instance", "Wren Error", MB_OK); \
 	exit(1); \
 } \
@@ -99,16 +97,14 @@ static void handle_mxml_error_note(const char* error) {
 	mxml_last_error = _strdup(error);
 }
 
-static WXML* attemptAllocateXML(WrenVM* vm) {
-	WXML *wxml = (WXML*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(WXML));
+static WXMLNode* attemptParseString(WrenVM* vm) {
+	WXMLNode *wxml = (WXMLNode*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(WXMLNode));
 
 	const char* text = wrenGetSlotString(vm, 1);
 	last_loaded_xml = text;
 
-	wxml->nodes = new unordered_set<WXMLNode*>();
-
-	wxml->root_node = mxmlLoadString(NULL, text, MXML_TEXT_CALLBACK);
-	wxml->open = wxml->root_node != NULL;
+	wxml->root = wxml;
+	wxml->handle = mxmlLoadString(NULL, text, MXML_TEXT_CALLBACK);
 
 	// Use the crash callback for anything else
 	mxmlSetErrorCallback(&handle_mxml_error_crash);
@@ -118,34 +114,27 @@ static WXML* attemptAllocateXML(WrenVM* vm) {
 
 static void allocateXML(WrenVM* vm) {
 	mxmlSetErrorCallback(&handle_mxml_error_crash);
-	WXML *wxml = attemptAllocateXML(vm);
+	WXMLNode *wxml = attemptParseString(vm);
 
-	if (!wxml->open) {
+	if (!wxml->handle) {
 		WXML_ERR("Uncaught parse error!");
 	}
 }
 
 static void finalizeXML(void* data) {
-	WXML *wxml = (WXML*)data;
-	if (!wxml->open) return;
-	wxml->open = false;
+	WXMLNode *wxml = (WXMLNode*)data;
+
+	if (wxml->handle == NULL || wxml->root != wxml) return;
 
 	// free resources
-	mxmlDelete(wxml->root_node);
+	mxmlDelete(wxml->handle);
 
-	unordered_set<WXMLNode*> *nodes = wxml->nodes;
-	wxml->nodes = NULL;
-
-	for (WXMLNode *node : *nodes) {
-		finalizeXMLNode(node);
-	}
-
-	delete nodes;
+	wxml->handle = NULL;
 }
 
 static void XMLtry_parse(WrenVM* vm) {
 	mxmlSetErrorCallback(&handle_mxml_error_note);
-	WXML *wxml = attemptAllocateXML(vm);
+	WXMLNode *wxml = attemptParseString(vm);
 
 	if (mxml_last_error) {
 		finalizeXML(wxml);
@@ -156,35 +145,22 @@ static void XMLtry_parse(WrenVM* vm) {
 	}
 }
 
-static void XMLfree(WrenVM* vm) {
+static void XMLdelete(WrenVM* vm) {
 	// Make sure we don't crash if already freed, so don't use THIS_WXML
-	WXML *wxml = (WXML*)wrenGetSlotForeign(vm, 0);
+	WXMLNode *wxml = (WXMLNode*)wrenGetSlotForeign(vm, 0);
 	finalizeXML(wxml);
 }
 
-static WXMLNode* XMLNode_create(WrenVM *vm, WXML *root, mxml_node_t *xnode, int slot) {
-	if (xnode == NULL) WXML_ERR("Cannot create null XMLNode");
+static WXMLNode* XMLNode_create(WrenVM *vm, WXMLNode *root, mxml_node_t *xnode, int slot) {
+	if (xnode == NULL) WXML_ERR("Cannot create null XML Node");
 
-	wrenGetVariable(vm, MODULE, "XMLNode", slot);
+	wrenGetVariable(vm, MODULE, "XML", slot);
 
 	WXMLNode *node = (WXMLNode*)wrenSetSlotNewForeign(vm, slot, slot, sizeof(WXMLNode));
 	node->root = root;
 	node->handle = xnode;
-	root->nodes->insert(node);
 
 	return node;
-}
-
-static void XMLroot_node(WrenVM* vm) {
-	THIS_WXML(vm);
-	XMLNode_create(vm, wxml, wxml->root_node, 0);
-}
-
-static void finalizeXMLNode(void* data) {
-	WXMLNode *node = (WXMLNode*)data;
-	if (node->root == NULL) return;
-	if (node->root->nodes) node->root->nodes->erase(node);
-	node->root = NULL;
 }
 
 static void XMLNode_type(WrenVM* vm) {
@@ -284,6 +260,16 @@ static void XMLNode_attribute_names(WrenVM* vm) {
 	}
 }
 
+static void XMLNode_create_element(WrenVM* vm) {
+	THIS_WXML_NODE(vm);
+
+	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
+
+	const char *name = wrenGetSlotString(vm, 1);
+	mxml_node_t *node = mxmlNewElement(handle, name);
+	XMLNode_create(vm, wxml->root, node, 0);
+}
+
 #define XMLNODE_FUNC(getter, name) \
 static void XMLNode_ ## name(WrenVM* vm) { \
 	THIS_WXML_NODE(vm); \
@@ -321,14 +307,7 @@ WrenForeignMethodFn wrenxml::bind_wxml_method(
 		if (is_static && signature == "try_parse(_)") {
 			return XMLtry_parse;
 		}
-		else if (!is_static && signature == "free()") {
-			return XMLfree;
-		}
-		else if (!is_static && signature == "root_node") {
-			return XMLroot_node;
-		}
-	}
-	else if (class_name == "XMLNode") {
+
 #define XMLNODE_CHECK_FUNC(getter, name) \
 		if (!is_static && signature == #name) { \
 			return XMLNode_ ## name; \
@@ -353,6 +332,14 @@ WrenForeignMethodFn wrenxml::bind_wxml_method(
 			return XMLNode_attribute_set;
 		}
 
+		if (!is_static && signature == "create_element(_)") {
+			return XMLNode_create_element;
+		}
+
+		if (!is_static && signature == "delete()") {
+			return XMLdelete;
+		}
+
 		XMLNODE_FUNC_SET(XMLNODE_CHECK_FUNC);
 	}
 
@@ -365,12 +352,6 @@ WrenForeignClassMethods wrenxml::get_XML_class_def(WrenVM* vm, const char* modul
 			WrenForeignClassMethods def;
 			def.allocate = allocateXML;
 			def.finalize = finalizeXML;
-			return def;
-		}
-		else if (string(class_name) == "XMLBase") {
-			WrenForeignClassMethods def;
-			def.allocate = NULL;
-			def.finalize = finalizeXMLNode;
 			return def;
 		}
 	}
