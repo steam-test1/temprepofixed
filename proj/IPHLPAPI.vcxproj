@@ -165,6 +165,7 @@
     <ClInclude Include="..\src\signatures\sigdef.h" />
     <ClInclude Include="..\src\signatures\signatures.h" />
     <ClInclude Include="..\src\threading\queue.h" />
+    <ClInclude Include="..\src\tweaker\wrenxml.h" />
     <ClInclude Include="..\src\tweaker\xmltweaker.h" />
     <ClInclude Include="..\src\tweaker\xmltweaker_internal.h" />
     <ClInclude Include="..\src\util\util.h" />
