@@ -223,6 +223,34 @@ static void XMLNode_name(WrenVM* vm) {
 	wrenSetSlotString(vm, 0, mxmlGetElement(wxml->handle));
 }
 
+static void XMLNode_attribute(WrenVM* vm) {
+	THIS_WXML_NODE(vm);
+
+	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
+
+	const char *value = mxmlElementGetAttr(wxml->handle, wrenGetSlotString(vm, 1));
+	if (value)
+		wrenSetSlotString(vm, 0, value);
+	else
+		wrenSetSlotNull(vm, 0);
+}
+
+static void XMLNode_attribute_names(WrenVM* vm) {
+	THIS_WXML_NODE(vm);
+
+	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
+
+	wrenEnsureSlots(vm, 2);
+
+	wrenSetSlotNewList(vm, 0);
+	for (int i = 0; i < mxmlElementGetAttrCount(wxml->handle); i++) {
+		const char *name;
+		mxmlElementGetAttrByIndex(wxml->handle, i, &name);
+		wrenSetSlotString(vm, 1, name);
+		wrenInsertInList(vm, 0, -1, 1);
+	}
+}
+
 #define XMLNODE_FUNC(getter, name) \
 static void XMLNode_ ## name(WrenVM* vm) { \
 	THIS_WXML_NODE(vm); \
@@ -277,6 +305,11 @@ WrenForeignMethodFn wrenxml::bind_wxml_method(
 		XMLNODE_CHECK_FUNC(z, text);
 		XMLNODE_CHECK_FUNC(z, string);
 		XMLNODE_CHECK_FUNC(z, name);
+		XMLNODE_CHECK_FUNC(z, attribute_names);
+
+		if (!is_static && signature == "[_]") {
+			return XMLNode_attribute;
+		}
 
 		XMLNODE_FUNC_SET(XMLNODE_CHECK_FUNC);
 	}
