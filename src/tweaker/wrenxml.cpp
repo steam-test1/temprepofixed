@@ -13,9 +13,12 @@ using namespace wrenxml;
 const char *MODULE = "base/native";
 
 #define WXML_ERR(err) { \
-	PD2HOOK_LOG_ERROR(err) \
+	string str = err; \
+	wrenSetSlotString(vm, 0, str.c_str()); \
+	wrenAbortFiber(vm, 0); \
+	/*PD2HOOK_LOG_ERROR(err) \
 	MessageBox(0, "A WXML Error has occured - details are logged in the console", "WXML Error", MB_OK); \
-	exit(1); \
+	exit(1);*/ \
 }
 
 #define THIS_WXML_NODE(vm) \
