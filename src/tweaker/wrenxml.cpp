@@ -21,12 +21,14 @@ const char *MODULE = "base/native";
 	exit(1);*/ \
 }
 
+#define GET_WXML_NODE(vm, slot, name) \
+WXMLNode *name = *(WXMLNode**)wrenGetSlotForeign(vm, slot); \
+if(name->root == NULL) { \
+	WXML_ERR("Cannot use closed Wren XML Instance"); \
+}
+
 #define THIS_WXML_NODE(vm) \
-WXMLNode *wxml = *(WXMLNode**)wrenGetSlotForeign(vm, 0); \
-if(wxml->root == NULL) { \
-	MessageBox(0, "Cannot use closed Wren XML Instance", "Wren Error", MB_OK); \
-	exit(1); \
-} \
+GET_WXML_NODE(vm, 0, wxml) \
 mxml_node_t *handle = wxml->handle
 
 static char *					/* O - Allocated string */
@@ -93,6 +95,25 @@ static void handle_mxml_error_note(const char* error) {
 	mxml_last_error = _strdup(error);
 }
 
+static mxml_node_t* recursive_clone(mxml_node_t *dest_parent, mxml_node_t *src) {
+	mxml_node_t *dest = mxmlNewElement(dest_parent, mxmlGetElement(src));
+	for (int i = 0; i < mxmlElementGetAttrCount(src); i++)
+	{
+		const char *name;
+		const char *value = mxmlElementGetAttrByIndex(src, i, &name);
+		mxmlElementSetAttr(dest, name, value);
+	}
+
+	mxml_node_t *src_child = mxmlGetFirstChild(src);
+	while (src_child != NULL) {
+		recursive_clone(dest, src_child);
+
+		src_child = mxmlGetNextSibling(src_child);
+	}
+
+	return dest;
+}
+
 mxml_type_t remove_whitespace_callback(mxml_node_t *) {
 	return MXML_IGNORE;
 }
@@ -100,6 +121,12 @@ mxml_type_t remove_whitespace_callback(mxml_node_t *) {
 WXMLDocument::WXMLDocument(const char *text) {
 	root_node = mxmlLoadString(NULL, text, remove_whitespace_callback);
 }
+
+WXMLDocument::WXMLDocument(WXMLNode *clone_from) {
+	root_node = recursive_clone(MXML_NO_PARENT, clone_from->handle);
+}
+
+WXMLDocument::WXMLDocument(mxml_node_t *root_node) : root_node(root_node) {}
 
 WXMLDocument::~WXMLDocument() {
 	for (auto const &node : nodes) {
@@ -114,6 +141,16 @@ WXMLNode* WXMLDocument::GetNode(mxml_node_t *node) {
 	if (nodes.count(node)) return nodes[node];
 
 	return new WXMLNode(this, node);
+}
+
+void WXMLDocument::MergeInto(WXMLDocument *other) {
+	for (auto const &pair : nodes) {
+		other->nodes[pair.first] = pair.second;
+		pair.second->root = other;
+	}
+	nodes.clear();
+	root_node = NULL;
+	// TODO mark ourselves for deletion
 }
 
 WXMLNode::WXMLNode(WXMLDocument *root, mxml_node_t *handle) : root(root), handle(handle), usages(0) {
@@ -135,6 +172,40 @@ void WXMLNode::Release() {
 		root = NULL;
 		delete this; // DANGER!
 	}
+}
+
+WXMLDocument* WXMLNode::MoveToNewDocument() {
+	WXMLDocument *old = root;
+	WXMLDocument *doc = new WXMLDocument(handle);
+
+	vector<mxml_node_t*> to_remove;
+	for (auto const &node : old->nodes) {
+		mxml_node_t *nod = node.first;
+		bool is_child = false;
+		while (nod != NULL) {
+			if (nod == handle) {
+				is_child = true;
+				printf("Is Child!\n");
+				break;
+			}
+			nod = mxmlGetParent(nod);
+		}
+		printf("done\n");
+
+		if (!is_child) continue;
+
+		to_remove.push_back(node.first);
+		node.second->root = doc;
+		doc->nodes[node.first] = node.second;
+	}
+
+	for (mxml_node_t* const &node : to_remove) {
+		old->nodes.erase(node);
+	}
+
+	mxmlRemove(handle);
+
+	return doc;
 }
 
 static WXMLNode* attemptParseString(WrenVM* vm) {
@@ -181,7 +252,7 @@ static void XMLtry_parse(WrenVM* vm) {
 	}
 }
 
-static void XMLdelete(WrenVM* vm) {
+static void XMLNode_delete(WrenVM* vm) {
 	// Make sure we don't crash if already freed, so don't use THIS_WXML
 	WXMLNode *wxml = *(WXMLNode**)wrenGetSlotForeign(vm, 0);
 	if (wxml->root != NULL) delete wxml->root;
@@ -306,6 +377,37 @@ static void XMLNode_create_element(WrenVM* vm) {
 	XMLNode_create(vm, wxml->root, node, 0);
 }
 
+static void XMLNode_detach(WrenVM* vm) {
+	THIS_WXML_NODE(vm);
+
+	// Don't do anything if we're already at the top of a tree
+	if (mxmlGetParent(handle) == NULL) return;
+
+	wxml->MoveToNewDocument();
+}
+
+static void XMLNode_clone(WrenVM* vm) {
+	THIS_WXML_NODE(vm);
+
+	WXMLDocument *doc = new WXMLDocument(wxml);
+	XMLNode_create(vm, doc, doc->GetRootNode()->handle, 0);
+}
+
+static void XMLNode_attach(WrenVM* vm) {
+	THIS_WXML_NODE(vm);
+	GET_WXML_NODE(vm, 1, new_child);
+
+	if (mxmlGetParent(new_child->handle) != NULL) {
+		WXML_ERR("Cannot attach a node that already has a parent");
+	}
+
+	WXMLDocument *old_root = new_child->root;
+
+	mxmlAdd(handle, MXML_ADD_AFTER, MXML_ADD_TO_PARENT, new_child->handle);
+	new_child->root->MergeInto(wxml->root);
+	delete old_root;
+}
+
 #define XMLNODE_FUNC(getter, name) \
 static void XMLNode_ ## name(WrenVM* vm) { \
 	THIS_WXML_NODE(vm); \
@@ -344,36 +446,39 @@ WrenForeignMethodFn wrenxml::bind_wxml_method(
 			return XMLtry_parse;
 		}
 
-#define XMLNODE_CHECK_FUNC(getter, name) \
-		if (!is_static && signature == #name) { \
+#define XMLNODE_FUNC(name, sig) \
+		if (!is_static && signature == #name sig) { \
 			return XMLNode_ ## name; \
 		}
 
+#define XMLNODE_CHECK_FUNC(getter, name) XMLNODE_FUNC(name)
+
 #define XMLNODE_BI_FUNC(name) \
-		XMLNODE_CHECK_FUNC(, name) \
+		XMLNODE_FUNC(name) \
 		if (!is_static && signature == #name "=(_)") { \
 			return XMLNode_ ## name ## _set; \
 		}
 
-		XMLNODE_CHECK_FUNC(, type);
+		XMLNODE_FUNC(type);
+		XMLNODE_FUNC(string);
+		XMLNODE_FUNC(attribute_names);
+
 		XMLNODE_BI_FUNC(text);
-		XMLNODE_CHECK_FUNC(, string);
 		XMLNODE_BI_FUNC(name);
-		XMLNODE_CHECK_FUNC(, attribute_names);
+
+		XMLNODE_FUNC(create_element, "(_)");
+
+		XMLNODE_FUNC(detach, "()");
+		XMLNODE_FUNC(clone, "()");
+		XMLNODE_FUNC(attach, "(_)");
+
+		XMLNODE_FUNC(delete, "()");
 
 		if (!is_static && signature == "[_]") {
 			return XMLNode_attribute;
 		}
 		if (!is_static && signature == "[_]=(_)") {
 			return XMLNode_attribute_set;
-		}
-
-		if (!is_static && signature == "create_element(_)") {
-			return XMLNode_create_element;
-		}
-
-		if (!is_static && signature == "delete()") {
-			return XMLdelete;
 		}
 
 		XMLNODE_FUNC_SET(XMLNODE_CHECK_FUNC);

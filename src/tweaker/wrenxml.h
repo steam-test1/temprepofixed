@@ -17,12 +17,16 @@ namespace pd2hook {
 			class WXMLDocument {
 			public:
 				WXMLDocument(const char *text);
+				WXMLDocument(WXMLNode *clone_from);
 				~WXMLDocument();
 				WXMLNode *GetRootNode() { return GetNode(root_node); }
 				WXMLNode *GetNode(mxml_node_t *node);
+				void MergeInto(WXMLDocument *other);
 			private:
 				mxml_node_t *root_node;
 				std::map<mxml_node_t*, WXMLNode*> nodes;
+
+				WXMLDocument(mxml_node_t *root_node);
 
 				friend class WXMLNode;
 			};
@@ -34,6 +38,7 @@ namespace pd2hook {
 				mxml_node_t *handle;
 				void Use() { usages++; }
 				void Release();
+				WXMLDocument* MoveToNewDocument();
 			private:
 				WXMLNode(WXMLDocument *root, mxml_node_t *handle);
 
