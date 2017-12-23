@@ -27,6 +27,10 @@ static void log(WrenVM* vm)
 	PD2HOOK_LOG_LOG(string("[WREN] ") + text);
 }
 
+static string file_to_string(ifstream &in) {
+	return string((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
+}
+
 void io_listDirectory(WrenVM* vm) {
 	string filename = wrenGetSlotString(vm, 1);
 	bool dir = wrenGetSlotBool(vm, 2);
@@ -60,7 +64,14 @@ void io_info(WrenVM* vm) {
 
 void io_read(WrenVM *vm) {
 	string file = wrenGetSlotString(vm, 1);
-	string contents = Util::GetFileContents(file);
+
+	ifstream handle(file);
+	if (!handle.good()) {
+		PD2HOOK_LOG_ERROR("Wren IO.read: Could not load file " + file);
+		exit(1);
+	}
+
+	string contents = file_to_string(handle);
 	wrenSetSlotString(vm, 0, contents.c_str());
 }
 
@@ -132,8 +143,12 @@ static char* getModulePath(WrenVM* vm, const char* name_c)
 	string mod = name.substr(0, name.find_first_of('/'));
 	string file = name.substr(name.find_first_of('/') + 1);
 
-	string xname = string("mods/") + mod + "/wren/" + file + ".wren";
-	string str = Util::GetFileContents(xname);
+	ifstream handle("mods/" + mod + "/wren/" + file + ".wren");
+	if (!handle.good()) {
+		return NULL;
+	}
+
+	string str = file_to_string(handle);
 
 	size_t length = str.length() + 1;
 	char* output = (char*)malloc(length); // +1 for the null
