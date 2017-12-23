@@ -185,12 +185,10 @@ WXMLDocument* WXMLNode::MoveToNewDocument() {
 		while (nod != NULL) {
 			if (nod == handle) {
 				is_child = true;
-				printf("Is Child!\n");
 				break;
 			}
 			nod = mxmlGetParent(nod);
 		}
-		printf("done\n");
 
 		if (!is_child) continue;
 

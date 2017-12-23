@@ -38,8 +38,6 @@ void tweaker::init_xml_tweaker() {
 		tmp += 0x14;
 		last_loaded_ext = *((idstring**)tmp);
 	}
-
-	printf("name: %p, ext: %p\n", last_loaded_name, last_loaded_ext);
 }
 
 void* __cdecl tweaker::tweak_pd2_xml(char* text) {
