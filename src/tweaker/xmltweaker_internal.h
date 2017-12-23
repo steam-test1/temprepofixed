@@ -1,6 +1,7 @@
 #pragma once
 
 #include "xmltweaker.h"
+#include <string>
 
 namespace pd2hook {
 	namespace tweaker {
@@ -17,5 +18,7 @@ namespace pd2hook {
 		* but not necessaraly after that.
 		*/
 		const char* transform_file(const char* contents);
+
+		idstring idstring_hash(std::string text);
 	};
 };

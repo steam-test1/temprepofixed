@@ -84,6 +84,14 @@ void io_dynamic_import(WrenVM *vm) {
 	printf("Module Load: %d\n", compileResult);
 }
 
+void io_idstring_hash(WrenVM *vm) {
+	idstring hash = idstring_hash(wrenGetSlotString(vm, 1));
+
+	char hex[17]; // 16-chars long +1 for the null
+	sprintf_s(hex, 17, "%016llx", hash);
+	wrenSetSlotString(vm, 0, hex);
+}
+
 static WrenForeignClassMethods bindForeignClass(
 	WrenVM* vm, const char* module, const char* class_name) {
 	WrenForeignClassMethods methods = wrenxml::get_XML_class_def(vm, module, class_name);
@@ -128,6 +136,10 @@ static WrenForeignMethodFn bindForeignMethod(
 			if (isStatic && strcmp(signature, "dynamic_import(_)") == 0)
 			{
 				return &io_dynamic_import;
+			}
+			if (isStatic && strcmp(signature, "idstring_hash(_)") == 0)
+			{
+				return &io_idstring_hash;
 			}
 		}
 		// Other classes in main...
