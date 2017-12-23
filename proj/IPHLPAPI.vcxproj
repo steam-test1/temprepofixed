@@ -72,7 +72,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>CURL_STATICLIB;AL_LIBTYPE_STATIC;ENABLE_XAUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CURL_STATICLIB;AL_LIBTYPE_STATIC;ENABLE_XAUDIO;CHECK_DUPLICATE_SIGNATURES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

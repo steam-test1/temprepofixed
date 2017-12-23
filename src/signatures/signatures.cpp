@@ -166,6 +166,19 @@ DWORD FindPattern(char* module, const char* funcname, const char* pattern, const
 		DWORD result;
 		bool correct = CheckSignature(pattern, patternLength, mask, base, size, i, &result);
 		if (correct) {
+#ifdef CHECK_DUPLICATE_SIGNATURES
+			// Sigdup checking
+			for (DWORD ci = i + 1; ci < size - patternLength; ci++) {
+				DWORD addr;
+				bool correct = CheckSignature(pattern, patternLength, mask, base, size, ci, &addr);
+				if (correct) {
+					string err = string("Found duplicate signature for ") + string(funcname) + string(" at ") + to_string(result) + string(",") + to_string(addr);
+					PD2HOOK_LOG_WARN(err);
+					hintOut = NULL; // Don't cache sigs with errors
+				}
+			}
+#endif
+
 			if (hintOut) *hintOut = i;
 			return result;
 		}
@@ -215,19 +228,19 @@ void SignatureSearch::Search(){
 		DWORD hint = cache.GetAddress(funcname);
 
 		bool hintCorrect;
-		DWORD hintOut;
+		DWORD hintOut = NULL;
 		DWORD addr = (FindPattern(filename, it->funcname, it->signature, it->mask, hint, &hintCorrect, &hintOut) + it->offset);
 		*((void**)it->address) = (void*)addr;
 
 		if (addr == NULL) {
 			hintCorrect = true; // If the signature doesn't exist at all, it's not the cache's fault
-		} if (hint == -1) {
+		} else if (hint == -1 && addr != NULL) {
 			PD2HOOK_LOG_LOG(string("Sigcache hit failed for function ") + funcname);
 		} else if (!hintCorrect) {
-			PD2HOOK_LOG_WARN(string("Sigcache for function ") + funcname + string(" incorrect!"));
+			PD2HOOK_LOG_WARN(string("Sigcache for function ") + funcname + " incorrect (" + to_string(hint) + " vs " + to_string(hintOut) + ")!");
 		}
 
-		if (!hintCorrect) {
+		if (!hintCorrect && hintOut != NULL) {
 			cache.UpdateAddress(funcname, hintOut);
 			cacheMisses++;
 		}
