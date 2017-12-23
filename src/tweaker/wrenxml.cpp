@@ -319,7 +319,7 @@ static void XMLNode_ ## name(WrenVM* vm) { \
 func(NextSibling, next) \
 func(PrevSibling, prev) \
 func(Parent, parent) \
-func(FirstChild, child) \
+func(FirstChild, first_child) \
 func(LastChild, last_child)
 
 XMLNODE_FUNC_SET(XMLNODE_FUNC)
