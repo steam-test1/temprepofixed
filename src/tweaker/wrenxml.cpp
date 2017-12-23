@@ -393,7 +393,7 @@ static void XMLNode_clone(WrenVM* vm) {
 	XMLNode_create(vm, doc, doc->GetRootNode()->handle, 0);
 }
 
-static void XMLNode_attach(WrenVM* vm) {
+static void XMLNode_attach(WrenVM* vm, int where, mxml_node_t *child) {
 	THIS_WXML_NODE(vm);
 	GET_WXML_NODE(vm, 1, new_child);
 
@@ -403,9 +403,27 @@ static void XMLNode_attach(WrenVM* vm) {
 
 	WXMLDocument *old_root = new_child->root;
 
-	mxmlAdd(handle, MXML_ADD_AFTER, MXML_ADD_TO_PARENT, new_child->handle);
+	mxmlAdd(handle, where, child, new_child->handle);
 	new_child->root->MergeInto(wxml->root);
 	delete old_root;
+}
+
+static void XMLNode_attach(WrenVM* vm) {
+	XMLNode_attach(vm, MXML_ADD_AFTER, MXML_ADD_TO_PARENT);
+}
+
+static void XMLNode_attach_pos(WrenVM* vm) {
+	THIS_WXML_NODE(vm);
+	GET_WXML_NODE(vm, 1, new_child);
+
+	if (wrenGetSlotType(vm, 2) == WREN_TYPE_NULL) {
+		XMLNode_attach(vm, MXML_ADD_BEFORE, MXML_ADD_TO_PARENT);
+	}
+	else {
+		GET_WXML_NODE(vm, 2, prev_child);
+
+		XMLNode_attach(vm, MXML_ADD_AFTER, prev_child->handle);
+	}
 }
 
 #define XMLNODE_FUNC(getter, name) \
@@ -446,10 +464,12 @@ WrenForeignMethodFn wrenxml::bind_wxml_method(
 			return XMLtry_parse;
 		}
 
-#define XMLNODE_FUNC(name, sig) \
-		if (!is_static && signature == #name sig) { \
+#define XMLNODE_DIFF_FUNC(name, sig) \
+		if (!is_static && signature == sig) { \
 			return XMLNode_ ## name; \
 		}
+
+#define XMLNODE_FUNC(name, sig) XMLNODE_DIFF_FUNC(name, #name sig)
 
 #define XMLNODE_CHECK_FUNC(getter, name) XMLNODE_FUNC(name)
 
@@ -471,15 +491,12 @@ WrenForeignMethodFn wrenxml::bind_wxml_method(
 		XMLNODE_FUNC(detach, "()");
 		XMLNODE_FUNC(clone, "()");
 		XMLNODE_FUNC(attach, "(_)");
+		XMLNODE_DIFF_FUNC(attach_pos, "attach(_,_)");
 
 		XMLNODE_FUNC(delete, "()");
 
-		if (!is_static && signature == "[_]") {
-			return XMLNode_attribute;
-		}
-		if (!is_static && signature == "[_]=(_)") {
-			return XMLNode_attribute_set;
-		}
+		XMLNODE_DIFF_FUNC(attribute, "[_]");
+		XMLNODE_DIFF_FUNC(attribute_set, "[_]=(_)");
 
 		XMLNODE_FUNC_SET(XMLNODE_CHECK_FUNC);
 	}
