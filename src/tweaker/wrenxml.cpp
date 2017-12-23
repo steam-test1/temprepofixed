@@ -90,8 +90,12 @@ static void handle_mxml_error_note(const char* error) {
 	mxml_last_error = _strdup(error);
 }
 
+mxml_type_t remove_whitespace_callback(mxml_node_t *) {
+	return MXML_IGNORE;
+}
+
 WXMLDocument::WXMLDocument(const char *text) {
-	root_node = mxmlLoadString(NULL, text, MXML_TEXT_CALLBACK);
+	root_node = mxmlLoadString(NULL, text, remove_whitespace_callback);
 }
 
 WXMLDocument::~WXMLDocument() {
