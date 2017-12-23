@@ -13,11 +13,11 @@ using namespace wrenxml;
 const char *MODULE = "base/native";
 
 #define WXML_ERR(err) { \
+	PD2HOOK_LOG_ERROR(err) \
 	string str = err; \
 	wrenSetSlotString(vm, 0, str.c_str()); \
 	wrenAbortFiber(vm, 0); \
-	/*PD2HOOK_LOG_ERROR(err) \
-	MessageBox(0, "A WXML Error has occured - details are logged in the console", "WXML Error", MB_OK); \
+	/*MessageBox(0, "A WXML Error has occured - details are logged in the console", "WXML Error", MB_OK); \
 	exit(1);*/ \
 }
 
@@ -218,13 +218,13 @@ static WXMLNode* attemptParseString(WrenVM* vm) {
 	(*node)->Use();
 
 	// Use the crash callback for anything else
-	mxmlSetErrorCallback(&handle_mxml_error_crash);
+	mxmlSetErrorCallback(handle_mxml_error_crash);
 
 	return *node;
 }
 
 static void allocateXML(WrenVM* vm) {
-	mxmlSetErrorCallback(&handle_mxml_error_crash);
+	mxmlSetErrorCallback(handle_mxml_error_crash);
 	WXMLNode *wxml = attemptParseString(vm);
 
 	if (!wxml->handle) {
@@ -238,7 +238,7 @@ static void finalizeXML(void* data) {
 }
 
 static void XMLtry_parse(WrenVM* vm) {
-	mxmlSetErrorCallback(&handle_mxml_error_note);
+	mxmlSetErrorCallback(handle_mxml_error_note);
 	WXMLNode *wxml = attemptParseString(vm);
 
 	if (mxml_last_error) {
