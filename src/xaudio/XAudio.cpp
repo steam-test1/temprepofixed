@@ -10,7 +10,7 @@ namespace pd2hook {
 		double world_scale = 1;
 
 		map<string, xabuffer::XABuffer*> openBuffers;
-		vector<xasource::XASource*> openSources;
+		unordered_set<xasource::XASource*> openSources;
 
 		bool is_setup = false;
 	};
@@ -21,15 +21,15 @@ namespace pd2hook {
 		// When changing heists, we don't need old sounds anymore.
 
 		// Delete all sources.
-		// Do this first, otherwise buffers might not be deleted properly
-		for (auto source : openSources) {
+		// Iterate over a copy so there aren't issues when the items are deleted
+		unordered_set<xasource::XASource*> openSourcesCopy = openSources;
+		for (xasource::XASource* source : openSourcesCopy) {
 			source->Close();
 
 			delete source;
 		}
 
-		// To remove dangling pointers
-		// Should not be used again, but just to be safe
+		// In case any of the sources didn't remove themselves
 		openSources.clear();
 	}
 

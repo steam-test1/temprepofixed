@@ -9,6 +9,7 @@ namespace pd2hook {
 	using namespace pd2hook::xaudio;
 
 	void xasource::XASource::ALClose() {
+		openSources.erase(this);
 		alDeleteSources(1, &alhandle);
 	}
 
@@ -35,6 +36,7 @@ namespace pd2hook {
 
 		for (size_t i = 0; i < count; i++) {
 			XASource *buff = new XASource(sources[i]);
+			openSources.insert(buff);
 			*(XALuaHandle*)lua_newuserdata(L, sizeof(XALuaHandle)) = XALuaHandle(buff);
 
 			// Set the metatable

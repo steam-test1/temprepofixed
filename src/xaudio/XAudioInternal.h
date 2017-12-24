@@ -6,7 +6,7 @@
 
 #include <string>
 #include <map>
-#include <vector>
+#include <unordered_set>
 
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -103,7 +103,7 @@ namespace pd2hook {
 		};
 
 		extern map<string, xabuffer::XABuffer*> openBuffers;
-		extern vector<xasource::XASource*> openSources;
+		extern unordered_set<xasource::XASource*> openSources;
 		extern double world_scale;
 		extern bool is_setup;
 	};
