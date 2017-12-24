@@ -87,7 +87,7 @@ namespace pd2hook {
 		return count;
 	}
 
-	XA_CLASS_LUA_METHOD_VOID(xabuffer::XABuffer, Close);
+	XA_CLASS_LUA_CLOSE(xabuffer::XABuffer, lua_toboolean(L, 2));
 	XA_CLASS_LUA_METHOD(xabuffer::XABuffer, GetSampleCount, integer);
 	XA_CLASS_LUA_METHOD(xabuffer::XABuffer, GetSampleRate, integer);
 };

@@ -52,6 +52,14 @@ int klass ## _ ## method(lua_State *L) { \
 	return 0; \
 }
 
+#define XA_CLASS_LUA_CLOSE(klass, force) \
+int klass ## _Close(lua_State *L) { \
+	xaudio::XALuaHandle *handle = (xaudio::XALuaHandle*)lua_touserdata(L, 1); \
+	handle->Close(force); \
+	ALERR \
+	return 0; \
+}
+
 namespace pd2hook {
 	namespace xasource {
 		class XASource;

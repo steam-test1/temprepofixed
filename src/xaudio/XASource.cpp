@@ -45,7 +45,7 @@ namespace pd2hook {
 		return count;
 	}
 
-	XA_CLASS_LUA_METHOD_VOID(xasource::XASource, Close)
+	XA_CLASS_LUA_CLOSE(xasource::XASource, true);
 
 	int xasource::XASource_set_buffer(lua_State *L) {
 		ALERR;
