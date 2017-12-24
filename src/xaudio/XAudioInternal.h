@@ -40,14 +40,14 @@ int klass ## _ ## method(lua_State *L) { \
 	xaudio::XALuaHandle *handle = (xaudio::XALuaHandle*)lua_touserdata(L, 1); \
 	klass *val = (klass*) handle->Resource(); \
 
-#define XA_CLASS_LUA_METHOD(klass, method, type) XA_CLASS_LUA_METHOD_BASE(klass, method) \
-	lua_push ## type(L, val->method()); \
+#define XA_CLASS_LUA_METHOD(klass, method, type, ...) XA_CLASS_LUA_METHOD_BASE(klass, method) \
+	lua_push ## type(L, val->method(__VA_ARGS__)); \
 	ALERR \
 	return 1; \
 }
 
-#define XA_CLASS_LUA_METHOD_VOID(klass, method) XA_CLASS_LUA_METHOD_BASE(klass, method) \
-	val->method(); \
+#define XA_CLASS_LUA_METHOD_VOID(klass, method, ...) XA_CLASS_LUA_METHOD_BASE(klass, method) \
+	val->method(__VA_ARGS__); \
 	ALERR \
 	return 0; \
 }
@@ -131,7 +131,11 @@ namespace pd2hook {
 
 	namespace xasource {
 		class XASource : public xaudio::XAResource {
+		public:
 			using xaudio::XAResource::XAResource;
+			void SetLooping(bool looping);
+			void SetRelative(bool relative);
+		protected:
 			virtual void ALClose();
 		};
 
@@ -149,6 +153,9 @@ namespace pd2hook {
 
 		int XASource_get_gain(lua_State *L);
 		int XASource_set_gain(lua_State *L);
+
+		XA_CLASS_LUA_METHOD_DEC(XASource, SetLooping);
+		XA_CLASS_LUA_METHOD_DEC(XASource, SetRelative);
 	};
 
 	namespace xalistener {

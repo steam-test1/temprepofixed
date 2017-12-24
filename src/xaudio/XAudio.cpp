@@ -180,6 +180,9 @@ namespace pd2hook {
 
 			{ "getgain", xasource::XASource_get_gain },
 			{ "setgain", xasource::XASource_set_gain },
+
+			{ "setlooping", xasource::XASource_SetLooping },
+			{ "setrelative", xasource::XASource_SetRelative },
 			{ NULL, NULL }
 		};
 

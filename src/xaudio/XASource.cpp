@@ -6,11 +6,20 @@
 #include "XAudioInternal.h"
 
 namespace pd2hook {
-	using namespace pd2hook::xaudio;
+	using namespace xaudio;
+	using namespace xasource;
 
 	void xasource::XASource::ALClose() {
 		openSources.erase(this);
 		alDeleteSources(1, &alhandle);
+	}
+
+	void XASource::SetLooping(bool looping) {
+		alSourcei(alhandle, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
+	}
+
+	void XASource::SetRelative(bool relative) {
+		alSourcei(alhandle, AL_SOURCE_RELATIVE, relative ? AL_TRUE : AL_FALSE);
 	}
 
 	int xasource::lX_new_source(lua_State *L) {
@@ -180,6 +189,9 @@ namespace pd2hook {
 
 		return 0;
 	}
+
+	XA_CLASS_LUA_METHOD_VOID(xasource::XASource, SetLooping, lua_toboolean(L, 2));
+	XA_CLASS_LUA_METHOD_VOID(xasource::XASource, SetRelative, lua_toboolean(L, 2));
 };
 
 #endif
