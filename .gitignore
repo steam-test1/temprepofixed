@@ -33,6 +33,7 @@ incl/trees.h
 incl/zconf.h
 incl/zlib.h
 incl/AL/
+incl/mxml.h
 
 # Library libs (excluding detours)
 lib/engines/*
@@ -45,4 +46,5 @@ lib/zlib.*
 lib/libssl*
 lib/libcrypto*
 lib/OpenAL32.lib
+lib/mxml1.lib
 
