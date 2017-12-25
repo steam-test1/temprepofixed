@@ -478,6 +478,14 @@ namespace pd2hook
 		return 1;
 	}
 
+	int luaF_createDirectory(lua_State * L)
+	{
+		const char *path = lua_tostring(L, 1);
+		bool success = CreateDirectoryA(path, NULL);
+		lua_pushboolean(L, success);
+		return 1;
+	}
+
 	void load_vr_globals(lua_State *L)
 	{
 		luaL_Reg vrLib[] = {
@@ -578,6 +586,7 @@ namespace pd2hook
 			{ "DirectoryHash", luaF_directoryhash },
 			{ "FileHash", luaF_filehash },
 			{ "MoveDirectory", luaF_moveDirectory },
+			{ "CreateDirectory", luaF_createDirectory },
 			{ NULL, NULL }
 		};
 		luaI_openlib(L, "file", fileLib, 0);
