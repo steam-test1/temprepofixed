@@ -105,6 +105,7 @@ void LoggerImpl::setForceFlush(bool forceFlush)
 
 LoggerImpl::LoggerImpl(std::string&& file)
 {
+	Util::EnsurePathWritable(file);
 	openFile(std::forward<std::string>(file));
 }
 

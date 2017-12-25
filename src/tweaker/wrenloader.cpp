@@ -169,9 +169,19 @@ static char* getModulePath(WrenVM* vm, const char* name_c)
 	return output; // free()d by Wren
 }
 
+static bool available = true;
+
 const char* tweaker::transform_file(const char* text)
 {
 	if (vm == NULL) {
+		if (available) {
+			// If the main file doesn't exist, do nothing
+			DWORD ftyp = GetFileAttributes("mods/base/wren/base.wren");
+			if (ftyp == INVALID_FILE_ATTRIBUTES) available = false;
+		}
+
+		if (!available) return text;
+
 		WrenConfiguration config;
 		wrenInitConfiguration(&config);
 		config.errorFn = &err;

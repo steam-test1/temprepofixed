@@ -76,7 +76,13 @@ const char *IOException::exceptionName() const
 	}
 
 	bool DirectoryExists(const std::string& dir){
-		DWORD ftyp = GetFileAttributes(dir.c_str());
+		string clean = dir;
+
+		if (clean[clean.length() - 1] == '/') {
+			clean.erase(clean.end() - 1);
+		}
+
+		DWORD ftyp = GetFileAttributes(clean.c_str());
 		if (ftyp == INVALID_FILE_ATTRIBUTES) return false;
 		if (ftyp & FILE_ATTRIBUTE_DIRECTORY) return true;
 		return false;

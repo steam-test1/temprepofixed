@@ -9,6 +9,9 @@
 
 namespace pd2hook
 {
+
+void download_blt();
+
 typedef void(*HTTPCallback)(void* data, std::string& urlContents);
 typedef void(*HTTPProgress)(void* data, long progress, long total);
 

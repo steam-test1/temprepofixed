@@ -521,6 +521,8 @@ namespace pd2hook
 		return do_game_update(thislol, a, b);
 	}
 
+	bool setup_check_done = false;
+
 	// Random dude who wrote what's his face?
 	// I 'unno, I stole this method from the guy who wrote the 'underground-light-lua-hook'
 	// Mine worked fine, but this seems more elegant.
@@ -533,6 +535,18 @@ namespace pd2hook
 		if (!L) return ret;
 
 		add_active_state(L);
+
+		if (!setup_check_done) {
+			setup_check_done = true;
+
+			if (!(Util::DirectoryExists("mods") && Util::DirectoryExists("mods/base"))) {
+				int result = MessageBox(NULL, "Do you want to download the PAYDAY 2 BLT basemod?\n"
+					"This is required for using mods", "BLT 'mods/base' folder missing", MB_YESNO);
+				if (result == IDYES) download_blt();
+
+				return ret;
+			}
+		}
 
 		lua_pushcclosure(L, luaF_print, 0);
 		lua_setfield(L, LUA_GLOBALSINDEX, "log");
