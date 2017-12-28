@@ -385,12 +385,13 @@ namespace pd2hook {
 
 		// Flip around the indexes to account for endianess
 #define INDEX_READ(index) \
+if(numRead + 4 > buffer.size()) return false; \
 readbuff[0] = buffer[index + 3]; \
 readbuff[1] = buffer[index + 2]; \
 readbuff[2] = buffer[index + 1]; \
 readbuff[3] = buffer[index + 0]; \
 numRead += 4; \
-value = *readbuff
+value = *(uint32_t*)readbuff
 
 #define READ INDEX_READ(numRead)
 
@@ -417,6 +418,8 @@ return true
 			// Find the length of said string
 			READ;
 			int length = value;
+
+			if (numRead + length > buffer.size()) return false;
 
 			// Read the string
 			// TODO Do we need anything special for Unicode handling?
