@@ -3,6 +3,7 @@
 #include <atlstr.h>
 #include <sstream>
 #include <fstream>
+#include <map>
 
 #include "debug.h"
 #include "signatures/sigdef.h"
@@ -29,6 +30,7 @@ enum MessageType {
 
 namespace pd2hook {
 	static DebugConnection* connection = NULL;
+	static std::map<string, string> parameters;
 
 	static int luaF_isloaded(lua_State* L) {
 		lua_pushboolean(L, connection != NULL);
@@ -44,6 +46,18 @@ namespace pd2hook {
 		connection->WaitForMessage();
 		DebugConnection::Update(L);
 		return 0;
+	}
+
+	static int luaF_get_param(lua_State* L) {
+		string name = lua_tostring(L, 1);
+		if (parameters.count(name)) {
+			lua_pushstring(L, parameters[name].c_str());
+		}
+		else {
+			// TODO add lua_pushnil signature, and use that instead
+			lua_pushboolean(L, false);
+		}
+		return 1;
 	}
 
 	static void startVR() {
@@ -117,6 +131,16 @@ namespace pd2hook {
 
 				// PD2HOOK_LOG_LOG("debug params: '" + host + "' . '" + port + "' . '" + key + "'");
 			}
+			else if (!StrCmpW(L"--debug-lua-param", szArglist[i])) {
+				if (i >= nArgs - 2) {
+					PD2HOOK_LOG_WARN("Debug: --debug-lua-param requires two further arguments!");
+					break;
+				}
+
+				string name = CW2A(szArglist[i + 1]);
+				string value = CW2A(szArglist[i + 2]);
+				parameters[name] = value;
+			}
 		}
 
 		const string debugfile_name = "remote-debug.conf";
@@ -129,6 +153,8 @@ namespace pd2hook {
 			DeleteFileA(debugfile_name.c_str());
 
 			ConnectFromParameters(line);
+
+			// TODO lua parameters
 		}
 
 		// Free memory allocated for CommandLineToArgvW arguments.
@@ -187,6 +213,7 @@ namespace pd2hook {
 			{ "is_loaded", luaF_isloaded },
 			{ "send_message", luaF_send_message },
 			{ "wait", luaF_wait },
+			{ "get_parameter", luaF_get_param },
 			{ NULL, NULL }
 		};
 		luaI_openlib(L, "blt_debugger", vrLib, 0);
