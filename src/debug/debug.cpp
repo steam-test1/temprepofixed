@@ -22,8 +22,9 @@ enum MessageType {
 	MSGT_Log = 1,
 	MSGT_Init,
 	MCGT_Continue,
-	MCGT_StartVR,
-	MCGT_LuaMessage
+	MCGT_StartVR, // no longer used by the IDE, still supported however
+	MCGT_LuaMessage,
+	MSGT_LuaMesage
 };
 
 namespace pd2hook {
@@ -32,6 +33,17 @@ namespace pd2hook {
 	static int luaF_isloaded(lua_State* L) {
 		lua_pushboolean(L, connection != NULL);
 		return 1;
+	}
+
+	static int luaF_send_message(lua_State* L) {
+		connection->SendLuaMessage(lua_tostring(L, 1));
+		return 0;
+	}
+
+	static int luaF_wait(lua_State* L) {
+		connection->WaitForMessage();
+		DebugConnection::Update(L);
+		return 0;
 	}
 
 	static void startVR() {
@@ -172,7 +184,9 @@ namespace pd2hook {
 		lua_State* L = (lua_State*)state;
 
 		luaL_Reg vrLib[] = {
-			{ "isloaded", luaF_isloaded },
+			{ "is_loaded", luaF_isloaded },
+			{ "send_message", luaF_send_message },
+			{ "wait", luaF_wait },
 			{ NULL, NULL }
 		};
 		luaI_openlib(L, "blt_debugger", vrLib, 0);
@@ -189,6 +203,32 @@ namespace pd2hook {
 		string str = data.str();
 		send(connection->sock, str.c_str(), str.length(), 0);
 		// TODO check result
+	}
+
+	void DebugConnection::SendLuaMessage(std::string message) {
+		if (!connection) return;
+
+		stringstream data;
+		WRITE_DATA(data, MSGT_LuaMesage);
+		WRITE_DATA(data, message.length());
+		data << message;
+
+		string str = data.str();
+		send(connection->sock, str.c_str(), str.length(), 0);
+		// TODO check result
+	}
+
+	void DebugConnection::WaitForMessage() {
+		// Switch to blocking mode
+		u_long mode = 0;  // 0 to disable non-blocking socket
+		ioctlsocket(sock, FIONBIO, &mode);
+
+		// Wait until the message arrives
+		ReadMessage(1);
+
+		// Switch to non-blocking mode
+		mode = 1;  // 1 to enable non-blocking socket
+		ioctlsocket(sock, FIONBIO, &mode);
 	}
 
 	DebugConnection::DebugConnection(string host, int port, string key) {
@@ -416,7 +456,6 @@ return true
 	}
 
 	void DebugConnection::Connect(string host, int port, string key) {
-		static DebugConnection vrSingleton(host, port, key);
-		connection = &vrSingleton;
+		connection = new DebugConnection(host, port, key);
 	}
 }

@@ -11,6 +11,9 @@ namespace pd2hook {
 		static void Update(void* state);
 		static void AddGlobals(void* state);
 		static void Log(std::string message);
+
+		void SendLuaMessage(std::string message);
+		void WaitForMessage();
 	private:
 		DebugConnection(std::string host, int port, std::string key);
 		~DebugConnection();
