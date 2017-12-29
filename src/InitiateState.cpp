@@ -2,6 +2,7 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 #include <detours.h>
+#include <mxml.h>
 
 #define SIG_INCLUDE_MAIN
 #include "signatures/sigdef.h"
@@ -486,6 +487,65 @@ namespace pd2hook
 		return 1;
 	}
 
+	void build_xml_tree(lua_State *L, mxml_node_t *node)
+	{
+		// Create the main table
+		lua_newtable(L);
+
+		// Set the element name
+		lua_pushstring(L, mxmlGetElement(node));
+		lua_setfield(L, -2, "name");
+
+		// Create the parameters table
+		lua_newtable(L);
+		for (int i = 0; i < mxmlElementGetAttrCount(node); i++)
+		{
+			const char *name;
+			const char *value = mxmlElementGetAttrByIndex(node, i, &name);
+
+			lua_pushstring(L, value);
+			lua_setfield(L, -2, name);
+		}
+
+		lua_setfield(L, -2, "params");
+
+		// Add all the child nodes
+		mxml_node_t *child = mxmlGetFirstChild(node);
+		int i = 1;
+		while (child != NULL) {
+			build_xml_tree(L, child);
+			lua_rawseti(L, -2, i++);
+
+			child = mxmlGetNextSibling(child);
+		}
+	}
+
+	int luaF_parsexml(lua_State * L)
+	{
+		const char *xml = lua_tostring(L, 1);
+
+		mxml_node_t *tree = mxmlLoadString(NULL, xml, MXML_IGNORE_CALLBACK);
+
+		mxml_node_t *base = tree;
+		if (!strncmp(mxmlGetElement(base), "?xml", 4))
+		{
+			base = mxmlGetFirstChild(base);
+		}
+
+		if (base)
+		{
+			build_xml_tree(L, base);
+		}
+		else
+		{
+			lua_pushboolean(L, false); // TODO pushnil
+		}
+
+		mxmlDelete(tree);
+
+		return 1;
+	}
+
 	void load_vr_globals(lua_State *L)
 	{
 		luaL_Reg vrLib[] = {
@@ -595,6 +655,7 @@ namespace pd2hook
 		luaL_Reg bltLib[] = {
 			{ "ispcallforced", luaF_ispcallforced },
 			{ "forcepcalls", luaF_forcepcalls },
+			{ "parsexml", luaF_parsexml },
 			{ NULL, NULL }
 		};
 		luaI_openlib(L, "blt", bltLib, 0);
