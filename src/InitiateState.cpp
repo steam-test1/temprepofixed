@@ -546,6 +546,49 @@ namespace pd2hook
 		return 1;
 	}
 
+	// Basically the same thing as lua_topointer
+	int luaF_structid(lua_State * L)
+	{
+		if (lua_gettop(L) != 1)
+		{
+			luaL_error(L, "Signature: structid(struct)");
+		}
+
+		void *value_ptr = NULL;
+
+		typedef struct {
+			uint32_t gcptr32;     /* Pseudo 32 bit pointer. */
+			uint32_t it;      /* Internal object tag. Must overlap MSW of number. */
+		} TValue;
+
+		const TValue **value;
+		{
+			char *ptr = (char*)L;
+			ptr += 16; // Lua stack starts here, ends at +20
+			value = (const TValue**)ptr;
+		}
+
+		if (lua_type(L, 1) == LUA_TUSERDATA || lua_islightuserdata(L, 1))
+		{
+			value_ptr = lua_touserdata(L, 1);
+		}
+		else if ((*value)->it > (~13u)) // Boiled down from lua_topointer in LuaJIT
+		{
+			value_ptr = (void*) (*value)->gcptr32;
+		}
+		else
+		{
+			luaL_error(L, "Illegal argument - should be tvgcv (table) or userdata");
+		}
+
+		char buffer[9]; // 8 chars for the address, one for the null
+		sprintf_s(buffer, sizeof(buffer), "%p", value_ptr);
+
+		lua_pushstring(L, buffer);
+
+		return 1;
+	}
+
 	void load_vr_globals(lua_State *L)
 	{
 		luaL_Reg vrLib[] = {
@@ -656,6 +699,7 @@ namespace pd2hook
 			{ "ispcallforced", luaF_ispcallforced },
 			{ "forcepcalls", luaF_forcepcalls },
 			{ "parsexml", luaF_parsexml },
+			{ "structid", luaF_structid },
 			{ NULL, NULL }
 		};
 		luaI_openlib(L, "blt", bltLib, 0);
