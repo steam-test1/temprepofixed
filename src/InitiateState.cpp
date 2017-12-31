@@ -513,8 +513,10 @@ namespace pd2hook
 		mxml_node_t *child = mxmlGetFirstChild(node);
 		int i = 1;
 		while (child != NULL) {
-			build_xml_tree(L, child);
-			lua_rawseti(L, -2, i++);
+			if (strncmp(mxmlGetElement(child), "!--", 3) != 0) {
+				build_xml_tree(L, child);
+				lua_rawseti(L, -2, i++);
+			}
 
 			child = mxmlGetNextSibling(child);
 		}
