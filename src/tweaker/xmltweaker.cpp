@@ -41,6 +41,16 @@ void tweaker::init_xml_tweaker() {
 }
 
 void* __cdecl tweaker::tweak_pd2_xml(char* text, int32_t text_length) {
+	idstring extension = *tweaker::last_loaded_ext;
+
+	// Don't bother with .model or .texture files
+	if (
+		extension == 0xaf612bbc207e00bd ||	// idstring("model")
+		extension == 0x5368e150b05a5b8c		// idstring("texture")
+		) {
+		return text;
+	}
+
 	const char* new_text = transform_file(text);
 	size_t length = strlen(new_text) + 1; // +1 for the null
 
