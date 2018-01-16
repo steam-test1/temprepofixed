@@ -40,7 +40,7 @@ void tweaker::init_xml_tweaker() {
 	}
 }
 
-void* __cdecl tweaker::tweak_pd2_xml(char* text) {
+void* __cdecl tweaker::tweak_pd2_xml(char* text, int32_t text_length) {
 	const char* new_text = transform_file(text);
 	size_t length = strlen(new_text) + 1; // +1 for the null
 

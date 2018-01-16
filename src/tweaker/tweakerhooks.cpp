@@ -10,12 +10,20 @@ void __declspec(naked) tweaker::node_from_xml_new() {
 	__asm
 	{
 		push ecx
+
+		// Push on, as the last argument, the value of a pointer passed as the last function argument
+		// This appears to be a length value, however it will often have a huge (and fixed) value.
+		push [esp + 12]
+
 		push edx
 
 		// Run the intercept method
 		call tweak_pd2_xml
 
 		pop edx
+
+		add esp, 4 // Remove the last argument
+
 		pop ecx
 
 		// Move across our string
