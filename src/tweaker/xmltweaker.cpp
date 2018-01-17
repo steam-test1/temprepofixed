@@ -17,6 +17,10 @@ static unordered_set<char*> buffers;
 
 idstring *tweaker::last_loaded_name = NULL, *tweaker::last_loaded_ext = NULL;
 
+// The file we last parsed. If we try to parse the same file more than
+// once, nothing should happen as a file from the filesystem is being loaded.
+idstring last_parsed_name = NULL, last_parsed_ext = NULL;
+
 void tweaker::init_xml_tweaker() {
 	char *tmp;
 
@@ -41,7 +45,16 @@ void tweaker::init_xml_tweaker() {
 }
 
 void* __cdecl tweaker::tweak_pd2_xml(char* text, int32_t text_length) {
+	idstring name = *tweaker::last_loaded_name;
 	idstring extension = *tweaker::last_loaded_ext;
+
+	// Don't parse the same file more than once, as it's not actually the same file.
+	if (last_parsed_name == name && last_parsed_ext == extension) {
+		return text;
+	}
+
+	last_parsed_name = name;
+	last_parsed_ext = extension;
 
 	// Don't bother with .model or .texture files
 	if (
