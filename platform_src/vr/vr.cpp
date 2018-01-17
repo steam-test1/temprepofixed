@@ -1,5 +1,5 @@
-#include "vr/vr.h"
-#include "vr/openvr.h"
+#include "vr.h"
+#include "openvr.h"
 #include "util/util.h"
 #include "signatures/signatures.h"
 #include "windows.h"

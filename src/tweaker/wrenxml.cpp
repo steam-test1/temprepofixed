@@ -3,9 +3,6 @@
 #include <string>
 #include <util/util.h>
 
-#define WIN32_LEAN_AND_MEAN 1 // Uh, Microsoft?
-#include <Windows.h>
-
 using namespace std;
 using namespace pd2hook::tweaker;
 using namespace wrenxml;

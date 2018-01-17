@@ -134,7 +134,10 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\console\console.cpp" />
+    <ClCompile Include="..\platform_src\console\console.cpp" />
+    <ClCompile Include="..\platform_src\platform.cpp" />
+    <ClCompile Include="..\platform_src\util\files.cpp" />
+    <ClCompile Include="..\platform_src\vr\vr.cpp" />
     <ClCompile Include="..\src\debug\debug.cpp" />
     <ClCompile Include="..\src\http\blt_downloader.cpp" />
     <ClCompile Include="..\src\http\http.cpp" />
@@ -148,10 +151,8 @@
     <ClCompile Include="..\src\tweaker\tweakerhooks.cpp" />
     <ClCompile Include="..\src\tweaker\xmltweaker.cpp" />
     <ClCompile Include="..\src\util\compression.cpp" />
-    <ClCompile Include="..\src\util\files.cpp" />
     <ClCompile Include="..\src\util\logging.cpp" />
     <ClCompile Include="..\src\util\util.cpp" />
-    <ClCompile Include="..\src\vr\vr.cpp" />
     <ClCompile Include="..\src\xaudio\stb_vorbis.c" />
     <ClCompile Include="..\src\xaudio\XABuffer.cpp" />
     <ClCompile Include="..\src\xaudio\XAListener.cpp" />
@@ -159,10 +160,13 @@
     <ClCompile Include="..\src\xaudio\XAudio.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\console\console.h" />
+    <ClInclude Include="..\platform_src\console\console.h" />
+    <ClInclude Include="..\platform_src\vr\openvr.h" />
+    <ClInclude Include="..\platform_src\vr\vr.h" />
     <ClInclude Include="..\src\debug\debug.h" />
     <ClInclude Include="..\src\http\http.h" />
     <ClInclude Include="..\src\InitState.h" />
+    <ClInclude Include="..\src\platform.h" />
     <ClInclude Include="..\src\signatures\sigdef.h" />
     <ClInclude Include="..\src\signatures\signatures.h" />
     <ClInclude Include="..\src\threading\queue.h" />
@@ -170,8 +174,6 @@
     <ClInclude Include="..\src\tweaker\xmltweaker.h" />
     <ClInclude Include="..\src\tweaker\xmltweaker_internal.h" />
     <ClInclude Include="..\src\util\util.h" />
-    <ClInclude Include="..\src\vr\openvr.h" />
-    <ClInclude Include="..\src\vr\vr.h" />
     <ClInclude Include="..\src\xaudio\stb_vorbis.h" />
     <ClInclude Include="..\src\xaudio\XAudio.h" />
     <ClInclude Include="..\src\xaudio\XAudioInternal.h" />

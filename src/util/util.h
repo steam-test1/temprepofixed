@@ -5,7 +5,10 @@
 #include <vector>
 #include <string>
 #include <sstream>
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 namespace pd2hook
 {

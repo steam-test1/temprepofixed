@@ -1,7 +1,7 @@
 #include "http.h"
-#include "console/console.h"
 #include "util/util.h"
 #include <curl/curl.h>
+#include "platform.h"
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
@@ -15,7 +15,7 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
 }
 
 void pd2hook::download_blt() {
-	CConsole *console = new CConsole(); // TODO what if developer.txt already exists?
+	blt::platform::win32::OpenConsole();
 	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	SetConsoleTextAttribute(hStdout, FOREGROUND_BLUE | FOREGROUND_INTENSITY);

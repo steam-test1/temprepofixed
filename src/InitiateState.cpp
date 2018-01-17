@@ -8,11 +8,10 @@
 #include "signatures/sigdef.h"
 #undef SIG_INCLUDE_MAIN
 
+#include "platform.h"
 #include "util/util.h"
-#include "console/console.h"
 #include "threading/queue.h"
 #include "http/http.h"
-#include "vr/vr.h"
 #include "debug/debug.h"
 #include "xaudio/xaudio.h"
 #include "tweaker/xmltweaker.h"
@@ -157,6 +156,7 @@ namespace pd2hook
 		return 1;
 	}
 
+	/* // TODO enable me
 	int luaF_isvrhookloaded(lua_State* L) {
 		lua_pushboolean(L, VRManager::GetInstance()->IsLoaded());
 		return 1;
@@ -174,6 +174,7 @@ namespace pd2hook
 		lua_pushinteger(L, VRManager::GetInstance()->GetButtonsStatus(id));
 		return 1;
 	}
+	*/
 
 	int luaH_getcontents(lua_State* L, bool files)
 	{
@@ -434,9 +435,7 @@ namespace pd2hook
 		return 1;
 	}
 
-	CConsole* gbl_mConsole = NULL;
-
-	int luaF_createconsole(lua_State* L)
+	/*int luaF_createconsole(lua_State* L) // TODO reenable
 	{
 		if (gbl_mConsole) return 0;
 		gbl_mConsole = new CConsole();
@@ -449,7 +448,7 @@ namespace pd2hook
 		delete gbl_mConsole;
 		gbl_mConsole = NULL;
 		return 0;
-	}
+	}*/
 
 	int luaF_print(lua_State* L)
 	{
@@ -595,9 +594,9 @@ namespace pd2hook
 	{
 		luaL_Reg vrLib[] = {
 			{ "getvrstate", luaF_getvrstate },
-			{ "isvrhookloaded", luaF_isvrhookloaded },
+			/*{ "isvrhookloaded", luaF_isvrhookloaded }, // TODO enable me
 			{ "gethmdbrand", luaF_gethmdbrand },
-			{ "getbuttonstate", luaF_getbuttonstate },
+			{ "getbuttonstate", luaF_getbuttonstate },*/
 			{ NULL, NULL }
 		};
 		luaI_openlib(L, "blt_vr", vrLib, 0);
@@ -677,8 +676,8 @@ namespace pd2hook
 		lua_setfield(L, LUA_GLOBALSINDEX, "dohttpreq");
 
 		luaL_Reg consoleLib[] = {
-			{ "CreateConsole", luaF_createconsole },
-			{ "DestroyConsole", luaF_destroyconsole },
+			/*{ "CreateConsole", luaF_createconsole }, // TODO reenable
+			{ "DestroyConsole", luaF_destroyconsole },*/
 			{ NULL, NULL }
 		};
 		luaI_openlib(L, "console", consoleLib, 0);
@@ -750,34 +749,17 @@ namespace pd2hook
 
 	void InitiateStates()
 	{
-		// Set up logging first, so we can see messages from the signature search process
-#ifndef INJECTABLE_BLT
-		std::ifstream infile("mods/developer.txt");
-		std::string debug_mode;
-		if (infile.good()) {
-			debug_mode = "post"; // default value
-			infile >> debug_mode;
-		}
-		else {
-			debug_mode = "disabled";
-		}
-
-		if (debug_mode == "pre")
-#endif
-		gbl_mConsole = new CConsole();
 
 		main_thread_id = std::this_thread::get_id();
 
 		// Set up debugging right away, for log viewing
 		DebugConnection::Initialize();
 
-#ifndef INJECTABLE_BLT
-		if (debug_mode != "disabled" && gbl_mConsole == NULL && !DebugConnection::IsLoaded())
-			gbl_mConsole = new CConsole();
-#endif
+		blt::platform::PreInitPlatform();
 
 		SignatureSearch::Search();
-		VRManager::CheckAndLoad();
+
+		blt::platform::InitPlatform();
 
 		if (node_from_xml == NULL) node_from_xml = node_from_xml_vr;
 
@@ -793,9 +775,7 @@ namespace pd2hook
 
 	void DestroyStates()
 	{
-		// Okay... let's not do that.
-		// I don't want to keep this in memory, but it CRASHES THE SHIT OUT if you delete this after all is said and done.
-		if (gbl_mConsole) delete gbl_mConsole;
+		blt::platform::ClosePlatform();
 	}
 
 }
