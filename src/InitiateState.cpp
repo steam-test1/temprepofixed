@@ -10,7 +10,7 @@
 #include "threading/queue.h"
 #include "http/http.h"
 #include "debug/blt_debug.h"
-#include "xaudio/xaudio.h"
+#include "xaudio/XAudio.h"
 #include "tweaker/xmltweaker.h"
 
 #include <thread>
