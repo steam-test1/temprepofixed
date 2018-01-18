@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2003
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IPHLPAPI", "IPHLPAPI.vcxproj", "{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E5AA9476-9751-4654-8109-B1A2112D5E73} = {E5AA9476-9751-4654-8109-B1A2112D5E73}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mxml1", "mxml1.vcxproj", "{E5AA9476-9751-4654-8109-B1A2112D5E73}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		InjectorDLL|x64 = InjectorDLL|x64
+		InjectorDLL|x86 = InjectorDLL|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}.Debug|x64.ActiveCfg = Debug|Win32
+		{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}.Debug|x86.ActiveCfg = Debug|Win32
+		{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}.Debug|x86.Build.0 = Debug|Win32
+		{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}.InjectorDLL|x64.ActiveCfg = InjectorDLL|Win32
+		{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}.InjectorDLL|x86.ActiveCfg = InjectorDLL|Win32
+		{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}.InjectorDLL|x86.Build.0 = InjectorDLL|Win32
+		{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}.Release|x64.ActiveCfg = Release|Win32
+		{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}.Release|x86.ActiveCfg = Release|Win32
+		{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}.Release|x86.Build.0 = Release|Win32
+		{E5AA9476-9751-4654-8109-B1A2112D5E73}.Debug|x64.ActiveCfg = Debug|Win32
+		{E5AA9476-9751-4654-8109-B1A2112D5E73}.Debug|x86.ActiveCfg = Debug|Win32
+		{E5AA9476-9751-4654-8109-B1A2112D5E73}.Debug|x86.Build.0 = Debug|Win32
+		{E5AA9476-9751-4654-8109-B1A2112D5E73}.InjectorDLL|x64.ActiveCfg = Release|Win32
+		{E5AA9476-9751-4654-8109-B1A2112D5E73}.InjectorDLL|x64.Build.0 = Release|Win32
+		{E5AA9476-9751-4654-8109-B1A2112D5E73}.InjectorDLL|x86.ActiveCfg = Release|Win32
+		{E5AA9476-9751-4654-8109-B1A2112D5E73}.InjectorDLL|x86.Build.0 = Release|Win32
+		{E5AA9476-9751-4654-8109-B1A2112D5E73}.Release|x64.ActiveCfg = Release|Win32
+		{E5AA9476-9751-4654-8109-B1A2112D5E73}.Release|x86.ActiveCfg = Release|Win32
+		{E5AA9476-9751-4654-8109-B1A2112D5E73}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4494B68C-1625-4485-916A-844AE3661390}
+	EndGlobalSection
+EndGlobal

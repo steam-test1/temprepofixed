@@ -17,7 +17,7 @@ proj/IPHLPAPI.opensdf
 proj/.vs
 
 # VS Solution
-proj/IPHLPAPI.sln
+proj/*.vcxproj.user
 
 # Library includes (excluding detours)
 /lib-win32/incl/curl/*
@@ -33,7 +33,6 @@ proj/IPHLPAPI.sln
 /lib-win32/incl/zconf.h
 /lib-win32/incl/zlib.h
 /lib-win32/incl/AL/
-/lib-win32/incl/mxml.h
 /lib-win32/incl/wren.h
 
 # Library libs (excluding detours)
@@ -49,4 +48,10 @@ proj/IPHLPAPI.sln
 /lib-win32/OpenAL32.lib
 /lib-win32/mxml1.lib
 /lib-win32/wren_static.lib
+
+# Source-based libraries
+/lib-win32/mxml/
+
+# CMake build directory
+/build/
 
