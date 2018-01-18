@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include "util/util.h"
-#include "signatures/sigdef.h"
+#include "lua.h"
 #include "xmltweaker_internal.h"
-#include "signatures/sigdef.h"
 
 using namespace pd2hook;
 

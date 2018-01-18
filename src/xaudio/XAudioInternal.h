@@ -11,7 +11,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-#include "signatures/sigdef.h"
+#include "lua.h"
 #include "util/util.h"
 
 using namespace std;

@@ -1,8 +1,7 @@
 #include "vr.h"
 #include "openvr.h"
 #include "util/util.h"
-#include "signatures/signatures.h"
-#include "windows.h"
+#include "../signatures/signatures.h"
 
 using namespace vr;
 
@@ -60,7 +59,7 @@ namespace pd2hook {
 		return std::string(name, len - 1); // SteamVR includes null, std::string doesn't.
 	}
 
-	int VRManager::GetButtonsStatus(int hand) {
+	uint64_t VRManager::GetButtonsStatus(int hand) {
 		if (steamvr == NULL) return 0;
 
 		VRControllerState_t state;

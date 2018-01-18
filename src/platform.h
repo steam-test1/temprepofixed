@@ -2,7 +2,6 @@
 
 namespace blt {
 	namespace platform {
-		void PreInitPlatform();
 		void InitPlatform();
 		void ClosePlatform();
 

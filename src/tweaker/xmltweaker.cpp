@@ -3,7 +3,7 @@
 #include <fstream>
 #include <unordered_set>
 #include "util/util.h"
-#include "signatures/sigdef.h"
+#include "lua.h"
 
 extern "C" {
 #include "wren.h"

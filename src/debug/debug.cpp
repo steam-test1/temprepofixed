@@ -6,7 +6,7 @@
 #include <map>
 
 #include "debug.h"
-#include "signatures/sigdef.h"
+#include "lua.h"
 #include "util/util.h"
 
 using std::string;

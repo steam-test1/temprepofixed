@@ -1,14 +1,11 @@
 #include "InitState.h"
-#define WIN32_LEAN_AND_MEAN 1
-#include <Windows.h>
-#include <detours.h>
 #include <mxml.h>
 
-#define SIG_INCLUDE_MAIN
-#include "signatures/sigdef.h"
-#undef SIG_INCLUDE_MAIN
+#include "lua.h"
 
 #include "platform.h"
+#include "lua_functions.h"
+
 #include "util/util.h"
 #include "threading/queue.h"
 #include "http/http.h"
@@ -47,8 +44,6 @@ namespace pd2hook
 		}
 		return false;
 	}
-
-	FuncDetour* luaCallDetour = nullptr;
 
 	// Not tracking the error count here so it can automatically be reset to 0 whenever the Lua state is deleted and re-created (e.g.
 	// when transitioning to / from the menu to a level)
@@ -112,6 +107,9 @@ namespace pd2hook
 		lua_remove(L, errorhandler);
 	}
 
+	/*
+	FuncDetour* luaCallDetour = nullptr;
+
 	int luaF_ispcallforced(lua_State* L)
 	{
 		lua_pushboolean(L, luaCallDetour ? true : false);
@@ -148,6 +146,7 @@ namespace pd2hook
 		}
 		return 0;
 	}
+	*/
 
 	bool vrMode = false;
 
@@ -603,143 +602,6 @@ namespace pd2hook
 	}
 
 	int updates = 0;
-	std::thread::id main_thread_id;
-
-	void* __fastcall do_game_update_new(void* thislol, int edx, int* a, int* b)
-	{
-
-		// If someone has a better way of doing this, I'd like to know about it.
-		// I could save the this pointer?
-		// I'll check if it's even different at all later.
-		if (std::this_thread::get_id() != main_thread_id)
-		{
-			return do_game_update(thislol, a, b);
-		}
-
-		lua_State* L = (lua_State*)*((void**)thislol);
-		if (updates == 0)
-		{
-			HTTPManager::GetSingleton()->init_locks();
-		}
-
-		if (updates > 1)
-		{
-			EventQueueMaster::GetSingleton().ProcessEvents();
-		}
-
-		DebugConnection::Update(L);
-
-		updates++;
-		return do_game_update(thislol, a, b);
-	}
-
-	bool setup_check_done = false;
-
-	// Random dude who wrote what's his face?
-	// I 'unno, I stole this method from the guy who wrote the 'underground-light-lua-hook'
-	// Mine worked fine, but this seems more elegant.
-	int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char freakin, int clue)
-	{
-		int ret = (vrMode ? luaL_newstate_vr : luaL_newstate)(thislol, no, freakin, clue);
-
-		lua_State* L = (lua_State*)*((void**)thislol);
-		printf("Lua State: %p\n", (void*)L);
-		if (!L) return ret;
-
-		add_active_state(L);
-
-		if (!setup_check_done) {
-			setup_check_done = true;
-
-			if (!(Util::DirectoryExists("mods") && Util::DirectoryExists("mods/base"))) {
-				int result = MessageBox(NULL, "Do you want to download the PAYDAY 2 BLT basemod?\n"
-					"This is required for using mods", "BLT 'mods/base' folder missing", MB_YESNO);
-				if (result == IDYES) download_blt();
-
-				return ret;
-			}
-		}
-
-		lua_pushcclosure(L, luaF_print, 0);
-		lua_setfield(L, LUA_GLOBALSINDEX, "log");
-
-		lua_pushcclosure(L, luaF_pcall, 0);
-		lua_setfield(L, LUA_GLOBALSINDEX, "pcall");
-
-		lua_pushcclosure(L, luaF_dofile, 0);
-		lua_setfield(L, LUA_GLOBALSINDEX, "dofile");
-
-		lua_pushcclosure(L, luaF_unzipfile, 0);
-		lua_setfield(L, LUA_GLOBALSINDEX, "unzip");
-
-		lua_pushcclosure(L, luaF_dohttpreq, 0);
-		lua_setfield(L, LUA_GLOBALSINDEX, "dohttpreq");
-
-		luaL_Reg consoleLib[] = {
-			/*{ "CreateConsole", luaF_createconsole }, // TODO reenable
-			{ "DestroyConsole", luaF_destroyconsole },*/
-			{ NULL, NULL }
-		};
-		luaI_openlib(L, "console", consoleLib, 0);
-
-		luaL_Reg fileLib[] = {
-			{ "GetDirectories", luaF_getdir },
-			{ "GetFiles", luaF_getfiles },
-			{ "RemoveDirectory", luaF_removeDirectory },
-			{ "DirectoryExists", luaF_directoryExists },
-			{ "DirectoryHash", luaF_directoryhash },
-			{ "FileHash", luaF_filehash },
-			{ "MoveDirectory", luaF_moveDirectory },
-			{ "CreateDirectory", luaF_createDirectory },
-			{ NULL, NULL }
-		};
-		luaI_openlib(L, "file", fileLib, 0);
-
-		// Keeping everything in lowercase since IspcallForced / IsPCallForced and Forcepcalls / ForcePCalls look rather weird anyway
-		luaL_Reg bltLib[] = {
-			{ "ispcallforced", luaF_ispcallforced },
-			{ "forcepcalls", luaF_forcepcalls },
-			{ "parsexml", luaF_parsexml },
-			{ "structid", luaF_structid },
-			{ NULL, NULL }
-		};
-		luaI_openlib(L, "blt", bltLib, 0);
-
-		if (vrMode)
-		{
-			load_vr_globals(L);
-		}
-
-		DebugConnection::AddGlobals(L);
-#ifdef ENABLE_XAUDIO
-		XAudio::Register(L);
-#endif
-
-		int result;
-		PD2HOOK_LOG_LOG("Initiating Hook");
-
-		result = luaL_loadfilex(L, "mods/base/base.lua", nullptr);
-		if (result == LUA_ERRSYNTAX)
-		{
-			size_t len;
-			PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
-			return ret;
-		}
-		result = lua_pcall(L, 0, 1, 0);
-		if (result == LUA_ERRRUN)
-		{
-			size_t len;
-			PD2HOOK_LOG_LOG(lua_tolstring(L, -1, &len));
-			return ret;
-		}
-
-		return ret;
-	}
-
-	int __fastcall luaL_newstate_new_vr(void* thislol, int edx, char no, char freakin, int clue) {
-		vrMode = true;
-		return luaL_newstate_new(thislol, edx, no, freakin, clue);
-	}
 
 	void luaF_close(lua_State* L)
 	{
@@ -749,26 +611,10 @@ namespace pd2hook
 
 	void InitiateStates()
 	{
-
-		main_thread_id = std::this_thread::get_id();
-
 		// Set up debugging right away, for log viewing
 		DebugConnection::Initialize();
 
-		blt::platform::PreInitPlatform();
-
-		SignatureSearch::Search();
-
 		blt::platform::InitPlatform();
-
-		if (node_from_xml == NULL) node_from_xml = node_from_xml_vr;
-
-		FuncDetour* gameUpdateDetour = new FuncDetour((void**)&do_game_update, do_game_update_new);
-		FuncDetour* newStateDetour = new FuncDetour((void**)&luaL_newstate, luaL_newstate_new);
-		FuncDetour* newStateDetourVr = new FuncDetour((void**)&luaL_newstate_vr, luaL_newstate_new_vr);
-		FuncDetour* luaCloseDetour = new FuncDetour((void**)&lua_close, luaF_close);
-
-		FuncDetour* node_from_xmlDetour = new FuncDetour((void**)&node_from_xml, tweaker::node_from_xml_new);
 
 		tweaker::init_xml_tweaker();
 	}
@@ -779,3 +625,122 @@ namespace pd2hook
 	}
 
 }
+
+using namespace pd2hook;
+
+namespace blt {
+	namespace lua_functions {
+
+		bool setup_check_done = false;
+
+		// Random dude who wrote what's his face?
+		// I 'unno, I stole this method from the guy who wrote the 'underground-light-lua-hook'
+		// Mine worked fine, but this seems more elegant.
+		void lua_functions::initiate_lua(lua_State *L) {
+			add_active_state(L);
+
+			if (!setup_check_done) {
+				setup_check_done = true;
+
+				if (!(Util::DirectoryExists("mods") && Util::DirectoryExists("mods/base"))) {
+					int result = MessageBox(NULL, "Do you want to download the PAYDAY 2 BLT basemod?\n"
+						"This is required for using mods", "BLT 'mods/base' folder missing", MB_YESNO);
+					if (result == IDYES) download_blt();
+
+					return;
+				}
+			}
+
+			lua_pushcclosure(L, luaF_print, 0);
+			lua_setfield(L, LUA_GLOBALSINDEX, "log");
+
+			lua_pushcclosure(L, luaF_pcall, 0);
+			lua_setfield(L, LUA_GLOBALSINDEX, "pcall");
+
+			lua_pushcclosure(L, luaF_dofile, 0);
+			lua_setfield(L, LUA_GLOBALSINDEX, "dofile");
+
+			lua_pushcclosure(L, luaF_unzipfile, 0);
+			lua_setfield(L, LUA_GLOBALSINDEX, "unzip");
+
+			lua_pushcclosure(L, luaF_dohttpreq, 0);
+			lua_setfield(L, LUA_GLOBALSINDEX, "dohttpreq");
+
+			luaL_Reg consoleLib[] = {
+				/*{ "CreateConsole", luaF_createconsole }, // TODO reenable
+				{ "DestroyConsole", luaF_destroyconsole },*/
+				{ NULL, NULL }
+			};
+			luaI_openlib(L, "console", consoleLib, 0);
+
+			luaL_Reg fileLib[] = {
+				{ "GetDirectories", luaF_getdir },
+			{ "GetFiles", luaF_getfiles },
+			{ "RemoveDirectory", luaF_removeDirectory },
+			{ "DirectoryExists", luaF_directoryExists },
+			{ "DirectoryHash", luaF_directoryhash },
+			{ "FileHash", luaF_filehash },
+			{ "MoveDirectory", luaF_moveDirectory },
+			{ "CreateDirectory", luaF_createDirectory },
+			{ NULL, NULL }
+			};
+			luaI_openlib(L, "file", fileLib, 0);
+
+			// Keeping everything in lowercase since IspcallForced / IsPCallForced and Forcepcalls / ForcePCalls look rather weird anyway
+			luaL_Reg bltLib[] = {
+				/*{ "ispcallforced", luaF_ispcallforced }, // TODO reenable
+				{ "forcepcalls", luaF_forcepcalls },*/
+				{ "parsexml", luaF_parsexml },
+			{ "structid", luaF_structid },
+			{ NULL, NULL }
+			};
+			luaI_openlib(L, "blt", bltLib, 0);
+
+			if (vrMode) {
+				load_vr_globals(L);
+			}
+
+			DebugConnection::AddGlobals(L);
+	#ifdef ENABLE_XAUDIO
+			XAudio::Register(L);
+	#endif
+
+			int result;
+			PD2HOOK_LOG_LOG("Initiating Hook");
+
+			result = luaL_loadfilex(L, "mods/base/base.lua", nullptr);
+			if (result == LUA_ERRSYNTAX) {
+				size_t len;
+				PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
+				return;
+			}
+			result = lua_pcall(L, 0, 1, 0);
+			if (result == LUA_ERRRUN) {
+				size_t len;
+				PD2HOOK_LOG_LOG(lua_tolstring(L, -1, &len));
+				return;
+			}
+
+			return;
+		}
+
+		void lua_functions::close(lua_State *L)
+		{
+			remove_active_state(L);
+		}
+
+		void update(lua_State *L) {
+			if (updates == 0) {
+				HTTPManager::GetSingleton()->init_locks();
+			}
+
+			if (updates > 1) {
+				EventQueueMaster::GetSingleton().ProcessEvents();
+			}
+
+			DebugConnection::Update(L);
+
+			updates++;
+		}
+	};
+};

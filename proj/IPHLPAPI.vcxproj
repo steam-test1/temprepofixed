@@ -138,13 +138,13 @@
     <ClCompile Include="..\platform_src\loader\injectloader.cpp" />
     <ClCompile Include="..\platform_src\loader\iphp.cpp" />
     <ClCompile Include="..\platform_src\platform.cpp" />
+    <ClCompile Include="..\platform_src\signatures\signatures.cpp" />
     <ClCompile Include="..\platform_src\util\files.cpp" />
     <ClCompile Include="..\platform_src\vr\vr.cpp" />
     <ClCompile Include="..\src\debug\debug.cpp" />
     <ClCompile Include="..\src\http\blt_downloader.cpp" />
     <ClCompile Include="..\src\http\http.cpp" />
     <ClCompile Include="..\src\InitiateState.cpp" />
-    <ClCompile Include="..\src\signatures\signatures.cpp" />
     <ClCompile Include="..\src\threading\threadqueue.cpp" />
     <ClCompile Include="..\src\tweaker\wrenloader.cpp" />
     <ClCompile Include="..\src\tweaker\wrenxml.cpp" />
@@ -161,14 +161,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\platform_src\console\console.h" />
+    <ClInclude Include="..\platform_src\signatures\sigdef.h" />
+    <ClInclude Include="..\platform_src\signatures\signatures.h" />
     <ClInclude Include="..\platform_src\vr\openvr.h" />
     <ClInclude Include="..\platform_src\vr\vr.h" />
     <ClInclude Include="..\src\debug\debug.h" />
     <ClInclude Include="..\src\http\http.h" />
     <ClInclude Include="..\src\InitState.h" />
+    <ClInclude Include="..\src\lua.h" />
+    <ClInclude Include="..\src\lua_functions.h" />
     <ClInclude Include="..\src\platform.h" />
-    <ClInclude Include="..\src\signatures\sigdef.h" />
-    <ClInclude Include="..\src\signatures\signatures.h" />
     <ClInclude Include="..\src\threading\queue.h" />
     <ClInclude Include="..\src\tweaker\wrenxml.h" />
     <ClInclude Include="..\src\tweaker\xmltweaker.h" />

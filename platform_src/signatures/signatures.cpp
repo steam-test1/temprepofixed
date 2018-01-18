@@ -6,8 +6,11 @@
 #include <Psapi.h>
 #include <detours.h>
 
-#include "util/util.h"
+#define SIG_INCLUDE_MAIN
+#include "sigdef.h"
+#undef SIG_INCLUDE_MAIN
 
+#include "util/util.h"
 #include "signatures.h"
 
 using std::string;

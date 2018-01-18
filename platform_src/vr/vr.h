@@ -16,7 +16,7 @@ public:
 
 	std::string GetHMDBrand();
 
-	int GetButtonsStatus(int hand);
+	uint64_t GetButtonsStatus(int hand);
 
 	static VRManager* VRManager::GetInstance();
 
