@@ -33,7 +33,7 @@ namespace Util {
 		Exception(const char *file, int line);
 		Exception(std::string msg, const char *file, int line);
 
-		virtual const char *what() const override;
+		virtual const char *what() const throw() override;
 
 		virtual const char *exceptionName() const;
 		virtual void writeToStream(std::ostream& os) const;
