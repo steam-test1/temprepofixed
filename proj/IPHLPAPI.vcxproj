@@ -54,16 +54,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\incl;..\..\curl\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\lib;..\..\curl\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\lib-win32\incl;$(IncludePath)</IncludePath>
+    <LibraryPath>..\lib-win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='InjectorDLL|Win32'">
-    <IncludePath>..\incl;..\..\curl\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\lib;..\..\curl\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\lib-win32\incl;$(IncludePath)</IncludePath>
+    <LibraryPath>..\lib-win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\incl;..\..\curl\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\lib;..\..\curl\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\lib-win32\incl;$(IncludePath)</IncludePath>
+    <LibraryPath>..\lib-win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
