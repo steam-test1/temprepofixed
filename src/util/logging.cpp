@@ -1,5 +1,5 @@
 #include "util/util.h"
-#include "debug/debug.h"
+#include "debug/blt_debug.h"
 
 #include <ctime>
 #include <fstream>

@@ -5,7 +5,7 @@
 #include <fstream>
 #include <map>
 
-#include "debug.h"
+#include "blt_debug.h"
 #include "lua.h"
 #include "util/util.h"
 
