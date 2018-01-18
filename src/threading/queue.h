@@ -86,7 +86,9 @@ struct EventQueueRuntimeRegisterer
 	namespace { EventQueueRuntimeRegisterer<DataT> PD2HOOK_CONCAT(staticRegisterer, __COUNTER__); EventQueue<DataT>& Get##Name##Queue() { return EventQueue<DataT>::GetSingleton(); } }
 #define PD2HOOK_REGISTER_EVENTQUEUE_EASY(DataT) PD2HOOK_REGISTER_EVENTQUEUE(DataT, DataT)
 
+#ifdef _WIN32
 #pragma region Implementation
+#endif
 
 template<typename DataT>
 EventQueue<DataT>::EventQueue()
@@ -148,7 +150,9 @@ void EventQueue<DataT>::AddToQueue(EventFunction runFunction, DataT data)
 	eventQueue.emplace_back(runFunction, std::move(data));
 }
 
+#ifdef _WIN32
 #pragma endregion
+#endif
 
 }
 
