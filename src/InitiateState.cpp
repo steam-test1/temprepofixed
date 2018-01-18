@@ -642,6 +642,7 @@ namespace blt {
 			if (!setup_check_done) {
 				setup_check_done = true;
 
+#ifdef _WIN32 // TODO GNU+Linux support
 				if (!(Util::DirectoryExists("mods") && Util::DirectoryExists("mods/base"))) {
 					int result = MessageBox(NULL, "Do you want to download the PAYDAY 2 BLT basemod?\n"
 						"This is required for using mods", "BLT 'mods/base' folder missing", MB_YESNO);
@@ -649,6 +650,7 @@ namespace blt {
 
 					return;
 				}
+#endif
 			}
 
 			lua_pushcclosure(L, luaF_print, 0);
