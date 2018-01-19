@@ -432,7 +432,7 @@ static void XMLNode_attach_pos(WrenVM* vm) {
 	}
 }
 
-#define XMLNODE_FUNC(getter, name) \
+#define XMLNODE_ACTION_FUNC(getter, name) \
 static void XMLNode_ ## name(WrenVM* vm) { \
 	THIS_WXML_NODE(vm); \
 	mxml_node_t *node = mxmlGet ## getter(handle); \
@@ -451,7 +451,7 @@ func(Parent, parent) \
 func(FirstChild, first_child) \
 func(LastChild, last_child)
 
-XMLNODE_FUNC_SET(XMLNODE_FUNC)
+XMLNODE_FUNC_SET(XMLNODE_ACTION_FUNC)
 
 WrenForeignMethodFn wrenxml::bind_wxml_method(
 	WrenVM* vm,
@@ -476,18 +476,19 @@ WrenForeignMethodFn wrenxml::bind_wxml_method(
 		}
 
 #define XMLNODE_FUNC(name, sig) XMLNODE_DIFF_FUNC(name, #name sig)
+#define XMLNODE_FUNC_FLAT(name) XMLNODE_DIFF_FUNC(name, #name)
 
-#define XMLNODE_CHECK_FUNC(getter, name) XMLNODE_FUNC(name)
+#define XMLNODE_CHECK_FUNC(getter, name) XMLNODE_FUNC_FLAT(name)
 
 #define XMLNODE_BI_FUNC(name) \
-		XMLNODE_FUNC(name) \
+		XMLNODE_FUNC_FLAT(name) \
 		if (!is_static && signature == #name "=(_)") { \
 			return XMLNode_ ## name ## _set; \
 		}
 
-		XMLNODE_FUNC(type);
-		XMLNODE_FUNC(string);
-		XMLNODE_FUNC(attribute_names);
+		XMLNODE_FUNC_FLAT(type);
+		XMLNODE_FUNC_FLAT(string);
+		XMLNODE_FUNC_FLAT(attribute_names);
 
 		XMLNODE_BI_FUNC(text);
 		XMLNODE_BI_FUNC(name);
