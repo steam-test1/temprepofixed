@@ -35,13 +35,13 @@ file(GLOB_RECURSE gnu_sources		platforms/gnu/src/*.cpp platforms/gnu/include/*.h
 file(GLOB_RECURSE mxml_sources		lib/mxml/*.c lib/mxml/*.h)
 add_library(mxml STATIC ${mxml_sources})
 include_directories(mxml lib/configs/mxml)
-target_compile_options(mxml PRIVATE -std=c99 -Wall -fPIC)
+target_compile_options(mxml PRIVATE -std=gnu99 -Wall -fPIC)
 target_include_directories(mxml PUBLIC lib/mxml)
 
 file(GLOB_RECURSE wren_sources		lib/wren/src/include/wren.h lib/wren/src/vm/*.c lib/wren/src/vm/*.h lib/wren/src/optional/*.c lib/wren/src/optional/*.h)
 add_library(wren STATIC ${wren_sources})
 include_directories(wren lib/wren/src/optional lib/wren/src/vm)
-target_compile_options(wren PRIVATE -std=c99 -Wall -fPIC)
+target_compile_options(wren PRIVATE -std=gnu99 -Wall -fPIC)
 target_include_directories(wren PUBLIC lib/wren/src/include)
 
 if(UNIX)
