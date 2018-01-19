@@ -99,12 +99,16 @@ const char *IOException::exceptionName() const
 		return RemoveDirectory(dir.c_str()) != 0;
 	}
 
+	bool CreateDirectorySingle(const std::string& path){
+		return CreateDirectory(path.c_str(), NULL);
+	}
+
 	bool CreateDirectoryPath(const std::string& path){
 		std::string newPath = "";
 		std::vector<std::string> paths = Util::SplitString(path, '/');
 		for (const auto& i : paths) {
 			newPath = newPath + i + "/";
-			CreateDirectory(newPath.c_str(), NULL);
+			CreateDirectorySingle(newPath);
 		}
 		return true;
 	}

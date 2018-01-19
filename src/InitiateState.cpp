@@ -480,7 +480,7 @@ namespace pd2hook
 	int luaF_createDirectory(lua_State * L)
 	{
 		const char *path = lua_tostring(L, 1);
-		bool success = CreateDirectoryA(path, NULL);
+		bool success = Util::CreateDirectorySingle(path);
 		lua_pushboolean(L, success);
 		return 1;
 	}
