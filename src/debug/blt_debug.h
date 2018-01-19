@@ -26,7 +26,7 @@ namespace pd2hook {
 		static void Connect(std::string host, int port, std::string key);
 
 		// UINT_PTR is SOCKET and we don't want to import winsock2 as it messes it up for others importing this header.
-		UINT_PTR sock = (UINT_PTR)(~0);
+		uintptr_t sock = (uintptr_t)(~0);
 
 		// Store for read bytes if they don't form a complete message
 		std::vector<char> buffer;
