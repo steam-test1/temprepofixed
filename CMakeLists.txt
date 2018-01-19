@@ -17,6 +17,7 @@ set(library_name IPHLPAPI)
 # `sources` and `data`
 file(GLOB_RECURSE sources		src/*.cpp src/*.h)
 file(GLOB_RECURSE win32_sources		platform_src/*.cpp platform_src/*.h)
+file(GLOB_RECURSE gnu_sources		platforms/gnu/src/*.cpp platforms/gnu/include/*.hh)
 # you can use set(sources src/main.cpp) etc if you don't want to
 # use globing to find files automatically
 
@@ -31,7 +32,7 @@ target_compile_options(mxml PRIVATE -std=c99 -Wall)
 target_include_directories(mxml PUBLIC lib/mxml)
 
 if(UNIX)
-	add_library(${library_name} SHARED ${sources})
+	add_library(${library_name} SHARED ${sources} ${gnu_sources})
 	target_compile_options(${library_name} PUBLIC -std=c++1y -Wall)
 elseif(WIN32)
 	add_library(${library_name} SHARED ${sources} ${win32_sources})
