@@ -20,7 +20,7 @@ namespace pd2hook
 			mFile(file), mLine(line), mMsg(std::move(msg))
 		{}
 
-		const char *Exception::what() const
+		const char *Exception::what() const throw()
 		{
 			if (!mMsg.empty())
 			{
