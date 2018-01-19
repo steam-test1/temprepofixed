@@ -1,14 +1,11 @@
 #pragma once
 
+#include "platform.h"
 #include "xmltweaker.h"
 #include <string>
 
 namespace pd2hook {
 	namespace tweaker {
-		typedef unsigned long long idstring;
-
-		extern idstring *last_loaded_name, *last_loaded_ext;
-
 		void* tweak_pd2_xml(char* text, int32_t text_length);
 		void free_tweaked_pd2_xml(char* text);
 
@@ -19,6 +16,6 @@ namespace pd2hook {
 		*/
 		const char* transform_file(const char* contents);
 
-		idstring idstring_hash(std::string text);
+		blt::idstring idstring_hash(std::string text);
 	};
 };

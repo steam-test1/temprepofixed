@@ -615,8 +615,6 @@ namespace pd2hook
 		DebugConnection::Initialize();
 
 		blt::platform::InitPlatform();
-
-		tweaker::init_xml_tweaker();
 	}
 
 	void DestroyStates()

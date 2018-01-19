@@ -20,6 +20,31 @@ static CConsole* console = NULL;
 static bool vrMode;
 static std::thread::id main_thread_id;
 
+blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::last_loaded_ext = idstring_none;
+
+static void init_idstring_pointers() {
+	char *tmp;
+
+	if (try_open_base_vr) {
+		tmp = (char*)try_open_base_vr;
+		tmp += 0x3D;
+		blt::platform::last_loaded_name = *((blt::idstring**)tmp);
+
+		tmp = (char*)try_open_base_vr;
+		tmp += 0x23;
+		blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
+	}
+	else {
+		tmp = (char*)try_open_base;
+		tmp += 0x26;
+		blt::platform::last_loaded_name = *((blt::idstring**)tmp);
+
+		tmp = (char*)try_open_base;
+		tmp += 0x14;
+		blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
+	}
+}
+
 static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char freakin, int clue)
 {
 	int ret = (vrMode ? luaL_newstate_vr : luaL_newstate)(thislol, no, freakin, clue);
@@ -142,6 +167,8 @@ void blt::platform::InitPlatform() {
 	FuncDetour* node_from_xmlDetour = new FuncDetour((void**)&node_from_xml, node_from_xml_new);
 
 	VRManager::CheckAndLoad();
+
+	init_idstring_pointers();
 }
 
 void blt::platform::ClosePlatform() {

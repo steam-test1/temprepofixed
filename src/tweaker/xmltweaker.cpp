@@ -1,3 +1,4 @@
+#include "global.h"
 #include "xmltweaker_internal.h"
 #include <stdio.h>
 #include <fstream>
@@ -12,41 +13,17 @@ extern "C" {
 using namespace std;
 using namespace pd2hook;
 using namespace tweaker;
+using blt::idstring;
 
 static unordered_set<char*> buffers;
 
-idstring *tweaker::last_loaded_name = NULL, *tweaker::last_loaded_ext = NULL;
-
 // The file we last parsed. If we try to parse the same file more than
 // once, nothing should happen as a file from the filesystem is being loaded.
-idstring last_parsed_name = NULL, last_parsed_ext = NULL;
+idstring last_parsed_name = idstring_none, last_parsed_ext = idstring_none;
 
-void tweaker::init_xml_tweaker() {
-	char *tmp;
-
-	if (try_open_base_vr) {
-		tmp = (char*)try_open_base_vr;
-		tmp += 0x3D;
-		last_loaded_name = *((idstring**)tmp);
-
-		tmp = (char*)try_open_base_vr;
-		tmp += 0x23;
-		last_loaded_ext = *((idstring**)tmp);
-	}
-	else {
-		tmp = (char*)try_open_base;
-		tmp += 0x26;
-		last_loaded_name = *((idstring**)tmp);
-
-		tmp = (char*)try_open_base;
-		tmp += 0x14;
-		last_loaded_ext = *((idstring**)tmp);
-	}
-}
-
-void* __cdecl tweaker::tweak_pd2_xml(char* text, int32_t text_length) {
-	idstring name = *tweaker::last_loaded_name;
-	idstring extension = *tweaker::last_loaded_ext;
+void* tweaker::tweak_pd2_xml(char* text, int32_t text_length) {
+	idstring name = *blt::platform::last_loaded_name;
+	idstring extension = *blt::platform::last_loaded_ext;
 
 	// Don't parse the same file more than once, as it's not actually the same file.
 	if (last_parsed_name == name && last_parsed_ext == extension) {
@@ -100,7 +77,7 @@ void* __cdecl tweaker::tweak_pd2_xml(char* text, int32_t text_length) {
 	return (char*)buffer;
 }
 
-void __cdecl tweaker::free_tweaked_pd2_xml(char* text) {
+void tweaker::free_tweaked_pd2_xml(char* text) {
 	if (buffers.erase(text)) {
 		free(text);
 	}
