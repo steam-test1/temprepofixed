@@ -1,12 +1,19 @@
 cmake_minimum_required(VERSION 3.0)
 project(SuperBLT)
 
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+if(CMAKE_SYSTEM_NAME MATCHES "Linux") # Add other systems, if they get PD2 support
 	set(UNIX true)
 endif()
 
 # TODO set depending on platform
-set(library_name IPHLPAPI)
+if(UNIX)
+	set(library_name superblt_loader)
+elseif(WIN32)
+	set(library_name IPHLPAPI)
+else()
+	# TODO raise error
+	message(FATAL_ERROR "Unspported OS; if unix based, please add it in CMakeLists.txt")
+endif()
 
 ###############################################################################
 ## file globbing ##############################################################
