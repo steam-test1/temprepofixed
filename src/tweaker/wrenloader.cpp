@@ -49,12 +49,13 @@ void io_listDirectory(WrenVM* vm) {
 
 void io_info(WrenVM* vm) {
 	const char* path = wrenGetSlotString(vm, 1);
-	DWORD dwAttrib = GetFileAttributesA(path);
 
-	if (dwAttrib == INVALID_FILE_ATTRIBUTES) {
+	Util::FileType type = Util::GetFileType(path);
+
+	if (type == Util::FileType_None) {
 		wrenSetSlotString(vm, 0, "none");
 	}
-	else if (dwAttrib & FILE_ATTRIBUTE_DIRECTORY) {
+	else if (type == Util::FileType_Directory) {
 		wrenSetSlotString(vm, 0, "dir");
 	}
 	else {
@@ -176,8 +177,8 @@ const char* tweaker::transform_file(const char* text)
 	if (vm == NULL) {
 		if (available) {
 			// If the main file doesn't exist, do nothing
-			DWORD ftyp = GetFileAttributes("mods/base/wren/base.wren");
-			if (ftyp == INVALID_FILE_ATTRIBUTES) available = false;
+			Util::FileType ftyp = Util::GetFileType("mods/base/wren/base.wren");
+			if (ftyp == Util::FileType_None) available = false;
 		}
 
 		if (!available) return text;

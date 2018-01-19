@@ -129,5 +129,19 @@ const char *IOException::exceptionName() const
 		return elems;
 	}
 
+	FileType GetFileType(const std::string &path) {
+		DWORD dwAttrib = GetFileAttributesA(path.c_str());
+
+		if (dwAttrib == INVALID_FILE_ATTRIBUTES) {
+			return FileType_None;
+		}
+		else if (dwAttrib & FILE_ATTRIBUTE_DIRECTORY) {
+			return FileType_Directory;
+		}
+		else {
+			return FileType_File;
+		}
+	}
+
 }
 }

@@ -14,8 +14,15 @@ namespace pd2hook
 {
 
 namespace Util {
+	enum FileType {
+		FileType_None,
+		FileType_File,
+		FileType_Directory
+	};
+
 	std::vector<std::string> GetDirectoryContents(const std::string& path, bool isDirs = false);
 	std::string GetFileContents(const std::string& filename);
+	FileType GetFileType(const std::string& file);
 	void EnsurePathWritable(const std::string& path);
 	bool RemoveEmptyDirectory(const std::string& dir);
 	bool DirectoryExists(const std::string& dir);
