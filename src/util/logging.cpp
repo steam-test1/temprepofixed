@@ -1,3 +1,4 @@
+#include "global.h"
 #include "util/util.h"
 #include "debug/blt_debug.h"
 
@@ -17,7 +18,7 @@ std::string GetDateString()
 {
 	std::time_t currentTime = time(0);
 	std::tm now;
-	localtime_s(&now, &currentTime);
+	localtime_r(&currentTime, &now);
 
 	char datestring[100];
 	std::strftime(datestring, sizeof(datestring), "%Y_%m_%d", &now);
@@ -28,7 +29,7 @@ std::ostream& LogTime(std::ostream& os)
 {
 	std::time_t currentTime = time(0);
 	std::tm now;
-	localtime_s(&now, &currentTime);
+	localtime_r(&currentTime, &now);
 
 	char datestring[100];
 	std::strftime(datestring, sizeof(datestring), "%I:%M:%S %p", &now);
