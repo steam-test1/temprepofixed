@@ -182,3 +182,5 @@ CREATE_CALLABLE_CLASS_SIGNATURE(luaL_newstate_vr, int, "\x8B\x44\x24\x0C\x56\x8B
 #define lua_tostring(L,i)	lua_tolstring(L, (i), NULL)
 
 #define luaL_getmetatable(L,n)		(lua_getfield(L, LUA_REGISTRYINDEX, (n)))
+
+#define luaL_openlib luaI_openlib

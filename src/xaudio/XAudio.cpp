@@ -163,7 +163,7 @@ namespace pd2hook {
 		lua_pushvalue(L, -2);  /* pushes the metatable */
 		lua_settable(L, -3);  /* metatable.__index = metatable */
 
-		luaI_openlib(L, NULL, XABufferLib, 0);
+		luaL_openlib(L, NULL, XABufferLib, 0);
 		lua_pop(L, 1);
 
 		// Source metatable
@@ -192,7 +192,7 @@ namespace pd2hook {
 		lua_pushvalue(L, -2);  /* pushes the metatable */
 		lua_settable(L, -3);  /* metatable.__index = metatable */
 
-		luaI_openlib(L, NULL, XASourceLib, 0);
+		luaL_openlib(L, NULL, XASourceLib, 0);
 		lua_pop(L, 1);
 
 		// blt.xaudio table
@@ -212,7 +212,7 @@ namespace pd2hook {
 
 		// Make a new table and populate it with XAudio stuff
 		lua_newtable(L);
-		luaI_openlib(L, NULL, lib, 0);
+		luaL_openlib(L, NULL, lib, 0);
 
 		// Add the blt.xaudio.listener table
 		xalistener::lua_register(L);

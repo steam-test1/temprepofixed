@@ -598,7 +598,7 @@ namespace pd2hook
 			{ "getbuttonstate", luaF_getbuttonstate },*/
 			{ NULL, NULL }
 		};
-		luaI_openlib(L, "blt_vr", vrLib, 0);
+		luaL_openlib(L, "blt_vr", vrLib, 0);
 	}
 
 	int updates = 0;
@@ -673,7 +673,7 @@ namespace blt {
 				{ "DestroyConsole", luaF_destroyconsole },*/
 				{ NULL, NULL }
 			};
-			luaI_openlib(L, "console", consoleLib, 0);
+			luaL_openlib(L, "console", consoleLib, 0);
 
 			luaL_Reg fileLib[] = {
 				{ "GetDirectories", luaF_getdir },
@@ -686,7 +686,7 @@ namespace blt {
 			{ "CreateDirectory", luaF_createDirectory },
 			{ NULL, NULL }
 			};
-			luaI_openlib(L, "file", fileLib, 0);
+			luaL_openlib(L, "file", fileLib, 0);
 
 			// Keeping everything in lowercase since IspcallForced / IsPCallForced and Forcepcalls / ForcePCalls look rather weird anyway
 			luaL_Reg bltLib[] = {
@@ -696,7 +696,7 @@ namespace blt {
 			{ "structid", luaF_structid },
 			{ NULL, NULL }
 			};
-			luaI_openlib(L, "blt", bltLib, 0);
+			luaL_openlib(L, "blt", bltLib, 0);
 
 			if (vrMode) {
 				load_vr_globals(L);

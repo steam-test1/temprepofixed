@@ -68,7 +68,7 @@ namespace pd2hook {
 
 		// Make a new table and populate it with XAudio stuff
 		lua_newtable(L);
-		luaI_openlib(L, NULL, lib, 0);
+		luaL_openlib(L, NULL, lib, 0);
 	}
 };
 

@@ -216,7 +216,7 @@ namespace pd2hook {
 			{ "get_parameter", luaF_get_param },
 			{ NULL, NULL }
 		};
-		luaI_openlib(L, "blt_debugger", vrLib, 0);
+		luaL_openlib(L, "blt_debugger", vrLib, 0);
 	}
 
 	void DebugConnection::Log(std::string message) {
