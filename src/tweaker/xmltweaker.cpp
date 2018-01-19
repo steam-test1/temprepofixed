@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <unordered_set>
+#include <string.h>
 #include "util/util.h"
 #include "lua.h"
 
@@ -54,7 +55,7 @@ void* tweaker::tweak_pd2_xml(char* text, int32_t text_length) {
 	char* buffer = (char*)malloc(length);
 	buffers.insert(buffer);
 
-	strcpy_s(buffer, length, new_text);
+	portable_strncpy(buffer, new_text, length);
 
 	//if (!strncmp(new_text, "<network>", 9)) {
 	//	std::ofstream out("output.txt");
