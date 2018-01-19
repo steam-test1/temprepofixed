@@ -21,9 +21,9 @@ namespace pd2hook {
 		void ReadMessage(int min);
 		bool ProcessMessageQueue();
 
-		static void DebugConnection::ConnectFromParameters(std::string params);
+		static void ConnectFromParameters(std::string params);
 
-		static void DebugConnection::Connect(std::string host, int port, std::string key);
+		static void Connect(std::string host, int port, std::string key);
 
 		// UINT_PTR is SOCKET and we don't want to import winsock2 as it messes it up for others importing this header.
 		UINT_PTR sock = (UINT_PTR)(~0);

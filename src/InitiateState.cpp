@@ -636,7 +636,7 @@ namespace blt {
 		// Random dude who wrote what's his face?
 		// I 'unno, I stole this method from the guy who wrote the 'underground-light-lua-hook'
 		// Mine worked fine, but this seems more elegant.
-		void lua_functions::initiate_lua(lua_State *L) {
+		void initiate_lua(lua_State *L) {
 			add_active_state(L);
 
 			if (!setup_check_done) {
@@ -726,7 +726,7 @@ namespace blt {
 			return;
 		}
 
-		void lua_functions::close(lua_State *L)
+		void close(lua_State *L)
 		{
 			remove_active_state(L);
 		}
