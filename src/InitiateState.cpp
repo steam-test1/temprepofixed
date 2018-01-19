@@ -589,6 +589,17 @@ namespace pd2hook
 		return 1;
 	}
 
+	int luaF_ignoretweak(lua_State* L) {
+		blt::idfile file;
+
+		file.name = luaX_toidstring(L, 1);
+		file.ext = luaX_toidstring(L, 2);
+
+		tweaker::ignore_file(file);
+
+		return 0;
+	}
+
 	void load_vr_globals(lua_State *L)
 	{
 		luaL_Reg vrLib[] = {
@@ -691,8 +702,9 @@ namespace blt {
 				/*{ "ispcallforced", luaF_ispcallforced }, // TODO reenable
 				{ "forcepcalls", luaF_forcepcalls },*/
 				{ "parsexml", luaF_parsexml },
-			{ "structid", luaF_structid },
-			{ NULL, NULL }
+				{ "structid", luaF_structid },
+				{ "ignoretweak", luaF_ignoretweak },
+				{ NULL, NULL }
 			};
 			luaL_openlib(L, "blt", bltLib, 0);
 

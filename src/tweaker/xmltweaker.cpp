@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <fstream>
 #include <unordered_set>
+#include <set>
 #include <string.h>
 #include "util/util.h"
-#include "lua.h"
 
 extern "C" {
 #include "wren.h"
@@ -15,30 +15,35 @@ using namespace std;
 using namespace pd2hook;
 using namespace tweaker;
 using blt::idstring;
+using blt::idfile;
 
 static unordered_set<char*> buffers;
+static set<idfile> ignored_files;
 
 // The file we last parsed. If we try to parse the same file more than
 // once, nothing should happen as a file from the filesystem is being loaded.
-idstring last_parsed_name = idstring_none, last_parsed_ext = idstring_none;
+idfile last_parsed;
 
-void* tweaker::tweak_pd2_xml(char* text, int32_t text_length) {
-	idstring name = *blt::platform::last_loaded_name;
-	idstring extension = *blt::platform::last_loaded_ext;
+void* tweaker::tweak_pd2_xml(char* text, int text_length) {
+	idfile file = idfile(*blt::platform::last_loaded_name, *blt::platform::last_loaded_ext);
 
 	// Don't parse the same file more than once, as it's not actually the same file.
-	if (last_parsed_name == name && last_parsed_ext == extension) {
+	if (last_parsed == file) {
 		return text;
 	}
 
-	last_parsed_name = name;
-	last_parsed_ext = extension;
+	last_parsed = file;
 
 	// Don't bother with .model or .texture files
 	if (
-		extension == 0xaf612bbc207e00bd ||	// idstring("model")
-		extension == 0x5368e150b05a5b8c		// idstring("texture")
+		file.ext == 0xaf612bbc207e00bd ||	// idstring("model")
+		file.ext == 0x5368e150b05a5b8c		// idstring("texture")
 		) {
+		return text;
+	}
+
+	// Check the exclusion list
+	if (ignored_files.count(file)) {
 		return text;
 	}
 
@@ -50,6 +55,12 @@ void* tweaker::tweak_pd2_xml(char* text, int32_t text_length) {
 	}
 
 	const char* new_text = transform_file(text);
+
+	// If the text is not to be altered, we can return it as is.
+	if (new_text == text) return text;
+
+	// Otherwise, copy it so it's not invalidated by another Wren call
+
 	size_t length = strlen(new_text) + 1; // +1 for the null
 
 	char* buffer = (char*)malloc(length);
@@ -82,6 +93,10 @@ void tweaker::free_tweaked_pd2_xml(char* text) {
 	if (buffers.erase(text)) {
 		free(text);
 	}
+}
+
+void pd2hook::tweaker::ignore_file(idfile file) {
+	ignored_files.insert(file);
 }
 
 static void convert_block(const char* str, uint64_t* var, int* start_ptr, int len, int val) {
