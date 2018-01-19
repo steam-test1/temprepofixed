@@ -151,7 +151,6 @@
     <ClCompile Include="..\src\threading\threadqueue.cpp" />
     <ClCompile Include="..\src\tweaker\wrenloader.cpp" />
     <ClCompile Include="..\src\tweaker\wrenxml.cpp" />
-    <ClCompile Include="..\src\tweaker\tweakerhooks.cpp" />
     <ClCompile Include="..\src\tweaker\xmltweaker.cpp" />
     <ClCompile Include="..\src\util\compression.cpp" />
     <ClCompile Include="..\src\util\logging.cpp" />

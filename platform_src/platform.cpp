@@ -1,11 +1,11 @@
 #include "platform.h"
+
+#include "lua.h"
 #include "lua_functions.h"
 
 #include "console/console.h"
 #include "vr/vr.h"
 #include "signatures/signatures.h"
-#include "lua.h"
-
 #include "tweaker/xmltweaker.h"
 
 #include <fstream>
@@ -61,6 +61,54 @@ void lua_close_new(lua_State* L) {
 	lua_close(L);
 }
 
+
+#include "tweaker/xmltweaker_internal.h"
+static void __declspec(naked) node_from_xml_new() {
+	__asm
+	{
+		push ecx
+
+		// Push on, as the last argument, the value of a pointer passed as the last function argument
+		// This appears to be a length value, however it will often have a huge (and fixed) value.
+		push[esp + 12]
+
+		push edx
+
+		// Run the intercept method
+		call pd2hook::tweaker::tweak_pd2_xml
+
+		pop edx
+
+		add esp, 4 // Remove the last argument
+
+		pop ecx
+
+		// Move across our string
+		mov edx, eax
+
+		// Save our value for later, so we can free it
+		push eax
+
+		// Bring the old top-of-the-stack back up
+		mov eax, [esp + 4]
+		push eax
+
+		call node_from_xml
+
+		add esp, 4 // Remove our temporary value from the stack
+
+		// Currently, the stack is: [ arg3, txt
+		// Call the free function, which uses the txt arg
+		call pd2hook::tweaker::free_tweaked_pd2_xml
+
+		// Clear off the txt argument, and the stack is back to how we left it
+		add esp, 4
+
+		retn
+	}
+}
+
+
 void blt::platform::InitPlatform() {
 	main_thread_id = std::this_thread::get_id();
 
@@ -91,7 +139,7 @@ void blt::platform::InitPlatform() {
 	FuncDetour* newStateDetourVr = new FuncDetour((void**)&luaL_newstate_vr, luaL_newstate_new_vr);
 	FuncDetour* luaCloseDetour = new FuncDetour((void**)&lua_close, lua_close_new);
 
-	FuncDetour* node_from_xmlDetour = new FuncDetour((void**)&node_from_xml, tweaker::node_from_xml_new);
+	FuncDetour* node_from_xmlDetour = new FuncDetour((void**)&node_from_xml, node_from_xml_new);
 
 	VRManager::CheckAndLoad();
 }
