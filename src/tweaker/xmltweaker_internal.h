@@ -9,8 +9,8 @@ namespace pd2hook {
 
 		extern idstring *last_loaded_name, *last_loaded_ext;
 
-		void* __cdecl tweak_pd2_xml(char* text, int32_t text_length);
-		void __cdecl free_tweaked_pd2_xml(char* text);
+		void* tweak_pd2_xml(char* text, int32_t text_length);
+		void free_tweaked_pd2_xml(char* text);
 
 		/**
 		* Transforms the contents of the file
