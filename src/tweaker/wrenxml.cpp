@@ -1,5 +1,7 @@
 #include "wrenxml.h"
 
+#include "global.h"
+
 #include <string>
 #include <util/util.h>
 
@@ -45,7 +47,7 @@ mxmlToAllocStringSafe(
 	bytes = mxmlSaveString(node, buffer, sizeof(buffer), cb);
 
 	if (bytes <= 0)
-		return _strdup(""); // Empty string case
+		return strdup(""); // Empty string case
 
 	if (bytes < (int)(sizeof(buffer) - 1))
 	{
@@ -54,7 +56,7 @@ mxmlToAllocStringSafe(
 		* return...
 		*/
 
-		return _strdup(buffer);
+		return strdup(buffer);
 	}
 
 	/*
@@ -89,7 +91,7 @@ static void handle_mxml_error_crash(const char* error) {
 }
 
 static void handle_mxml_error_note(const char* error) {
-	mxml_last_error = _strdup(error);
+	mxml_last_error = strdup(error);
 }
 
 static mxml_node_t* recursive_clone(mxml_node_t *dest_parent, mxml_node_t *src) {

@@ -168,6 +168,7 @@
     <ClInclude Include="..\platform_src\vr\openvr.h" />
     <ClInclude Include="..\platform_src\vr\vr.h" />
     <ClInclude Include="..\src\debug\blt_debug.h" />
+    <ClInclude Include="..\src\global.h" />
     <ClInclude Include="..\src\http\http.h" />
     <ClInclude Include="..\src\InitState.h" />
     <ClInclude Include="..\src\lua.h" />

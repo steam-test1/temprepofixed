@@ -1,6 +1,7 @@
 #include <fstream>
 #include <vector>
 
+#include "global.h"
 #include "xmltweaker_internal.h"
 #include "util/util.h"
 #include "wrenxml.h"
@@ -165,7 +166,7 @@ static char* getModulePath(WrenVM* vm, const char* name_c)
 
 	size_t length = str.length() + 1;
 	char* output = (char*)malloc(length); // +1 for the null
-	strcpy_s(output, length, str.c_str());
+	portable_strncpy(output, str.c_str(), length);
 
 	return output; // free()d by Wren
 }
