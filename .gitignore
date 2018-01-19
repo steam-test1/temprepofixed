@@ -51,6 +51,7 @@ proj/*.vcxproj.user
 
 # Source-based libraries
 /lib-win32/mxml/
+/lib-win32/wren/
 
 # CMake build directory
 /build/

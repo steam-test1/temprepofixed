@@ -31,6 +31,12 @@ include_directories(mxml lib/configs/mxml)
 target_compile_options(mxml PRIVATE -std=c99 -Wall)
 target_include_directories(mxml PUBLIC lib/mxml)
 
+file(GLOB_RECURSE wren_sources		lib/wren/src/include/wren.h lib/wren/src/vm/*.c lib/wren/src/vm/*.h lib/wren/src/optional/*.c lib/wren/src/optional/*.h)
+add_library(wren STATIC ${wren_sources})
+include_directories(wren lib/wren/src/optional lib/wren/src/vm)
+target_compile_options(wren PRIVATE -std=c99 -Wall)
+target_include_directories(wren PUBLIC lib/wren/src/include)
+
 if(UNIX)
 	add_library(${library_name} SHARED ${sources} ${gnu_sources})
 	target_compile_options(${library_name} PUBLIC -std=c++1y -Wall)
@@ -40,7 +46,7 @@ else()
 	# TODO raise error
 endif()
 
-# this lets me include files relative to the root src dir with a <> pair
+# Set up the root include directory for the main file
 target_include_directories(${library_name} PUBLIC src)
 
 # this copies all resource files in the build directory
@@ -52,6 +58,7 @@ file(COPY ${data} DESTINATION resources)
 ###############################################################################
 
 target_link_libraries(${library_name} mxml)
+target_link_libraries(${library_name} wren)
 
 if(UNIX)
 	find_package (CURL REQUIRED)

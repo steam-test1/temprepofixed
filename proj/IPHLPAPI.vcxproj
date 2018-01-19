@@ -54,15 +54,15 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\lib-win32\incl;..\lib\mxml;$(IncludePath)</IncludePath>
+    <IncludePath>..\lib-win32\incl;..\lib\mxml;..\lib\wren\src\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\lib-win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='InjectorDLL|Win32'">
-    <IncludePath>..\lib-win32\incl;..\lib\mxml;$(IncludePath)</IncludePath>
+    <IncludePath>..\lib-win32\incl;..\lib\mxml;..\lib\wren\src\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\lib-win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\lib-win32\incl;..\lib\mxml;$(IncludePath)</IncludePath>
+    <IncludePath>..\lib-win32\incl;..\lib\mxml;..\lib\wren\src\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\lib-win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -78,7 +78,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>iphp.def</ModuleDefinitionFile>
       <AdditionalDependencies>libcrypto.lib;libcurl.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;wren_static.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\lib-win32\mxml\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib-win32\mxml\$(Configuration)\;..\lib-win32\wren\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Message>Copy DLL to PD2</Message>
@@ -101,7 +101,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>iphp.def</ModuleDefinitionFile>
       <AdditionalDependencies>libcrypto.lib;libcurl.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;wren_static.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\lib-win32\mxml\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib-win32\mxml\$(Configuration)\;..\lib-win32\wren\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "C:\Users\ZNix\source\repos\SuperBLT\proj\$(Configuration)\IPHLPAPI.dll" "C:\Users\ZNix\Static\steamcmd\steamapps\common\PAYDAY 2\IPHLPAPI.dll"</Command>
@@ -127,7 +127,7 @@
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <AdditionalDependencies>libcrypto.lib;libcurl.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;wren_static.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\lib-win32\mxml\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib-win32\mxml\$(Configuration)\;..\lib-win32\wren\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Message>
