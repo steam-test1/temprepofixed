@@ -65,7 +65,11 @@ mxmlToAllocStringSafe(
 	*/
 
 	if ((s = (char*)malloc(bytes + 1)) == NULL) {
-		MessageBox(0, "[WREN/WXML] XML.string: Cannot allocate enough space for XML string", "SuperBLT OutOfMemory", MB_OK);
+		const char *message = "[WREN/WXML] XML.string: Cannot allocate enough space for XML string";
+		PD2HOOK_LOG_ERROR(message);
+#ifdef _WIN32
+		MessageBox(0, message, "SuperBLT OutOfMemory", MB_OK);
+#endif
 		exit(1);
 	}
 
@@ -86,7 +90,12 @@ static void handle_mxml_error_crash(const char* error) {
 	PD2HOOK_LOG_ERROR(error);
 	PD2HOOK_LOG_ERROR("Input XML:");
 	PD2HOOK_LOG_ERROR(last_loaded_xml);
-	MessageBox(0, "[WREN/WXML] XML.new: parse error - see log for details", "XML Parse Error", MB_OK);
+
+	const char *message = "[WREN/WXML] XML.new: parse error - see log for details";
+	PD2HOOK_LOG_ERROR(message);
+#ifdef _WIN32
+	MessageBox(0, message, "XML Parse Error", MB_OK);
+#endif
 	exit(1);
 }
 
