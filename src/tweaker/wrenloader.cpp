@@ -88,7 +88,7 @@ void io_idstring_hash(WrenVM *vm) {
 	idstring hash = idstring_hash(wrenGetSlotString(vm, 1));
 
 	char hex[17]; // 16-chars long +1 for the null
-	sprintf_s(hex, 17, "%016llx", hash);
+	snprintf(hex, sizeof(hex), "%016llx", hash);
 	wrenSetSlotString(vm, 0, hex);
 }
 
@@ -204,10 +204,10 @@ const char* tweaker::transform_file(const char* text)
 
 	wrenSetSlotHandle(vm, 0, tweakerClass);
 
-	sprintf_s(hex, 17, "%016llx", *tweaker::last_loaded_name);
+	snprintf(hex, sizeof(hex), "%016llx", *tweaker::last_loaded_name);
 	wrenSetSlotString(vm, 1, hex);
 
-	sprintf_s(hex, 17, "%016llx", *tweaker::last_loaded_ext);
+	snprintf(hex, sizeof(hex), "%016llx", *tweaker::last_loaded_ext);
 	wrenSetSlotString(vm, 2, hex);
 
 	wrenSetSlotString(vm, 3, text);

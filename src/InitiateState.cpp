@@ -582,7 +582,7 @@ namespace pd2hook
 		}
 
 		char buffer[9]; // 8 chars for the address, one for the null
-		sprintf_s(buffer, sizeof(buffer), "%p", value_ptr);
+		snprintf(buffer, sizeof(buffer), "%p", value_ptr);
 
 		lua_pushstring(L, buffer);
 
