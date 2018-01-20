@@ -141,6 +141,8 @@ void LoggerImpl::log(const Message_t& msg)
 {
 	std::lock_guard<std::mutex> lock(GetLoggerMutex());
 
+	std::cout << msg << mEndl;
+
 #ifdef ENABLE_DEBUG
 	DebugConnection::Log(msg);
 #endif
@@ -151,7 +153,6 @@ void LoggerImpl::log(const Message_t& msg)
 	}
 
 	mOut << msg << mEndl;
-	std::cout << msg << mEndl;
 }
 }
 
