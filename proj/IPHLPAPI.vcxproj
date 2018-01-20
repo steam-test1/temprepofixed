@@ -153,6 +153,7 @@
     <ClCompile Include="..\src\tweaker\wrenxml.cpp" />
     <ClCompile Include="..\src\tweaker\xmltweaker.cpp" />
     <ClCompile Include="..\src\util\compression.cpp" />
+    <ClCompile Include="..\src\util\files.cpp" />
     <ClCompile Include="..\src\util\logging.cpp" />
     <ClCompile Include="..\src\util\util.cpp" />
     <ClCompile Include="..\src\xaudio\stb_vorbis.c" />
