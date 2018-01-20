@@ -44,6 +44,11 @@ include_directories(wren lib/wren/src/optional lib/wren/src/vm)
 target_compile_options(wren PRIVATE -std=gnu99 -Wall -fPIC)
 target_include_directories(wren PUBLIC lib/wren/src/include)
 
+add_library(subhook STATIC lib/subhook/subhook.c)
+include_directories(subhook lib/subhook)
+target_compile_options(subhook PRIVATE -std=gnu99 -Wall -fPIC)
+target_include_directories(subhook PUBLIC lib/subhook)
+
 if(UNIX)
 	add_library(${library_name} SHARED ${sources} ${gnu_sources})
 	target_compile_options(${library_name} PUBLIC -std=c++1y -Wall)
@@ -56,16 +61,13 @@ endif()
 # Set up the root include directory for the main file
 target_include_directories(${library_name} PUBLIC src)
 
-# this copies all resource files in the build directory
-# we need this, because we want to work with paths relative to the executable
-file(COPY ${data} DESTINATION resources)
-
 ###############################################################################
 ## dependencies ###############################################################
 ###############################################################################
 
 target_link_libraries(${library_name} mxml)
 target_link_libraries(${library_name} wren)
+target_link_libraries(${library_name} subhook)
 
 if(UNIX)
 	find_package (CURL REQUIRED)
@@ -76,9 +78,4 @@ if(UNIX)
 	include_directories (${OPENSSL_INCLUDE_DIRS})
 	target_link_libraries(${library_name} ${OPENSSL_LIBRARIES})
 endif()
-
-target_link_libraries(${library_name} PUBLIC
-	${Boost_LIBRARIES}
-	# here you can add any library dependencies
-)
 
