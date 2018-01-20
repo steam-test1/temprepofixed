@@ -99,8 +99,6 @@ namespace pd2hook {
 	}
 
 	XAudio::XAudio() {
-		struct stat statbuf;
-
 		dev = alcOpenDevice(NULL);
 		if (!dev) {
 			throw string("Cannot open OpenAL Device");
@@ -215,7 +213,7 @@ namespace pd2hook {
 		luaL_openlib(L, NULL, lib, 0);
 
 		// Add the blt.xaudio.listener table
-		xalistener::lua_register(L);
+		xalistener::add_members(L);
 		// Put listener into xaudio
 		lua_setfield(L, -2, "listener");
 

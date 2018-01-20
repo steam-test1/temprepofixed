@@ -164,7 +164,7 @@ namespace pd2hook {
 		int XAListener_set_orientation(lua_State *L);
 		int XAListener_get_gain(lua_State *L);
 		int XAListener_set_gain(lua_State *L);
-		void lua_register(lua_State *L);
+		void add_members(lua_State *L);
 	};
 };
 

@@ -55,7 +55,7 @@ namespace pd2hook {
 		return 0;
 	}
 
-	void xalistener::lua_register(lua_State *L) {
+	void xalistener::add_members(lua_State *L) {
 		// blt.xaudio.listener table
 		luaL_Reg lib[] = {
 			{ "setposition", xalistener::XAListener_set_position },
