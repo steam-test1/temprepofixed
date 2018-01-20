@@ -623,7 +623,9 @@ namespace pd2hook
 	void InitiateStates()
 	{
 		// Set up debugging right away, for log viewing
+#ifdef ENABLE_DEBUG
 		DebugConnection::Initialize();
+#endif
 
 		blt::platform::InitPlatform();
 	}
@@ -712,7 +714,9 @@ namespace blt {
 				load_vr_globals(L);
 			}
 
+#ifdef ENABLE_DEBUG
 			DebugConnection::AddGlobals(L);
+#endif
 	#ifdef ENABLE_XAUDIO
 			XAudio::Register(L);
 	#endif
@@ -750,7 +754,9 @@ namespace blt {
 				EventQueueMaster::GetSingleton().ProcessEvents();
 			}
 
+#ifdef ENABLE_DEBUG
 			DebugConnection::Update(L);
+#endif
 
 			updates++;
 		}

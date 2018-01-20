@@ -141,7 +141,9 @@ void LoggerImpl::log(const Message_t& msg)
 {
 	std::lock_guard<std::mutex> lock(GetLoggerMutex());
 
+#ifdef ENABLE_DEBUG
 	DebugConnection::Log(msg);
+#endif
 
 	if (!mIsOpen)
 	{

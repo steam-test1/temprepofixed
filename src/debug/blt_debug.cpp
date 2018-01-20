@@ -1,3 +1,5 @@
+#ifdef ENABLE_DEBUG
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <atlstr.h>
@@ -489,3 +491,4 @@ return true
 		connection = new DebugConnection(host, port, key);
 	}
 }
+#endif
