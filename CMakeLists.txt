@@ -50,8 +50,18 @@ target_compile_options(subhook PRIVATE -std=gnu99 -Wall -fPIC)
 target_include_directories(subhook PUBLIC lib/subhook)
 
 if(UNIX)
-	add_library(${library_name} SHARED ${sources} ${gnu_sources})
+	# As the main file has a constructor, make sure it's linked last so it doesn't run before any static constructors
+	set(loader_file ${CMAKE_CURRENT_SOURCE_DIR}/platforms/gnu/src/blt_main.cpp)
+	list(REMOVE_ITEM gnu_sources ${loader_file})
+
+	add_library(${library_name} SHARED ${sources} ${gnu_sources} ${loader_file})
+	include_directories (platforms/gnu/include)
+
+	# Use modern C++, and show all warnings
 	target_compile_options(${library_name} PUBLIC -std=c++1y -Wall)
+
+	# Enable this to see missing references:
+	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 elseif(WIN32)
 	add_library(${library_name} SHARED ${sources} ${win32_sources})
 else()
