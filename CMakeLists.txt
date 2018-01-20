@@ -15,6 +15,10 @@ else()
 	message(FATAL_ERROR "Unspported OS; if unix based, please add it in CMakeLists.txt")
 endif()
 
+
+# Enable XAudio
+add_definitions(-DENABLE_XAUDIO)
+
 ###############################################################################
 ## file globbing ##############################################################
 ###############################################################################
@@ -87,5 +91,9 @@ if(UNIX)
 	find_package (OpenSSL REQUIRED)
 	include_directories (${OPENSSL_INCLUDE_DIRS})
 	target_link_libraries(${library_name} ${OPENSSL_LIBRARIES})
+
+	find_package (OpenAL REQUIRED)
+	include_directories (${OPENAL_INCLUDE_DIRS})
+	target_link_libraries(${library_name} ${OPENAL_LIBRARIES})
 endif()
 
