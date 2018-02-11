@@ -368,13 +368,32 @@ namespace pd2hook
 		lua_pcall(ourData->L, 3, 0, 0);
 	}
 
+	void call_hash_result(lua_State *L, int ref, std::string filename, std::string result) {
+		if (!check_active_state(L)) {
+			return;
+		}
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+		lua_pushlstring(L, result.c_str(), result.size());
+		lua_pushlstring(L, filename.c_str(), filename.size());
+		lua_pcall(L, 2, 0, 0);
+
+		luaL_unref(L, LUA_REGISTRYINDEX, ref);
+	}
+
 	int luaF_directoryhash(lua_State* L)
 	{
-		PD2HOOK_TRACE_FUNC;
-		int n = lua_gettop(L);
-
 		size_t length = 0;
 		const char* filename = lua_tolstring(L, 1, &length);
+
+		if (!lua_isnoneornil(L, 2)) {
+			lua_pushvalue(L, 2);
+			int callback = luaL_ref(L, LUA_REGISTRYINDEX);
+			Util::RunAsyncHash(L, callback, filename, Util::GetDirectoryHash, call_hash_result);
+			lua_pushboolean(L, true);
+			return 1;
+		}
+
 		std::string hash = Util::GetDirectoryHash(filename);
 		lua_pushlstring(L, hash.c_str(), hash.length());
 
@@ -383,10 +402,18 @@ namespace pd2hook
 
 	int luaF_filehash(lua_State* L)
 	{
-		int n = lua_gettop(L);
 		size_t l = 0;
-		const char * fileName = lua_tolstring(L, 1, &l);
-		std::string hash = Util::GetFileHash(fileName);
+		const char * filename = lua_tolstring(L, 1, &l);
+
+		if (!lua_isnoneornil(L, 2)) {
+			lua_pushvalue(L, 2);
+			int callback = luaL_ref(L, LUA_REGISTRYINDEX);
+			Util::RunAsyncHash(L, callback, filename, Util::GetFileHash, call_hash_result);
+			lua_pushboolean(L, true);
+			return 1;
+		}
+
+		std::string hash = Util::GetFileHash(filename);
 		lua_pushlstring(L, hash.c_str(), hash.length());
 		return 1;
 	}

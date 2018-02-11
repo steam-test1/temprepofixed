@@ -83,7 +83,7 @@ struct EventQueueRuntimeRegisterer
 
 // Not strictly necessary, but is a nice chance to make sure the static instance is initialised before there's a chance for multithreaded calls
 #define PD2HOOK_REGISTER_EVENTQUEUE(DataT, Name) \
-	namespace { EventQueueRuntimeRegisterer<DataT> PD2HOOK_CONCAT(staticRegisterer, __COUNTER__); EventQueue<DataT>& Get##Name##Queue() { return EventQueue<DataT>::GetSingleton(); } }
+	namespace { ::pd2hook::EventQueueRuntimeRegisterer<DataT> PD2HOOK_CONCAT(staticRegisterer, __COUNTER__); ::pd2hook::EventQueue<DataT>& Get##Name##Queue() { return ::pd2hook::EventQueue<DataT>::GetSingleton(); } }
 #define PD2HOOK_REGISTER_EVENTQUEUE_EASY(DataT) PD2HOOK_REGISTER_EVENTQUEUE(DataT, DataT)
 
 #ifdef _WIN32

@@ -10,6 +10,8 @@
 #include <windows.h>
 #endif
 
+#include "lua.h"
+
 namespace pd2hook
 {
 
@@ -34,6 +36,11 @@ namespace Util {
     std::string GetDirectoryHash(std::string directory);
 	std::string GetFileHash(std::string filename);
 	bool MoveDirectory(const std::string & path, const std::string & destination);
+
+	// See hashing.cpp
+	typedef std::string(*DirectoryHashFunction)(std::string);
+	typedef void(*HashResultReceiver)(lua_State* L, int ref, std::string filename, std::string result);
+	void RunAsyncHash(lua_State *L, int ref, std::string filename, DirectoryHashFunction hasher, HashResultReceiver callback);
 
 	class Exception : public std::exception
 	{
