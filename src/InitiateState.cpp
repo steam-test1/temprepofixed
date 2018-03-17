@@ -79,40 +79,9 @@ namespace pd2hook
 		}
 	}
 
-	void lua_newcall(lua_State* L, int args, int returns)
-	{
-		// https://stackoverflow.com/questions/30021904/lua-set-default-error-handler/30022216#30022216
-		lua_getglobal(L, "debug");
-		lua_getfield(L, -1, "traceback");
-		lua_remove(L, -2);
-		// Do not index from the top (i.e. use a negative index) as this has the potential to mess up if the callee function returns
-		// values /and/ lua_pcall() is set up with a > 0 nresults argument
-		int errorhandler = lua_gettop(L) - args - 1;
-		lua_insert(L, errorhandler);
-
-		int result = lua_pcall(L, args, returns, errorhandler);
-		if (result != 0)
-		{
-			size_t len;
-			const char* message = lua_tolstring(L, -1, &len);
-			PD2HOOK_LOG_ERROR(message);
-			NotifyErrorOverlay(L, message);
-			// This call pops the error message off the stack
-			lua_pop(L, 1);
-			// No, don't touch this variable anymore
-			message = nullptr;
-		}
-		// This call removes the error handler from the stack. Do not use lua_pop() as the callee function's return values may be
-		// present, which would pop one of those instead and leave the error handler on the stack
-		lua_remove(L, errorhandler);
-	}
-
-	/*
-	FuncDetour* luaCallDetour = nullptr;
-
 	int luaF_ispcallforced(lua_State* L)
 	{
-		lua_pushboolean(L, luaCallDetour ? true : false);
+		lua_pushboolean(L, blt::platform::lua::GetForcePCalls());
 		return 1;
 	}
 
@@ -125,28 +94,9 @@ namespace pd2hook
 			return 0;
 		}
 
-		if (lua_toboolean(L, 1))
-		{
-			if (!luaCallDetour)
-			{
-				luaCallDetour = new FuncDetour((void**)&lua_call, lua_newcall);
-				PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
-			}
-			//		else Logging::Log("blt.forcepcalls(): Protected calls are already being forced, ignoring request", Logging::LOGGING_WARN);
-		}
-		else
-		{
-			if (luaCallDetour)
-			{
-				delete luaCallDetour;
-				luaCallDetour = nullptr;
-				PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
-			}
-			//		else Logging::Log("blt.forcepcalls(): Protected calls are not currently being forced, ignoring request", Logging::LOGGING_WARN);
-		}
+		blt::platform::lua::SetForcePCalls(lua_toboolean(L, 1));
 		return 0;
 	}
-	*/
 
 	bool vrMode = false;
 
@@ -669,6 +619,32 @@ using namespace pd2hook;
 namespace blt {
 	namespace lua_functions {
 
+		void perform_lua_pcall(lua_State* L, int args, int returns) {
+			// https://stackoverflow.com/questions/30021904/lua-set-default-error-handler/30022216#30022216
+			lua_getglobal(L, "debug");
+			lua_getfield(L, -1, "traceback");
+			lua_remove(L, -2);
+			// Do not index from the top (i.e. use a negative index) as this has the potential to mess up if the callee function returns
+			// values /and/ lua_pcall() is set up with a > 0 nresults argument
+			int errorhandler = lua_gettop(L) - args - 1;
+			lua_insert(L, errorhandler);
+
+			int result = lua_pcall(L, args, returns, errorhandler);
+			if (result != 0) {
+				size_t len;
+				const char* message = lua_tolstring(L, -1, &len);
+				PD2HOOK_LOG_ERROR(message);
+				NotifyErrorOverlay(L, message);
+				// This call pops the error message off the stack
+				lua_pop(L, 1);
+				// No, don't touch this variable anymore
+				message = nullptr;
+			}
+			// This call removes the error handler from the stack. Do not use lua_pop() as the callee function's return values may be
+			// present, which would pop one of those instead and leave the error handler on the stack
+			lua_remove(L, errorhandler);
+		}
+
 		bool setup_check_done = false;
 
 		// Random dude who wrote what's his face?
@@ -728,8 +704,8 @@ namespace blt {
 
 			// Keeping everything in lowercase since IspcallForced / IsPCallForced and Forcepcalls / ForcePCalls look rather weird anyway
 			luaL_Reg bltLib[] = {
-				/*{ "ispcallforced", luaF_ispcallforced }, // TODO reenable
-				{ "forcepcalls", luaF_forcepcalls },*/
+				{ "ispcallforced", luaF_ispcallforced },
+				{ "forcepcalls", luaF_forcepcalls },
 				{ "parsexml", luaF_parsexml },
 				{ "structid", luaF_structid },
 				{ "ignoretweak", luaF_ignoretweak },

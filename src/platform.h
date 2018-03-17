@@ -28,6 +28,11 @@ namespace blt {
 		void InitPlatform();
 		void ClosePlatform();
 
+		namespace lua {
+			bool GetForcePCalls();
+			void SetForcePCalls(bool);
+		};
+
 #ifdef _WIN32
 		namespace win32 {
 			void OpenConsole();

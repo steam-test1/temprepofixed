@@ -182,3 +182,24 @@ void blt::platform::win32::OpenConsole() {
 		console = new CConsole();
 	}
 }
+
+FuncDetour* luaCallDetour = nullptr;
+
+bool blt::platform::lua::GetForcePCalls() {
+	return luaCallDetour != NULL;
+}
+
+void blt::platform::lua::SetForcePCalls(bool state) {
+	// Don't change if already set up
+	if (state == GetForcePCalls()) return;
+
+	if (state) {
+		luaCallDetour = new FuncDetour((void**)&lua_call, blt::lua_functions::perform_lua_pcall);
+		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
+	}
+	else {
+		delete luaCallDetour;
+		luaCallDetour = NULL;
+		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
+	}
+}
