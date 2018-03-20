@@ -26,7 +26,7 @@ add_definitions(-DENABLE_XAUDIO)
 # these instructions search the directory tree when cmake is
 # invoked and put all files that match the pattern in the variables
 # `sources` and `data`
-file(GLOB_RECURSE sources		src/*.cpp src/*.h)
+file(GLOB_RECURSE sources		src/*.cpp src/*.c src/*.h)
 file(GLOB_RECURSE win32_sources		platform_src/*.cpp platform_src/*.h)
 file(GLOB_RECURSE gnu_sources		platforms/gnu/src/*.cpp platforms/gnu/include/*.hh)
 # you can use set(sources src/main.cpp) etc if you don't want to

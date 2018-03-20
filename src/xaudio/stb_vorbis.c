@@ -4630,9 +4630,14 @@ stb_vorbis * stb_vorbis_open_file(FILE *file, int close_on_free, int *error, con
 
 stb_vorbis * stb_vorbis_open_filename(const char *filename, int *error, const stb_vorbis_alloc *alloc)
 {
+#ifdef _WIN32
    FILE *f;
    int err = fopen_s(&f, filename, "rb");
    if (!err) 
+#else
+   FILE *f = fopen(filename, "rb");
+   if (f)
+#endif
       return stb_vorbis_open_file(f, TRUE, error, alloc);
    if (error) *error = VORBIS_file_open_failure;
    return NULL;
