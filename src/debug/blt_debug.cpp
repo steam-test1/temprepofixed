@@ -1,3 +1,6 @@
+// This defines the ENABLE_DEBUG macro when appropriate
+#include "blt_debug.h"
+
 #ifdef ENABLE_DEBUG
 
 #include <winsock2.h>
@@ -7,7 +10,6 @@
 #include <fstream>
 #include <map>
 
-#include "blt_debug.h"
 #include "lua.h"
 #include "util/util.h"
 
