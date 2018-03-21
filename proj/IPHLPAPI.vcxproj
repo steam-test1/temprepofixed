@@ -142,7 +142,7 @@
     <ClCompile Include="..\platform_src\loader\iphp.cpp" />
     <ClCompile Include="..\platform_src\platform.cpp" />
     <ClCompile Include="..\platform_src\signatures\signatures.cpp" />
-    <ClCompile Include="..\platform_src\util\files.cpp" />
+    <ClCompile Include="..\platform_src\util\native_files.cpp" />
     <ClCompile Include="..\platform_src\vr\vr.cpp" />
     <ClCompile Include="..\src\debug\blt_debug.cpp" />
     <ClCompile Include="..\src\http\blt_downloader.cpp" />
