@@ -57,3 +57,5 @@ proj/*.vcxproj.user
 # CMake build directory
 /build/
 
+# Swap files
+.*.swp
