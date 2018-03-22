@@ -345,6 +345,12 @@ namespace pd2hook
 		size_t length = 0;
 		const char* filename = lua_tolstring(L, 1, &length);
 
+		Util::FileType type = Util::GetFileType(filename);
+		if (Util::GetFileType(filename) != Util::FileType_Directory) {
+			luaL_error(L, "Invalid directory %s: type=%d (none=%d,file=%d,dir=%d)", filename, type,
+				Util::FileType_None, Util::FileType_File, Util::FileType_Directory);
+		}
+
 		if (!lua_isnoneornil(L, 2)) {
 			lua_pushvalue(L, 2);
 			int callback = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -363,6 +369,12 @@ namespace pd2hook
 	{
 		size_t l = 0;
 		const char * filename = lua_tolstring(L, 1, &l);
+
+		Util::FileType type = Util::GetFileType(filename);
+		if (Util::GetFileType(filename) != Util::FileType_File) {
+			luaL_error(L, "Invalid file %s: type=%d (file=%d,dir=%d,none=%d)", filename, type,
+				Util::FileType_File, Util::FileType_Directory, Util::FileType_None);
+		}
 
 		if (!lua_isnoneornil(L, 2)) {
 			lua_pushvalue(L, 2);
