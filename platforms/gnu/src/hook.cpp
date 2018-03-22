@@ -91,14 +91,9 @@ namespace blt {
     void*
     dt_dsl_lua_newstate(dsl::LuaInterface* _this, bool b1, bool b2, dsl::LuaInterface::Allocation allocator)
     {
-        log::log("removing hook: " + std::to_string(*(uint64_t*) dsl_lua_newstate), log::LOG_INFO);
         hook_remove(luaNewStateDetour);
 
-        log::log("after hook: " + std::to_string(*(uint64_t*) dsl_lua_newstate), log::LOG_INFO);
-
         void* returnVal = _this->newstate(b1, b2, allocator);
-
-        log::log("Got state", log::LOG_INFO);
 
         lua_state* state = _this->state;
 
@@ -171,12 +166,10 @@ namespace blt {
          */
 
         {
-        log::log("a: " + std::to_string(*(uint64_t*) dsl_lua_newstate), log::LOG_INFO);
             gameUpdateDetour.Install    ((void*) do_game_update,                (void*) dt_Application_update, HookOption64BitOffset);
             luaNewStateDetour.Install   ((void*) dsl_lua_newstate,              (void*) dt_dsl_lua_newstate, HookOption64BitOffset);
-            //luaCloseDetour.Install      ((void*) &lua_close,                    (void*) dt_lua_close, HookOption64BitOffset);
-            //luaCallDetour.Install       ((void*) &lua_call,                     (void*) dt_lua_call, HookOption64BitOffset);
-        log::log("b: " + std::to_string(*(uint64_t*) dsl_lua_newstate), log::LOG_INFO);
+            luaCloseDetour.Install      ((void*) &lua_close,                    (void*) dt_lua_close, HookOption64BitOffset);
+            luaCallDetour.Install       ((void*) &lua_call,                     (void*) dt_lua_call, HookOption64BitOffset);
         }
 
         init_asset_hook(dlHandle);
