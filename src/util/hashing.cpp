@@ -1,4 +1,4 @@
-#pragma once
+#include <thread>
 
 #include "util.h"
 #include "threading/queue.h"
