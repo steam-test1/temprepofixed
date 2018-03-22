@@ -56,6 +56,10 @@ namespace blt {
     dt_Application_update(void* parentThis)
     {
         hook_remove(gameUpdateDetour);
+
+        lua_state* L = **(lua_state* **)(parentThis+696);
+        blt::lua_functions::update(L);
+
         return do_game_update(parentThis);
     }
 
@@ -164,7 +168,7 @@ namespace blt {
 
         {
         log::log("a: " + std::to_string(*(uint64_t*) dsl_lua_newstate), log::LOG_INFO);
-            //gameUpdateDetour.Install    ((void*) do_game_update,                (void*) dt_Application_update, HookOption64BitOffset);
+            gameUpdateDetour.Install    ((void*) do_game_update,                (void*) dt_Application_update, HookOption64BitOffset);
             luaNewStateDetour.Install   ((void*) dsl_lua_newstate,              (void*) dt_dsl_lua_newstate, HookOption64BitOffset);
             //luaCloseDetour.Install      ((void*) &lua_close,                    (void*) dt_lua_close, HookOption64BitOffset);
             //luaCallDetour.Install       ((void*) &lua_call,                     (void*) dt_lua_call, HookOption64BitOffset);
