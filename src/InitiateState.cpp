@@ -79,6 +79,14 @@ namespace pd2hook
 		}
 	}
 
+	void handled_pcall(lua_State *L, int nargs, int nresults) {
+		int err = lua_pcall(L, nargs, nresults, 0);
+		if (err == LUA_ERRRUN) {
+			size_t len;
+			PD2HOOK_LOG_LOG(lua_tolstring(L, -1, &len));
+		}
+	}
+
 	int luaF_ispcallforced(lua_State* L)
 	{
 		lua_pushboolean(L, blt::platform::lua::GetForcePCalls());
@@ -304,7 +312,7 @@ namespace pd2hook
 		lua_rawgeti(ourData->L, LUA_REGISTRYINDEX, ourData->funcRef);
 		lua_pushlstring(ourData->L, urlcontents.c_str(), urlcontents.length());
 		lua_pushinteger(ourData->L, ourData->requestIdentifier);
-		lua_pcall(ourData->L, 2, 0, 0);
+		handled_pcall(ourData->L, 2, 0);
 		luaL_unref(ourData->L, LUA_REGISTRYINDEX, ourData->funcRef);
 		luaL_unref(ourData->L, LUA_REGISTRYINDEX, ourData->progressRef);
 		delete ourData;
@@ -335,7 +343,7 @@ namespace pd2hook
 		lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
 		lua_pushlstring(L, result.c_str(), result.size());
 		lua_pushlstring(L, filename.c_str(), filename.size());
-		lua_pcall(L, 2, 0, 0);
+		handled_pcall(L, 2, 0);
 
 		luaL_unref(L, LUA_REGISTRYINDEX, ref);
 	}
