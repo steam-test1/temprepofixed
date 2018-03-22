@@ -22,6 +22,7 @@ extern "C" {
 #include <blt/error.hh>
 #include <blt/log.hh>
 #include <blt/assets.hh>
+#include <blt/lapi_compat.hh>
 
 #include <InitState.h>
 #include <lua_functions.h>
@@ -105,6 +106,9 @@ namespace blt {
         {
             return returnVal;
         }
+
+        // First, add our own compatibility stuff in
+        compat::add_members(state);
 
         blt::lua_functions::initiate_lua(state);
 
