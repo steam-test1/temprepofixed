@@ -60,13 +60,21 @@ namespace pd2hook
 			std::vector<std::string> files = pd2hook::Util::GetDirectoryContents(directory);
 			for (auto it = files.begin(); it < files.end(); it++) {
 				std::string fpath = directory + *it;
+
+				// Put all the paths to lower case
+				// Only do this on Windows
+				// TODO some better way to mark if we're case sensitive or not
+#ifdef WIN32
 				std::transform(fpath.begin(), fpath.end(), fpath.begin(), ::tolower);
+#endif
+
+				// Add the path on the list
 				paths.push_back(fpath);
 			}
 			for (auto it = dirs.begin(); it < dirs.end(); it++) {
 				if (*it == "." || *it == "..") continue;
 				if (ignore_versioning && (*it == ".hg" || *it == ".git")) continue;
-				RecurseDirectoryPaths(paths, directory + *it + "\\", false);
+				RecurseDirectoryPaths(paths, directory + *it + "/", false);
 			}
 		}
 
