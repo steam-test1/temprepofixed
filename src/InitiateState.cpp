@@ -179,6 +179,15 @@ namespace pd2hook
 		return 1;
 	}
 
+	int luaF_fileExists(lua_State* L)
+	{
+		size_t len;
+		const char* dirc = lua_tolstring(L, 1, &len);
+		bool doesExist = Util::GetFileType(dirc) == Util::FileType_File;
+		lua_pushboolean(L, doesExist);
+		return 1;
+	}
+
 	int luaF_unzipfile(lua_State* L)
 	{
 		size_t len;
@@ -695,6 +704,7 @@ namespace blt {
 			{ "RemoveDirectory", luaF_removeDirectory },
 			{ "DirectoryExists", luaF_directoryExists },
 			{ "DirectoryHash", luaF_directoryhash },
+			{ "FileExists", luaF_fileExists },
 			{ "FileHash", luaF_filehash },
 			{ "MoveDirectory", luaF_moveDirectory },
 			{ "CreateDirectory", luaF_createDirectory },
