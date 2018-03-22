@@ -1,4 +1,4 @@
-#ifndef INJECTABLE_BLT
+#ifdef BLT_USE_IPHLPAPI
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>

@@ -5,6 +5,7 @@
 proj/Release/*
 proj/Debug/*
 proj/InjectorDLL/*
+proj/IPHLPAPI Override/*
 
 # VS user specific files
 proj/IPHLPAPI.sdf

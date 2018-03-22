@@ -9,6 +9,10 @@
       <Configuration>InjectorDLL</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="IPHLPAPI Override|Win32">
+      <Configuration>IPHLPAPI Override</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -18,6 +22,7 @@
     <ProjectGuid>{74B4EB55-E7B5-428A-9FAF-BE86058A56A6}</ProjectGuid>
     <RootNamespace>IPHLPAPI</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectName>SuperBLT</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -27,6 +32,13 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='IPHLPAPI Override|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
@@ -49,6 +61,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='IPHLPAPI Override|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='InjectorDLL|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -56,6 +71,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>..\lib-win32\incl;..\lib\mxml;..\lib\wren\src\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\lib-win32;$(LibraryPath)</LibraryPath>
+    <TargetName>WSOCK32</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='IPHLPAPI Override|Win32'">
+    <IncludePath>..\lib-win32\incl;..\lib\mxml;..\lib\wren\src\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\lib-win32;$(LibraryPath)</LibraryPath>
+    <TargetName>IPHLPAPI</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='InjectorDLL|Win32'">
     <IncludePath>..\lib-win32\incl;..\lib\mxml;..\lib\wren\src\include;$(IncludePath)</IncludePath>
@@ -64,6 +85,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>..\lib-win32\incl;..\lib\mxml;..\lib\wren\src\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\lib-win32;$(LibraryPath)</LibraryPath>
+    <TargetName>WSOCK32</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -72,17 +94,17 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>CURL_STATICLIB;AL_LIBTYPE_STATIC;ENABLE_XAUDIO;CHECK_DUPLICATE_SIGNATURES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CURL_STATICLIB;AL_LIBTYPE_STATIC;ENABLE_XAUDIO;CHECK_DUPLICATE_SIGNATURES;BLT_USE_WSOCK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>iphp.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>wsock.def</ModuleDefinitionFile>
       <AdditionalDependencies>libcrypto.lib;libcurl.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;wren_static.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\lib-win32\mxml\$(Configuration)\;..\lib-win32\wren\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Message>Copy DLL to PD2</Message>
-      <Command>copy "C:\Users\ZNix\source\repos\SuperBLT\proj\$(Configuration)\IPHLPAPI.dll" "C:\Users\ZNix\Static\steamcmd\steamapps\common\PAYDAY 2\IPHLPAPI.dll"</Command>
+      <Command>copy "C:\Users\ZNix\source\repos\SuperBLT\proj\$(Configuration)\$(TargetName).dll" "C:\Users\ZNix\Static\steamcmd\steamapps\common\PAYDAY 2\$(TargetName).dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -93,7 +115,32 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>CURL_STATICLIB;AL_LIBTYPE_STATIC;ENABLE_XAUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CURL_STATICLIB;AL_LIBTYPE_STATIC;ENABLE_XAUDIO;BLT_USE_WSOCK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>wsock.def</ModuleDefinitionFile>
+      <AdditionalDependencies>libcrypto.lib;libcurl.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;wren_static.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\lib-win32\mxml\$(Configuration)\;..\lib-win32\wren\$(Configuration)\</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "C:\Users\ZNix\source\repos\SuperBLT\proj\$(Configuration)\$(TargetName).dll" "C:\Users\ZNix\Static\steamcmd\steamapps\common\PAYDAY 2\$(TargetName).dll"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy DLL to PD2</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='IPHLPAPI Override|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>CURL_STATICLIB;AL_LIBTYPE_STATIC;ENABLE_XAUDIO;BLT_USE_IPHLPAPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -101,7 +148,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>iphp.def</ModuleDefinitionFile>
       <AdditionalDependencies>libcrypto.lib;libcurl.lib;detours.lib;zlib.lib;ws2_32.lib;crypt32.lib;OpenAL32.lib;winmm.lib;wren_static.lib;mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\lib-win32\mxml\$(Configuration)\;..\lib-win32\wren\$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib-win32\mxml\Release\;..\lib-win32\wren\Release\</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "C:\Users\ZNix\source\repos\SuperBLT\proj\$(Configuration)\IPHLPAPI.dll" "C:\Users\ZNix\Static\steamcmd\steamapps\common\PAYDAY 2\IPHLPAPI.dll"</Command>
@@ -140,6 +187,7 @@
     <ClCompile Include="..\platform_src\console\console.cpp" />
     <ClCompile Include="..\platform_src\loader\injectloader.cpp" />
     <ClCompile Include="..\platform_src\loader\iphp.cpp" />
+    <ClCompile Include="..\platform_src\loader\wsock.cpp" />
     <ClCompile Include="..\platform_src\platform.cpp" />
     <ClCompile Include="..\platform_src\signatures\signatures.cpp" />
     <ClCompile Include="..\platform_src\util\native_files.cpp" />
