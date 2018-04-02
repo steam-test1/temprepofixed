@@ -42,15 +42,27 @@ include_directories(mxml lib/configs/mxml)
 target_compile_options(mxml PRIVATE -std=gnu99 -Wall -fPIC)
 target_include_directories(mxml PUBLIC lib/mxml)
 
-file(GLOB_RECURSE wren_sources		lib/wren/src/include/wren.h lib/wren/src/vm/*.c lib/wren/src/vm/*.h lib/wren/src/optional/*.c lib/wren/src/optional/*.h)
+file(GLOB_RECURSE wren_sources
+	lib/wren/src/include/wren.h # Public source file
+		lib/wren/src/vm/*.c lib/wren/src/vm/*.h # Core VM files
+		lib/wren/src/optional/*.c lib/wren/src/optional/*.h # Optional components (Meta and Random)
+)
 add_library(wren STATIC ${wren_sources})
 include_directories(wren lib/wren/src/optional lib/wren/src/vm)
-target_compile_options(wren PRIVATE -std=gnu99 -Wall -fPIC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
+	target_compile_options(wren PRIVATE -std=gnu99 -Wall -fPIC)
+else()
+	target_compile_options(wren PRIVATE -D_CRT_SECURE_NO_WARNINGS)
+endif()
 target_include_directories(wren PUBLIC lib/wren/src/include)
 
 add_library(subhook STATIC lib/subhook/subhook.c)
 include_directories(subhook lib/subhook)
-target_compile_options(subhook PRIVATE -std=gnu99 -Wall -fPIC)
+if(UNIX)
+	target_compile_options(subhook PRIVATE -std=gnu99 -Wall -fPIC)
+elseif(WIN32)
+	target_compile_options(subhook PRIVATE -DSUBHOOK_EXPORT=;)
+endif()
 target_include_directories(subhook PUBLIC lib/subhook)
 
 if(UNIX)
