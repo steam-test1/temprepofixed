@@ -5,17 +5,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux") # Add other systems, if they get PD2 suppo
 	set(UNIX true)
 endif()
 
-# TODO set depending on platform
-if(UNIX)
-	set(library_name superblt_loader)
-elseif(WIN32)
-	set(library_name IPHLPAPI)
-else()
-	# TODO raise error
-	message(FATAL_ERROR "Unspported OS; if unix based, please add it in CMakeLists.txt")
-endif()
-
-
 # Enable XAudio
 add_definitions(-DENABLE_XAUDIO)
 
@@ -28,7 +17,12 @@ add_definitions(-DENABLE_XAUDIO)
 # `sources` and `data`
 file(GLOB_RECURSE sources		src/*.cpp src/*.c src/*.h)
 file(GLOB_RECURSE win32_sources		platform_src/*.cpp platform_src/*.h)
+set(		  win32_loader_path	platform_src/loader)
+file(GLOB_RECURSE win32_loaders		${win32_loader_path}/*.cpp)
+list(REMOVE_ITEM  win32_sources		${win32_loaders})
 file(GLOB_RECURSE gnu_sources		platforms/gnu/src/*.cpp platforms/gnu/include/*.hh)
+set(		  gnu_loader_file	${CMAKE_CURRENT_SOURCE_DIR}/platforms/gnu/src/blt_main.cpp)
+list(REMOVE_ITEM  gnu_sources		${gnu_loader_file})
 # you can use set(sources src/main.cpp) etc if you don't want to
 # use globing to find files automatically
 
@@ -69,41 +63,41 @@ elseif(WIN32)
 endif()
 target_include_directories(subhook PUBLIC lib/subhook)
 
-if(UNIX)
-	# As the main file has a constructor, make sure it's linked last so it doesn't run before any static constructors
-	set(loader_file ${CMAKE_CURRENT_SOURCE_DIR}/platforms/gnu/src/blt_main.cpp)
-	list(REMOVE_ITEM gnu_sources ${loader_file})
+###############################################################################
+## Base (non-platform-specific) part of SuperBLT ##############################
+###############################################################################
 
-	add_library(${library_name} SHARED ${sources} ${gnu_sources} ${loader_file})
+if(UNIX)
+	add_library(SuperBLT STATIC ${sources} ${gnu_sources})
 	include_directories (platforms/gnu/include)
 
 	# Use modern C++, and show all warnings
-	target_compile_options(${library_name} PUBLIC -std=c++1y -Wall)
+	target_compile_options(SuperBLT PUBLIC -std=c++1y -Wall)
 
 	# Enable this to see missing references:
 	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 elseif(WIN32)
-	add_library(${library_name} SHARED ${sources} ${win32_sources})
-	target_compile_options(${library_name} PRIVATE -DAL_LIBTYPE_STATIC -DCURL_STATICLIB)
+	add_library(SuperBLT STATIC ${sources} ${win32_sources})
+	target_compile_options(SuperBLT PRIVATE -DAL_LIBTYPE_STATIC -DCURL_STATICLIB)
 
 	# Link against libraries
-	target_link_libraries(${library_name} winmm.lib)
-	target_link_libraries(${library_name} ws2_32.lib)
-	target_link_libraries(${library_name} crypt32.lib)
+	target_link_libraries(SuperBLT winmm.lib)
+	target_link_libraries(SuperBLT ws2_32.lib)
+	target_link_libraries(SuperBLT crypt32.lib)
 else()
 	# TODO raise error
 endif()
 
-# Set up the root include directory for the main file
-target_include_directories(${library_name} PUBLIC src)
+# Allow both SuperBLT and the loaders access to the headers
+target_include_directories(SuperBLT PUBLIC src)
 
 ###############################################################################
 ## dependencies ###############################################################
 ###############################################################################
 
-target_link_libraries(${library_name} mxml)
-target_link_libraries(${library_name} wren)
-target_link_libraries(${library_name} subhook)
+target_link_libraries(SuperBLT mxml)
+target_link_libraries(SuperBLT wren)
+target_link_libraries(SuperBLT subhook)
 
 if(WIN32)
 	set(ZLIB_ROOT $ENV{ZLIB_ROOT} $ENV{ZLIB_ROOT}/Release)
@@ -120,22 +114,47 @@ endif()
 
 find_package(ZLIB REQUIRED)
 include_directories (${ZLIB_INCLUDE_DIRS})
-target_link_libraries(${library_name} ${ZLIB_LIBRARIES})
+target_link_libraries(SuperBLT ${ZLIB_LIBRARIES})
 
 find_package (CURL REQUIRED)
 include_directories (${CURL_INCLUDE_DIRS})
-target_link_libraries(${library_name} ${CURL_LIBRARY})
+target_link_libraries(SuperBLT ${CURL_LIBRARY})
 
 find_package (OpenSSL REQUIRED)
 include_directories (${OPENSSL_INCLUDE_DIR})
-target_link_libraries(${library_name} ${OPENSSL_LIBRARIES})
+target_link_libraries(SuperBLT ${OPENSSL_LIBRARIES})
 
 find_package (OpenAL REQUIRED)
 include_directories (${OPENAL_INCLUDE_DIR})
-target_link_libraries(${library_name} ${OPENAL_LIBRARY})
+target_link_libraries(SuperBLT ${OPENAL_LIBRARY})
 
 # Detours for Windows - subhook is used on UNIX
 if(WIN32)
 	include_directories ("lib-win32/incl")
-	target_link_libraries(${library_name} "${CMAKE_SOURCE_DIR}/lib-win32/detours.lib")
+	target_link_libraries(SuperBLT "${CMAKE_SOURCE_DIR}/lib-win32/detours.lib")
+endif()
+
+###############################################################################
+## loader binary (this generates a seperate target for both Windows loaders) ##
+###############################################################################
+
+# Define the macro
+macro(Add_Loader library_name)
+	add_library(${library_name} SHARED ${ARGN})
+	target_link_libraries(${library_name} SuperBLT)
+	if(UNIX)
+		# Use modern C++, and show all warnings
+		target_compile_options(${library_name} PUBLIC -std=c++1y -Wall)
+	endif()
+endmacro()
+
+if(UNIX)
+	Add_Loader("superblt_loader" ${gnu_loader_file})
+elseif(WIN32)
+	Add_Loader("IPHLPAPI" ${win32_loader_path}/iphp.cpp ${win32_loader_path}/iphp.def)
+	Add_Loader("WSOCK32" ${win32_loader_path}/wsock.cpp ${win32_loader_path}/wsock.def)
+	target_compile_options(IPHLPAPI PRIVATE -DBLT_USE_IPHLPAPI)
+	target_compile_options(WSOCK32 PRIVATE -DBLT_USE_WSOCK)
+else()
+	message(FATAL_ERROR "Unspported OS; if unix based, please add it in CMakeLists.txt")
 endif()
