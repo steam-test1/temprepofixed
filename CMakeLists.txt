@@ -127,3 +127,8 @@ find_package (OpenAL REQUIRED)
 include_directories (${OPENAL_INCLUDE_DIR})
 target_link_libraries(${library_name} ${OPENAL_LIBRARY})
 
+# Detours for Windows - subhook is used on UNIX
+if(WIN32)
+	include_directories ("lib-win32/incl")
+	target_link_libraries(${library_name} "${CMAKE_SOURCE_DIR}/lib-win32/detours.lib")
+endif()
