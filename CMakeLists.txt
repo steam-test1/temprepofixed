@@ -39,7 +39,11 @@ file(GLOB_RECURSE gnu_sources		platforms/gnu/src/*.cpp platforms/gnu/include/*.h
 file(GLOB_RECURSE mxml_sources		lib/mxml/*.c lib/mxml/*.h)
 add_library(mxml STATIC ${mxml_sources})
 include_directories(mxml lib/configs/mxml)
-target_compile_options(mxml PRIVATE -std=gnu99 -Wall -fPIC)
+if(UNIX)
+	target_compile_options(mxml PRIVATE -std=gnu99 -Wall -fPIC)
+elseif(WIN32)
+	target_compile_options(mxml PRIVATE -D_CRT_SECURE_NO_WARNINGS)
+endif()
 target_include_directories(mxml PUBLIC lib/mxml)
 
 file(GLOB_RECURSE wren_sources
