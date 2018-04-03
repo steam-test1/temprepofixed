@@ -84,6 +84,12 @@ if(UNIX)
 	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 elseif(WIN32)
 	add_library(${library_name} SHARED ${sources} ${win32_sources})
+	target_compile_options(${library_name} PRIVATE -DAL_LIBTYPE_STATIC -DCURL_STATICLIB)
+
+	# Link against libraries
+	target_link_libraries(${library_name} winmm.lib)
+	target_link_libraries(${library_name} ws2_32.lib)
+	target_link_libraries(${library_name} crypt32.lib)
 else()
 	# TODO raise error
 endif()
