@@ -107,6 +107,7 @@ target_link_libraries(${library_name} subhook)
 
 if(WIN32)
 	set(ZLIB_ROOT $ENV{ZLIB_ROOT} $ENV{ZLIB_ROOT}/Release)
+	set(ZLIB_LIBRARY $ENV{ZLIB_ROOT}/Release/zlibstatic.lib) # Force the static version of ZLib
 	set(CURL_INCLUDE_DIR $ENV{CURL_INCLUDE_DIR})
 	set(CURL_LIBRARY $ENV{CURL_LIBRARY})
 	set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR})
