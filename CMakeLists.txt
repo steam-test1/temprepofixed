@@ -47,10 +47,10 @@ file(GLOB_RECURSE wren_sources
 )
 add_library(wren STATIC ${wren_sources})
 include_directories(wren lib/wren/src/optional lib/wren/src/vm)
-if(CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
-	target_compile_options(wren PRIVATE -std=gnu99 -Wall -fPIC)
-else()
+if(MSVC)
 	target_compile_options(wren PRIVATE -D_CRT_SECURE_NO_WARNINGS)
+else()
+	target_compile_options(wren PRIVATE -std=gnu99 -Wall -fPIC)
 endif()
 target_include_directories(wren PUBLIC lib/wren/src/include)
 
@@ -72,7 +72,7 @@ if(UNIX)
 	include_directories (platforms/gnu/include)
 
 	# Use modern C++, and show all warnings
-	target_compile_options(SuperBLT PUBLIC -std=c++1y -Wall)
+	target_compile_options(SuperBLT PUBLIC -std=c++1y -Wall -fPIC)
 
 	# Enable this to see missing references:
 	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
