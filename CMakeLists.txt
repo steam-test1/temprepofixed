@@ -103,6 +103,10 @@ if(WIN32)
 	set(ZLIB_ROOT $ENV{ZLIB_ROOT} $ENV{ZLIB_ROOT}/Release)
 	set(CURL_INCLUDE_DIR $ENV{CURL_INCLUDE_DIR})
 	set(CURL_LIBRARY $ENV{CURL_LIBRARY})
+	set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR}) # $ENV{ZLIB_ROOT}/Release)
+
+	# Use static libs on Windows
+	set(OPENSSL_USE_STATIC_LIBS true)
 endif()
 
 find_package(ZLIB REQUIRED)
@@ -113,11 +117,11 @@ find_package (CURL REQUIRED)
 include_directories (${CURL_INCLUDE_DIRS})
 target_link_libraries(${library_name} ${CURL_LIBRARIES})
 
-if(UNIX)
-	find_package (OpenSSL REQUIRED)
-	include_directories (${OPENSSL_INCLUDE_DIRS})
-	target_link_libraries(${library_name} ${OPENSSL_LIBRARIES})
+find_package (OpenSSL REQUIRED)
+include_directories (${OPENSSL_INCLUDE_DIR})
+target_link_libraries(${library_name} ${OPENSSL_LIBRARIES})
 
+if(UNIX)
 	find_package (OpenAL REQUIRED)
 	include_directories (${OPENAL_INCLUDE_DIRS})
 	target_link_libraries(${library_name} ${OPENAL_LIBRARIES})
