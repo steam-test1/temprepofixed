@@ -117,7 +117,7 @@ target_link_libraries(${library_name} ${ZLIB_LIBRARIES})
 
 find_package (CURL REQUIRED)
 include_directories (${CURL_INCLUDE_DIRS})
-target_link_libraries(${library_name} ${CURL_LIBRARIES})
+target_link_libraries(${library_name} ${CURL_LIBRARY})
 
 find_package (OpenSSL REQUIRED)
 include_directories (${OPENSSL_INCLUDE_DIR})
