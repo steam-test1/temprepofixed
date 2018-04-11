@@ -52,6 +52,7 @@ namespace blt {
     Hook     luaNewStateDetour;
     Hook     luaCallDetour;
     Hook     luaCloseDetour;
+    bool     forcepcalls = false;
 
     void*
     dt_Application_update(void* parentThis)
@@ -67,25 +68,12 @@ namespace blt {
     void
     dt_lua_call(lua_state* state, int argCount, int resultCount)
     {
-        //hook_remove(luaNewStateDetour);
+        hook_remove(luaCallDetour);
 
-        /*
-         * For lua_call, we want to give pcall a custom error handler.
-         * This gets run before the stack is unwound, so it can print out
-         * a stack trace.
-         */
-
-        const int target = 1; // Push our handler to the start of the stack
-
-        // Get the value onto the stack, as pcall can't accept indexes
-        lua_getref(state, error::check_callback(state));
-        lua_insert(state, target);
-
-        // Run the function, and any errors are handled for us.
-        lua_pcall(state, argCount, resultCount, target);
-
-        // Done with our error handler
-        lua_remove(state, target);
+        if(forcepcalls)
+            return blt::lua_functions::perform_lua_pcall(state, argCount, resultCount);
+        else
+            return lua_call(state, argCount, resultCount);
     }
 
     void*
@@ -137,6 +125,25 @@ namespace blt {
         void ClosePlatform() {}
 
         idstring *last_loaded_ext = NULL, *last_loaded_name = NULL;
+
+        namespace lua {
+            bool GetForcePCalls() {
+                return forcepcalls;
+            }
+
+            void SetForcePCalls(bool state) {
+                forcepcalls = state;
+
+                if (state) {
+                    luaCallDetour.Install((void*)lua_call, (void*) blt::lua_functions::perform_lua_pcall);
+                    //PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
+                }
+                else {
+                    luaCallDetour.Remove();
+                    //PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
+                }
+            }
+        }
     }
 
     void
