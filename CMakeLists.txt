@@ -23,6 +23,7 @@ list(REMOVE_ITEM  win32_sources		${win32_loaders})
 file(GLOB_RECURSE gnu_sources		platforms/gnu/src/*.cpp platforms/gnu/include/*.hh)
 set(		  gnu_loader_file	${CMAKE_CURRENT_SOURCE_DIR}/platforms/gnu/src/blt_main.cpp)
 list(REMOVE_ITEM  gnu_sources		${gnu_loader_file})
+set(		  gnu_link_script	${CMAKE_CURRENT_SOURCE_DIR}/platforms/gnu/link.ld)
 # you can use set(sources src/main.cpp) etc if you don't want to
 # use globing to find files automatically
 
@@ -145,6 +146,14 @@ macro(Add_Loader library_name)
 	if(UNIX)
 		# Use modern C++, and show all warnings
 		target_compile_options(${library_name} PUBLIC -std=c++1y -Wall)
+
+		# Use a custom link script, to ensure the correct initialization order
+		target_link_libraries(${library_name} "-Wl,-T,${gnu_link_script}") # Use the link script
+		set_target_properties(${library_name} PROPERTIES LINK_DEPENDS ${gnu_link_script}) # Relink if the script is edited
+
+		# Print the build script for debugging - comment out the custom link script and you can use this
+		# to retrieve the original script.
+		#target_link_libraries(${library_name} "-Wl,--verbose")
 	endif()
 endmacro()
 

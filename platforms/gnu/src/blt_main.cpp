@@ -16,7 +16,7 @@ using std::cerr;
 
 /*
  * Test for a GCC-compatible compiler, because we need 
- * the compiler to support the constructor attribute
+ * the compiler to support the section attribute
  */
 
 #if (!defined(__GNUC__))
@@ -33,7 +33,6 @@ using std::cerr;
  * unlike windows. This is problematic here since we need to get a linker handle
  * to the payday2_release process image, but can't necessarily do that.
  */
-__attribute__((constructor))
 static void
 blt_main ()
 {
@@ -53,5 +52,17 @@ blt_main ()
         dlclose(dlHandle);
     }
 }
+
+/*
+ * Put a function pointer to the main function in a special section.
+ *
+ * This is, by means of our custom link script, loaded last to ensure the static variables
+ * from all other parts of this project (including static libraries) are loaded first.
+ *
+ * I'd prefer not to use a custom link script, but I can't find any other way to get the main
+ * function run after the bulk of BLT (in it's own static library now, thanks to the new
+ * build system).
+ */
+void (*init_func)(void) __attribute__(( section(".init_superblt") )) = blt_main;
 
 /* vim: set ts=4 softtabstop=0 sw=4 expandtab: */
