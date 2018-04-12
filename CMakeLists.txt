@@ -142,13 +142,13 @@ endif()
 # Define the macro
 macro(Add_Loader library_name)
 	add_library(${library_name} SHARED ${ARGN})
-	target_link_libraries(${library_name} SuperBLT)
+	target_link_libraries(${library_name} LINK_PRIVATE SuperBLT)
 	if(UNIX)
 		# Use modern C++, and show all warnings
 		target_compile_options(${library_name} PUBLIC -std=c++1y -Wall)
 
 		# Use a custom link script, to ensure the correct initialization order
-		target_link_libraries(${library_name} "-Wl,-T,${gnu_link_script}") # Use the link script
+		target_link_libraries(${library_name} LINK_PRIVATE "-Wl,-T,${gnu_link_script}") # Use the link script
 		set_target_properties(${library_name} PROPERTIES LINK_DEPENDS ${gnu_link_script}) # Relink if the script is edited
 
 		# Print the build script for debugging - comment out the custom link script and you can use this
