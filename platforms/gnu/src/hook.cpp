@@ -59,7 +59,7 @@ namespace blt {
     {
         hook_remove(gameUpdateDetour);
 
-        lua_state* L = **(lua_state* **)(parentThis+696);
+        lua_state* L = **(lua_state* **)( (char*)parentThis + 696 );
         blt::lua_functions::update(L);
 
         return do_game_update(parentThis);

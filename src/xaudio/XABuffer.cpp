@@ -59,7 +59,6 @@ namespace pd2hook {
 
 				// Copy the file into our buffer
 				// TODO do this in the background
-				ALenum error;
 				alBufferData(buffers[i],
 					channels == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16,
 					data,

@@ -17,9 +17,9 @@
 using namespace std;
 
 #define WORLD_VEC_CUSTOMSCALE(scale, L, ix, iy, iz) \
-(lua_tonumber(L, ix) / scale), \
-(lua_tonumber(L, iy) / scale), \
-(lua_tonumber(L, iz) / scale)
+(float)(lua_tonumber(L, ix) / scale), \
+(float)(lua_tonumber(L, iy) / scale), \
+(float)(lua_tonumber(L, iz) / scale)
 #define WORLD_VEC(L, ix, iy, iz) WORLD_VEC_CUSTOMSCALE(xaudio::world_scale, L, ix, iy, iz)
 
 #define XAERR(str) luaL_error(L, "XAudio Error at %s:%d : %s", __FILE__, __LINE__, string(str).c_str()); throw "luaL_error returned."
@@ -72,6 +72,7 @@ namespace pd2hook {
 		class XAResource {
 		public:
 			XAResource(ALuint alhandle) : alhandle(alhandle) {}
+			virtual ~XAResource() {}
 			ALuint Handle() {
 				return alhandle;
 			}
@@ -112,7 +113,7 @@ namespace pd2hook {
 		class XABuffer : public xaudio::XAResource {
 		public:
 			XABuffer(ALuint handle, string filename, int sampleCount, int sampleRate)
-				: xaudio::XAResource::XAResource(handle), filename(filename), sampleCount(sampleCount), sampleRate(sampleRate) {}
+				: xaudio::XAResource::XAResource(handle), sampleCount(sampleCount), sampleRate(sampleRate), filename(filename) {}
 			double GetSampleCount() { return sampleCount; }
 			double GetSampleRate() { return sampleRate; }
 		protected:
