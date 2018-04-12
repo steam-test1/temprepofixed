@@ -28,6 +28,8 @@ extern "C" {
 #include <lua_functions.h>
 #include <util/util.h>
 
+#include <tweaker/xmltweaker.h> // TODO move into the standard interface API
+
 /**
  * Shorthand to reinstall a hook when a function exits, like a trampoline
  */
@@ -43,6 +45,7 @@ namespace blt {
 
     void* (*dsl_lua_newstate) (dsl::LuaInterface* /* this */, bool, bool, dsl::LuaInterface::Allocation);
     void* (*do_game_update)   (void* /* this */);
+    void* (*node_from_xml)   (void* /* this */, const char *, const uint64_t, void*);
 
     /*
      * Detour Impl
@@ -52,6 +55,7 @@ namespace blt {
     Hook     luaNewStateDetour;
     Hook     luaCallDetour;
     Hook     luaCloseDetour;
+    Hook     nodeFromXMLDetour;
     bool     forcepcalls = false;
 
     void*
@@ -120,6 +124,16 @@ namespace blt {
     // --------------------------
 #endif
 
+    void dt_node_from_xml(void *this_, const char *string, const uint64_t length, void *something)
+    {
+        hook_remove(nodeFromXMLDetour);
+
+        // TODO move into the standard interface API
+        char *newstr = (char*) pd2hook::tweaker::tweak_pd2_xml((char*) string, length);
+        node_from_xml(this_, newstr, length, something);
+        pd2hook::tweaker::free_tweaked_pd2_xml(newstr);
+    }
+
     namespace platform {
         void InitPlatform() {}
         void ClosePlatform() {}
@@ -164,7 +178,14 @@ namespace blt {
 
             // _ZN11Application6updateEv = Application::update()
             setcall(_ZN11Application6updateEv, do_game_update);
+
+            // _ZN3dsl8xmlparse13node_from_xmlERNS_4NodeEPKcRKm = dsl::xmlparse::node_from_xml(...)
+            setcall(_ZN3dsl8xmlparse13node_from_xmlERNS_4NodeEPKcRKm, node_from_xml);
         }
+
+        // Grab the IDstring things
+        platform::last_loaded_name = (idstring*) dlsym(dlHandle, "_ZN3dsl14LoadingTracker8_db_nameE");
+        platform::last_loaded_ext  = (idstring*) dlsym(dlHandle, "_ZN3dsl14LoadingTracker8_db_typeE");
 
         PD2HOOK_LOG_LOG("installing hooks");
 
@@ -177,6 +198,8 @@ namespace blt {
             luaNewStateDetour.Install   ((void*) dsl_lua_newstate,              (void*) dt_dsl_lua_newstate, HookOption64BitOffset);
             luaCloseDetour.Install      ((void*) &lua_close,                    (void*) dt_lua_close, HookOption64BitOffset);
             luaCallDetour.Install       ((void*) &lua_call,                     (void*) dt_lua_call, HookOption64BitOffset);
+
+            nodeFromXMLDetour.Install   ((void*) node_from_xml,                 (void*) dt_node_from_xml, HookOption64BitOffset);
         }
 
         init_asset_hook(dlHandle);
