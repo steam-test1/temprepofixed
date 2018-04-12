@@ -77,6 +77,13 @@ if(UNIX)
 
 	# Enable this to see missing references:
 	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
+
+	# LibCXX / Patches support
+	if (USE_LIBCXX)
+		message("Using Clang/LibC++")
+		add_definitions(-DBLT_USING_LIBCXX)
+		set(CMAKE_CXX_COMPILER clang++)
+	endif()
 elseif(WIN32)
 	add_library(SuperBLT STATIC ${sources} ${win32_sources})
 	target_compile_options(SuperBLT PRIVATE -DAL_LIBTYPE_STATIC -DCURL_STATICLIB)

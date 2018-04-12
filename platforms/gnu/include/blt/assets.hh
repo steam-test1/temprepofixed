@@ -1,9 +1,5 @@
 #pragma once
 
-#include <string>
-#include <map>
-#include <subhook.h>
-
 namespace blt {
     void init_asset_hook(void *dlHandle);
 };

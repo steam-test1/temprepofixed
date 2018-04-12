@@ -1,7 +1,13 @@
 
-#include <blt/assets.hh>
-
 #if defined(BLT_USING_LIBCXX)
+
+#include <lua.h>
+#include <subhook.h>
+
+#include <string>
+#include <map>
+
+#include <blt/assets.hh>
 
 #include <dlfcn.h>
 
@@ -10,7 +16,7 @@
 #include <dsl/DB.hh>
 #include <dsl/Transport.hh>
 
-#define hook_remove(hookName) SubHook::ScopedRemove _sh_remove_raii(&hookName)
+#define hook_remove(hookName) subhook::ScopedHookRemove _sh_remove_raii(&hookName)
 
 using namespace std;
 using namespace dsl;
@@ -68,7 +74,7 @@ func(2); \
 func(3); \
 func(4);
 
-    static SubHook dslDbAddMembers; // We need this to add the entries, as we need to do it after the DB table is set up
+    static subhook::Hook dslDbAddMembers; // We need this to add the entries, as we need to do it after the DB table is set up
 
     static void (*dsl_db_add_members)   (lua_state*);
     static void (*dsl_fss_open) (Archive *output, FileSystemStack **_this, std::string const*);
@@ -81,7 +87,7 @@ func(4);
 #define HOOK_VARS(id) \
     static try_open_t dsl_db_try_open_ ## id = NULL; \
     static do_resolve_t dsl_db_do_resolve_ ## id = NULL; \
-    static SubHook dslDbTryOpenDetour ## id;
+    static subhook::Hook dslDbTryOpenDetour ## id;
 
 EACH_HOOK(HOOK_VARS)
 
@@ -187,7 +193,10 @@ EACH_HOOK(HOOK_TRY_OPEN)
 #else
 
 // Stub implementation when not using LibC++
-void blt::init_asset_hook(void *dlHandle) {}
+namespace blt
+{
+    void init_asset_hook(void *dlHandle) {}
+}
 
 #endif
 
