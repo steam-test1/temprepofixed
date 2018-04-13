@@ -294,7 +294,14 @@ namespace pd2hook
 
 	struct lua_http_data
 	{
-		int funcRef;
+		int funcRef
+#ifdef __GNUC__
+			// Prevent crashes on GNU+Linux when compiled with Clang due to alignment issues surrounding SSE
+			// See https://github.com/blt4linux/blt4l/pull/90
+			__attribute__((aligned(16))) // Why, Clang, Why! Using misaligned floating point ops for ints!
+#endif
+			;
+
 		int progressRef;
 		int requestIdentifier;
 		lua_State* L;
