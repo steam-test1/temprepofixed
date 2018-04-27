@@ -36,6 +36,7 @@ namespace blt {
 #ifdef _WIN32
 		namespace win32 {
 			void OpenConsole();
+			void* get_lua_func(const char* name);
 		};
 #endif
 	};

@@ -261,3 +261,14 @@ void SignatureSearch::Search(){
 	}
 }
 
+void* SignatureSearch::GetFunctionByName(const char* name) {
+	if (!allSignatures) return NULL;
+
+	for (const auto& sig : *allSignatures) {
+		if (!strcmp(sig.funcname, name)) {
+			return *(void**)sig.address;
+		}
+	}
+
+	return NULL;
+}

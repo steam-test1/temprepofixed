@@ -16,6 +16,7 @@ class SignatureSearch {
 public:
 	SignatureSearch(const char* funcname, void* address, const char* signature, const char* mask, int offset);
 	static void Search();
+	static void* GetFunctionByName(const char* name);
 };
 
 #endif // __SIGNATURE_HEADER__
