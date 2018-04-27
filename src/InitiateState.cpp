@@ -12,10 +12,15 @@
 #include "debug/blt_debug.h"
 #include "xaudio/XAudio.h"
 #include "tweaker/xmltweaker.h"
+#include "plugins/plugins.h"
 
 #include <thread>
 #include <list>
 #include <fstream>
+
+using Plugin = blt::plugins::Plugin;
+
+std::list<Plugin*> plugins_list;
 
 // Code taken from LuaJIT 2.1.0-beta2
 namespace pd2hook
@@ -32,7 +37,7 @@ namespace pd2hook
 		activeStates.remove(L);
 	}
 
-	bool check_active_state(lua_State* L)
+	bool check_active_state(void* L)
 	{
 		std::list<lua_State*>::iterator it;
 		for (it = activeStates.begin(); it != activeStates.end(); it++)
@@ -613,6 +618,47 @@ namespace pd2hook
 		return 0;
 	}
 
+	int luaF_load_native(lua_State* L) {
+		std::string file(lua_tostring(L, 1));
+
+		// Major TODO before this is publicly released as stable:
+		// Add some kind of security system to avoid loading untrusted plugins
+		// (particularly those being used for the purpose of hiding a mod's
+		//   source code - doing so is against the GPLv3 license SuperBLT is
+		//   licensed under, but just in case)
+		// Also require an exported function confirming GPL compliance, to make
+		// plugin authors aware of the license - this could also provide a URL for
+		// obtaining the plugin source code.
+
+		for (const Plugin* plugin : plugins_list) {
+			// TODO some kind of UUID system to prevent issues with multiple mods having the same DLL
+			if (plugin->GetFile() == file) {
+				lua_pushstring(L, "Already loaded");
+				return 1;
+			}
+		}
+
+		PD2HOOK_LOG_LOG(std::string("Loading binary extension ") + file);
+
+		try {
+			Plugin *plugin = new Plugin(file);
+			plugins_list.push_back(plugin);
+
+			// Set up the already-running states
+			for (lua_State *&state : activeStates) {
+				plugin->AddToState(state);
+			}
+		}
+		catch (std::string err) {
+			luaL_error(L, err.c_str());
+		}
+		catch (const char* err) {
+			luaL_error(L, err);
+		}
+
+		return 0;
+	}
+
 	int luaF_blt_info(lua_State* L) {
 		lua_newtable(L);
 
@@ -759,6 +805,7 @@ namespace blt {
 				{ "parsexml", luaF_parsexml },
 				{ "structid", luaF_structid },
 				{ "ignoretweak", luaF_ignoretweak },
+				{ "load_native", luaF_load_native },
 				{ "blt_info", luaF_blt_info },
 				{ NULL, NULL }
 			};
@@ -774,6 +821,10 @@ namespace blt {
 	#ifdef ENABLE_XAUDIO
 			XAudio::Register(L);
 	#endif
+
+			for (Plugin *&plugin : plugins_list) {
+				plugin->AddToState(L);
+			}
 
 			int result;
 			PD2HOOK_LOG_LOG("Initiating Hook");
@@ -811,6 +862,10 @@ namespace blt {
 #ifdef ENABLE_DEBUG
 			DebugConnection::Update(L);
 #endif
+
+			for (Plugin *&plugin : plugins_list) {
+				plugin->Update(L);
+			}
 
 			updates++;
 		}
