@@ -613,6 +613,14 @@ namespace pd2hook
 		return 0;
 	}
 
+	int luaF_blt_info(lua_State* L) {
+		lua_newtable(L);
+
+		blt::platform::GetPlatformInformation(L);
+
+		return 1;
+	}
+
 	void load_vr_globals(lua_State *L)
 	{
 		luaL_Reg vrLib[] = {
@@ -751,6 +759,7 @@ namespace blt {
 				{ "parsexml", luaF_parsexml },
 				{ "structid", luaF_structid },
 				{ "ignoretweak", luaF_ignoretweak },
+				{ "blt_info", luaF_blt_info },
 				{ NULL, NULL }
 			};
 			luaL_openlib(L, "blt", bltLib, 0);

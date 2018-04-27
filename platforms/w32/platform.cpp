@@ -222,6 +222,14 @@ void blt::platform::ClosePlatform() {
 	if (console) delete console;
 }
 
+void blt::platform::GetPlatformInformation(lua_State * L) {
+	lua_pushstring(L, "mswindows");
+	lua_setfield(L, -2, "platform");
+
+	lua_pushstring(L, "arch");
+	lua_setfield(L, -2, "x86");
+}
+
 void blt::platform::win32::OpenConsole() {
 	if (!console) {
 		console = new CConsole();

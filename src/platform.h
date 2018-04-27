@@ -1,4 +1,5 @@
 #pragma once
+#include "lua.h"
 
 namespace blt {
 	#define idstring_none 0
@@ -27,6 +28,8 @@ namespace blt {
 
 		void InitPlatform();
 		void ClosePlatform();
+
+		void GetPlatformInformation(lua_State *L);
 
 		namespace lua {
 			bool GetForcePCalls();
