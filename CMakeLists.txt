@@ -16,8 +16,8 @@ add_definitions(-DENABLE_XAUDIO)
 # invoked and put all files that match the pattern in the variables
 # `sources` and `data`
 file(GLOB_RECURSE sources		src/*.cpp src/*.c src/*.h)
-file(GLOB_RECURSE win32_sources		platform_src/*.cpp platform_src/*.h)
-set(		  win32_loader_path	platform_src/loader)
+file(GLOB_RECURSE win32_sources		platforms/w32/*.cpp platforms/w32/*.h)
+set(		  win32_loader_path	platforms/w32/loader)
 file(GLOB_RECURSE win32_loaders		${win32_loader_path}/*.cpp)
 list(REMOVE_ITEM  win32_sources		${win32_loaders})
 file(GLOB_RECURSE gnu_sources		platforms/gnu/src/*.cpp platforms/gnu/include/*.hh)

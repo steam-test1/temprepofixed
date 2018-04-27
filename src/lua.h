@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #ifdef _WIN32
-#include "../platform_src/signatures/sigdef.h"
+#include "../platforms/w32/signatures/sigdef.h"
 #elif __GNUC__
 #include "../platforms/gnu/include/lua.hh"
 #else
