@@ -14,7 +14,7 @@ Payday2 BLT requires the following dependencies, which are all statically linked
 * OpenSSL
 * cURL
 * zlib
-* Detours
+* Subhook
 
 ### OpenSSL
 OpenSSL should be compiled as static libraries and the libraries placed in the lib directory, and the headers in the incl directory
@@ -26,8 +26,8 @@ cURL should be compiled as static, with the WITH_SSL parameter set to 'static' a
 zLib should be compiled as static.
 I had to add SAFESEH handling to the MASM objects in order for this to be compatible with Payday2-BLT
 
-### Detours
-A compiled version of detours is included, and all terms of the included Microsoft Research Shared Source License Agreement (detours_license.rtf) are applicable.
+### Subhook
+Subhook is included as a git submodule, and will be automatically compiled when compiling and linking SuperBLT.
 
 ## Contributors
 - Payday 2 BLT Team

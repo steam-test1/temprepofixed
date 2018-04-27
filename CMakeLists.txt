@@ -86,7 +86,11 @@ if(UNIX)
 	endif()
 elseif(WIN32)
 	add_library(SuperBLT STATIC ${sources} ${win32_sources})
-	target_compile_options(SuperBLT PRIVATE -DAL_LIBTYPE_STATIC -DCURL_STATICLIB)
+	target_compile_options(SuperBLT PRIVATE
+		-DAL_LIBTYPE_STATIC
+		-DCURL_STATICLIB
+		-DSUBHOOK_STATIC
+	)
 
 	# Link against libraries
 	target_link_libraries(SuperBLT winmm.lib)
@@ -135,12 +139,6 @@ target_link_libraries(SuperBLT ${OPENSSL_LIBRARIES})
 find_package (OpenAL REQUIRED)
 include_directories (${OPENAL_INCLUDE_DIR})
 target_link_libraries(SuperBLT ${OPENAL_LIBRARY})
-
-# Detours for Windows - subhook is used on UNIX
-if(WIN32)
-	include_directories ("lib-win32/incl")
-	target_link_libraries(SuperBLT "${CMAKE_SOURCE_DIR}/lib-win32/detours.lib")
-endif()
 
 ###############################################################################
 ## loader binary (this generates a seperate target for both Windows loaders) ##

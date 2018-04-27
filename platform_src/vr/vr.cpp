@@ -1,9 +1,11 @@
 #include "vr.h"
 #include "openvr.h"
 #include "util/util.h"
-#include "../signatures/signatures.h"
+#include "subhook.h"
 
 using namespace vr;
+
+static subhook::Hook gameUpdateDetour;
 
 namespace pd2hook {
 
@@ -12,6 +14,8 @@ namespace pd2hook {
 	VR_GetGenericInterface_t func;
 	IVRSystem *steamvr = 0;
 	void *VR_CALLTYPE __cdecl VR_GetGenericInterface_hook(const char *pchInterfaceVersion, EVRInitError *peError) {
+		subhook::ScopedHookRemove scoped_remove(&gameUpdateDetour);
+
 		void* res = func(pchInterfaceVersion, peError);
 
 		if (!strcmp(IVRSystem_Version, pchInterfaceVersion)) {
@@ -27,7 +31,7 @@ namespace pd2hook {
 		HMODULE api = GetModuleHandle("openvr_api.dll");
 		func = (VR_GetGenericInterface_t)GetProcAddress(api, "VR_GetGenericInterface");
 
-		FuncDetour* gameUpdateDetour = new FuncDetour((void**)&func, VR_GetGenericInterface_hook);
+		gameUpdateDetour.Install((void**)&func, VR_GetGenericInterface_hook);
 
 #ifdef INJECTABLE_BLT
 		// We will be too late to get the SteamVR call, so load it ourselves

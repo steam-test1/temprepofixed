@@ -8,6 +8,8 @@
 #include "signatures/signatures.h"
 #include "tweaker/xmltweaker.h"
 
+#include "subhook.h"
+
 #include <fstream>
 #include <string>
 #include <thread>
@@ -21,6 +23,8 @@ static bool vrMode;
 static std::thread::id main_thread_id;
 
 blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::last_loaded_ext = idstring_none;
+
+static subhook::Hook gameUpdateDetour, newStateDetour, newStateDetourVr, luaCloseDetour, node_from_xmlDetour;
 
 static void init_idstring_pointers() {
 	char *tmp;
@@ -47,6 +51,8 @@ static void init_idstring_pointers() {
 
 static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char freakin, int clue)
 {
+	subhook::ScopedHookRemove scoped_remove(vrMode ? &newStateDetourVr : &newStateDetour);
+
 	int ret = (vrMode ? luaL_newstate_vr : luaL_newstate)(thislol, no, freakin, clue);
 
 	lua_State* L = (lua_State*)*((void**)thislol);
@@ -66,6 +72,7 @@ static int __fastcall luaL_newstate_new_vr(void* thislol, int edx, char no, char
 
 void* __fastcall do_game_update_new(void* thislol, int edx, int* a, int* b)
 {
+	subhook::ScopedHookRemove scoped_remove(&gameUpdateDetour);
 
 	// If someone has a better way of doing this, I'd like to know about it.
 	// I could save the this pointer?
@@ -82,12 +89,15 @@ void* __fastcall do_game_update_new(void* thislol, int edx, int* a, int* b)
 }
 
 void lua_close_new(lua_State* L) {
+	subhook::ScopedHookRemove scoped_remove(&luaCloseDetour);
+
 	blt::lua_functions::close(L);
 	lua_close(L);
 }
 
 
 #include "tweaker/xmltweaker_internal.h"
+void __stdcall edit_node_from_xml_hook(int arg);
 static void __declspec(naked) node_from_xml_new() {
 	__asm
 	{
@@ -118,7 +128,29 @@ static void __declspec(naked) node_from_xml_new() {
 		mov eax, [esp + 4]
 		push eax
 
+		// Disarm the hook
+		// (wouldn't it be great if subhook had reliable trampolines? Sometime I should add and PR that)
+		push eax
+		push ecx
+		push edx
+		push 0
+		call edit_node_from_xml_hook
+		pop edx
+		pop ecx
+		pop eax
+
+		// Call the original function
 		call node_from_xml
+
+		// Rearm the hook
+		push eax
+		push ecx
+		push edx
+		push 1
+		call edit_node_from_xml_hook
+		pop edx
+		pop ecx
+		pop eax
 
 		add esp, 4 // Remove our temporary value from the stack
 
@@ -130,6 +162,17 @@ static void __declspec(naked) node_from_xml_new() {
 		add esp, 4
 
 		retn
+	}
+}
+
+void __stdcall edit_node_from_xml_hook(int arg)
+{
+	if (arg) {
+		node_from_xmlDetour.Install(node_from_xml, node_from_xml_new);
+	}
+	else
+	{
+		node_from_xmlDetour.Remove();
 	}
 }
 
@@ -159,12 +202,14 @@ void blt::platform::InitPlatform() {
 
 	if (node_from_xml == NULL) node_from_xml = node_from_xml_vr;
 
-	FuncDetour* gameUpdateDetour = new FuncDetour((void**)&do_game_update, do_game_update_new);
-	FuncDetour* newStateDetour = new FuncDetour((void**)&luaL_newstate, luaL_newstate_new);
-	FuncDetour* newStateDetourVr = new FuncDetour((void**)&luaL_newstate_vr, luaL_newstate_new_vr);
-	FuncDetour* luaCloseDetour = new FuncDetour((void**)&lua_close, lua_close_new);
+	gameUpdateDetour.Install(do_game_update, do_game_update_new);
+	if(luaL_newstate)
+		newStateDetour.Install(luaL_newstate, luaL_newstate_new);
+	else
+		newStateDetourVr.Install(luaL_newstate_vr, luaL_newstate_new_vr);
+	luaCloseDetour.Install(lua_close, lua_close_new);
 
-	FuncDetour* node_from_xmlDetour = new FuncDetour((void**)&node_from_xml, node_from_xml_new);
+	edit_node_from_xml_hook(true);
 
 	VRManager::CheckAndLoad();
 
@@ -183,10 +228,10 @@ void blt::platform::win32::OpenConsole() {
 	}
 }
 
-FuncDetour* luaCallDetour = nullptr;
+subhook::Hook luaCallDetour;
 
 bool blt::platform::lua::GetForcePCalls() {
-	return luaCallDetour != NULL;
+	return luaCallDetour.IsInstalled();
 }
 
 void blt::platform::lua::SetForcePCalls(bool state) {
@@ -194,12 +239,11 @@ void blt::platform::lua::SetForcePCalls(bool state) {
 	if (state == GetForcePCalls()) return;
 
 	if (state) {
-		luaCallDetour = new FuncDetour((void**)&lua_call, blt::lua_functions::perform_lua_pcall);
+		luaCallDetour.Install((void**)&lua_call, blt::lua_functions::perform_lua_pcall);
 		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
 	}
 	else {
-		delete luaCallDetour;
-		luaCallDetour = NULL;
+		luaCallDetour.Remove();
 		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
 	}
 }

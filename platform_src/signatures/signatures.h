@@ -18,16 +18,4 @@ public:
 	static void Search();
 };
 
-class FuncDetour {
-public:
-	FuncDetour(void** oldF, void* newF);
-	~FuncDetour();
-	void Attach();
-	void Detach();
-protected:
-	void** oldFunction;
-	void* newFunction;
-};
-
-
 #endif // __SIGNATURE_HEADER__

@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include <tlhelp32.h>
 #include <Psapi.h>
-#include <detours.h>
+#include "subhook.h"
 
 #define SIG_INCLUDE_MAIN
 #include "sigdef.h"
@@ -261,19 +261,3 @@ void SignatureSearch::Search(){
 	}
 }
 
-
-FuncDetour::FuncDetour(void** oldF, void* newF) : oldFunction(oldF), newFunction(newF){
-	//DetourRestoreAfterWith();
-
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(oldF, newF);
-	LONG result = DetourTransactionCommit();
-}
-
-FuncDetour::~FuncDetour(){
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourDetach(oldFunction, newFunction);
-	LONG result = DetourTransactionCommit();
-}
