@@ -5,6 +5,7 @@
 #include "xmltweaker_internal.h"
 #include "util/util.h"
 #include "wrenxml.h"
+#include "plugins/plugins.h"
 
 extern "C" {
 #include "wren.h"
@@ -94,6 +95,12 @@ void io_idstring_hash(WrenVM *vm) {
 	wrenSetSlotString(vm, 0, hex);
 }
 
+static void io_load_plugin(WrenVM* vm)
+{
+	const char *plugin_filename = wrenGetSlotString(vm, 1);
+	blt::plugins::LoadPlugin(plugin_filename);
+}
+
 static WrenForeignClassMethods bindForeignClass(
 	WrenVM* vm, const char* module, const char* class_name) {
 	WrenForeignClassMethods methods = wrenxml::get_XML_class_def(vm, module, class_name);
@@ -142,6 +149,10 @@ static WrenForeignMethodFn bindForeignMethod(
 			if (isStatic && strcmp(signature, "idstring_hash(_)") == 0)
 			{
 				return &io_idstring_hash;
+			}
+			if (isStatic && strcmp(signature, "load_plugin(_)") == 0)
+			{
+				return &io_load_plugin;
 			}
 		}
 		// Other classes in main...
