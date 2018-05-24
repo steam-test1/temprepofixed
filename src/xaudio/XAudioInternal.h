@@ -60,23 +60,30 @@ int klass ## _Close(lua_State *L) { \
 	return 0; \
 }
 
-namespace pd2hook {
-	namespace xasource {
+namespace pd2hook
+{
+	namespace xasource
+	{
 		class XASource;
 	};
-	namespace xabuffer {
+	namespace xabuffer
+	{
 		class XABuffer;
 	};
 
-	namespace xaudio {
-		class XAResource {
+	namespace xaudio
+	{
+		class XAResource
+		{
 		public:
 			XAResource(ALuint alhandle) : alhandle(alhandle) {}
 			virtual ~XAResource() {}
-			ALuint Handle() {
+			ALuint Handle()
+			{
 				return alhandle;
 			}
-			void Employ() {
+			void Employ()
+			{
 				usecount++;
 			}
 			void Discard(bool force);
@@ -89,15 +96,20 @@ namespace pd2hook {
 			int usecount = 0;
 		};
 
-		class XALuaHandle {
+		class XALuaHandle
+		{
 		public:
 			XALuaHandle(XAResource *resource);
 			ALuint Handle(lua_State *L);
 			void Close(bool force);
-			bool Ready() {
+			bool Ready()
+			{
 				return open;
 			}
-			XAResource* Resource() { return resource; }
+			XAResource* Resource()
+			{
+				return resource;
+			}
 		private:
 			XAResource *resource;
 			bool open = true;
@@ -109,13 +121,21 @@ namespace pd2hook {
 		extern bool is_setup;
 	};
 
-	namespace xabuffer {
-		class XABuffer : public xaudio::XAResource {
+	namespace xabuffer
+	{
+		class XABuffer : public xaudio::XAResource
+		{
 		public:
 			XABuffer(ALuint handle, string filename, int sampleCount, int sampleRate)
 				: xaudio::XAResource::XAResource(handle), sampleCount(sampleCount), sampleRate(sampleRate), filename(filename) {}
-			double GetSampleCount() { return sampleCount; }
-			double GetSampleRate() { return sampleRate; }
+			double GetSampleCount()
+			{
+				return sampleCount;
+			}
+			double GetSampleRate()
+			{
+				return sampleRate;
+			}
 		protected:
 			virtual void ALClose();
 		private:
@@ -130,8 +150,10 @@ namespace pd2hook {
 		XA_CLASS_LUA_METHOD_DEC(XABuffer, GetSampleRate);
 	};
 
-	namespace xasource {
-		class XASource : public xaudio::XAResource {
+	namespace xasource
+	{
+		class XASource : public xaudio::XAResource
+		{
 		public:
 			using xaudio::XAResource::XAResource;
 			void SetLooping(bool looping);
@@ -159,7 +181,8 @@ namespace pd2hook {
 		XA_CLASS_LUA_METHOD_DEC(XASource, SetRelative);
 	};
 
-	namespace xalistener {
+	namespace xalistener
+	{
 		int XAListener_set_velocity(lua_State *L);
 		int XAListener_set_position(lua_State *L);
 		int XAListener_set_orientation(lua_State *L);

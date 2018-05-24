@@ -7,26 +7,30 @@
 
 namespace
 {
-class outbuf : public std::streambuf
-{
-public:
-	outbuf()
+	class outbuf : public std::streambuf
 	{
-		setp(0, 0);
-	}
+	public:
+		outbuf()
+		{
+			setp(0, 0);
+		}
 
-	virtual int_type overflow(int_type c = traits_type::eof()) override
-	{
-		return fputc(c, stdout) == EOF ? traits_type::eof() : c;
-	}
-};
+		virtual int_type overflow(int_type c = traits_type::eof()) override
+		{
+			return fputc(c, stdout) == EOF ? traits_type::eof() : c;
+		}
+	};
 
-outbuf obuf;
-std::streambuf *sb = nullptr;
+	outbuf obuf;
+	std::streambuf *sb = nullptr;
 }
-static BOOL WINAPI MyConsoleCtrlHandler(DWORD dwCtrlEvent) { return dwCtrlEvent == CTRL_C_EVENT; }
+static BOOL WINAPI MyConsoleCtrlHandler(DWORD dwCtrlEvent)
+{
+	return dwCtrlEvent == CTRL_C_EVENT;
+}
 
-CConsole::CConsole() : m_OwnConsole(false) {
+CConsole::CConsole() : m_OwnConsole(false)
+{
 	if (!AllocConsole()) return;
 
 	SetConsoleCtrlHandler(MyConsoleCtrlHandler, TRUE);
@@ -43,8 +47,10 @@ CConsole::CConsole() : m_OwnConsole(false) {
 	m_OwnConsole = true;
 }
 
-CConsole::~CConsole() {
-	if (m_OwnConsole) {
+CConsole::~CConsole()
+{
+	if (m_OwnConsole)
+	{
 		std::cout.rdbuf(sb);
 		SetConsoleCtrlHandler(MyConsoleCtrlHandler, FALSE);
 		FreeConsole();

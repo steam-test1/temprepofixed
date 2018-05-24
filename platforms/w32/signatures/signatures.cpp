@@ -16,11 +16,14 @@
 using std::string;
 using std::to_string;
 
-class SignatureCacheDB {
+class SignatureCacheDB
+{
 public:
-	SignatureCacheDB(string filename) : filename(filename) {
+	SignatureCacheDB(string filename) : filename(filename)
+	{
 		std::ifstream infile(filename);
-		if (!infile.good()) {
+		if (!infile.good())
+		{
 			PD2HOOK_LOG_WARN("Could not open signature cache file");
 			return;
 		}
@@ -29,7 +32,8 @@ public:
 
 		uint32_t revision;
 		READ_BIN(revision); // TODO if the file is EOF, exit
-		if (revision != CACHEDB_REVISION) {
+		if (revision != CACHEDB_REVISION)
+		{
 			// Using a differnt revision, can't safely use it.
 			// Not a big deal, just search properly for signatures this time.
 			PD2HOOK_LOG_WARN("Discarding signature cache data, different revision");
@@ -43,7 +47,8 @@ public:
 		{
 			uint32_t length;
 			READ_BIN(length);
-			if (length > BUFF_LEN) {
+			if (length > BUFF_LEN)
+			{
 				PD2HOOK_LOG_ERROR("Cannot read long signature name!");
 				locations.clear();
 				return;
@@ -62,17 +67,22 @@ public:
 #undef READ_BIN
 	}
 
-	DWORD GetAddress(string name) {
-		if (locations.count(name)) {
+	DWORD GetAddress(string name)
+	{
+		if (locations.count(name))
+		{
 			return locations[name];
 		}
-		else {
+		else
+		{
 			return -1;
 		}
 	}
 
-	void UpdateAddress(string name, DWORD address) {
-		if (name.length() > BUFF_LEN) {
+	void UpdateAddress(string name, DWORD address)
+	{
+		if (name.length() > BUFF_LEN)
+		{
 			string msg = "Cannot write long signature name!";
 			PD2HOOK_LOG_ERROR(msg);
 			throw msg;
@@ -80,9 +90,11 @@ public:
 		locations[name] = address;
 	}
 
-	void Save() {
+	void Save()
+	{
 		std::ofstream outfile(filename);
-		if (!outfile.good()) {
+		if (!outfile.good())
+		{
 			PD2HOOK_LOG_ERROR("Could not open signature cachefile for saving");
 			return;
 		}
@@ -133,12 +145,15 @@ MODULEINFO GetModuleInfo(string szModule)
 	return modinfo;
 }
 
-static bool CheckSignature(const char* pattern, DWORD patternLength, const char* mask, DWORD base, DWORD size, DWORD i, DWORD *result) {
+static bool CheckSignature(const char* pattern, DWORD patternLength, const char* mask, DWORD base, DWORD size, DWORD i, DWORD *result)
+{
 	bool found = true;
-	for (DWORD j = 0; j < patternLength; j++) {
+	for (DWORD j = 0; j < patternLength; j++)
+	{
 		found &= mask[j] == '?' || pattern[j] == *(char*)(base + i + j);
 	}
-	if (found) {
+	if (found)
+	{
 		// printf("Found %s: 0x%p\n", funcname, base + i);
 		*result = base + i;
 		return true;
@@ -156,25 +171,31 @@ DWORD FindPattern(char* module, const char* funcname, const char* pattern, const
 	DWORD size = (DWORD)mInfo.SizeOfImage;
 	DWORD patternLength = (DWORD)strlen(mask);
 
-	if (hint >= 0 && hint < size - patternLength) {
+	if (hint >= 0 && hint < size - patternLength)
+	{
 		DWORD result;
 		*hintCorrect = CheckSignature(pattern, patternLength, mask, base, size, hint, &result);
 		if (*hintCorrect) return result;
 	}
-	else {
+	else
+	{
 		*hintCorrect = false;
 	}
 
-	for (DWORD i = 0; i < size - patternLength; i++){
+	for (DWORD i = 0; i < size - patternLength; i++)
+	{
 		DWORD result;
 		bool correct = CheckSignature(pattern, patternLength, mask, base, size, i, &result);
-		if (correct) {
+		if (correct)
+		{
 #ifdef CHECK_DUPLICATE_SIGNATURES
 			// Sigdup checking
-			for (DWORD ci = i + 1; ci < size - patternLength; ci++) {
+			for (DWORD ci = i + 1; ci < size - patternLength; ci++)
+			{
 				DWORD addr;
 				bool correct = CheckSignature(pattern, patternLength, mask, base, size, ci, &addr);
-				if (correct) {
+				if (correct)
+				{
 					string err = string("Found duplicate signature for ") + string(funcname) + string(" at ") + to_string(result) + string(",") + to_string(addr);
 					PD2HOOK_LOG_WARN(err);
 					hintOut = NULL; // Don't cache sigs with errors
@@ -192,9 +213,11 @@ DWORD FindPattern(char* module, const char* funcname, const char* pattern, const
 
 std::vector<SignatureF>* allSignatures = NULL;
 
-SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char* signature, const char* mask, int offset){
+SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char* signature, const char* mask, int offset)
+{
 	// lazy-init, container gets 'emptied' when initialized on compile.
-	if (!allSignatures){
+	if (!allSignatures)
+	{
 		allSignatures = new std::vector<SignatureF>();
 	}
 
@@ -202,17 +225,18 @@ SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char*
 	allSignatures->push_back(ins);
 }
 
-void SignatureSearch::Search(){
+void SignatureSearch::Search()
+{
 	// Find the name of the current EXE
 	TCHAR processPath[MAX_PATH + 1];
 	GetModuleFileName(NULL, processPath, MAX_PATH + 1); // Get the path
 	TCHAR filename[MAX_PATH + 1];
 	_splitpath_s( // Find the filename part of the path
-		processPath, // Input
-		NULL, 0, // Don't care about the drive letter
-		NULL, 0, // Don't care about the directory
-		filename, MAX_PATH, // Grab the filename
-		NULL, 0 // Extension is always .exe
+	    processPath, // Input
+	    NULL, 0, // Don't care about the drive letter
+	    NULL, 0, // Don't care about the directory
+	    filename, MAX_PATH, // Grab the filename
+	    NULL, 0 // Extension is always .exe
 	);
 
 	string basename = filename;
@@ -226,7 +250,8 @@ void SignatureSearch::Search(){
 
 	int cacheMisses = 0;
 	std::vector<SignatureF>::iterator it;
-	for (it = allSignatures->begin(); it < allSignatures->end(); it++){
+	for (it = allSignatures->begin(); it < allSignatures->end(); it++)
+	{
 		string funcname = it->funcname;
 		DWORD hint = cache.GetAddress(funcname);
 
@@ -235,15 +260,21 @@ void SignatureSearch::Search(){
 		DWORD addr = (FindPattern(filename, it->funcname, it->signature, it->mask, hint, &hintCorrect, &hintOut) + it->offset);
 		*((void**)it->address) = (void*)addr;
 
-		if (addr == NULL) {
+		if (addr == NULL)
+		{
 			hintCorrect = true; // If the signature doesn't exist at all, it's not the cache's fault
-		} else if (hint == -1 && addr != NULL) {
+		}
+		else if (hint == -1 && addr != NULL)
+		{
 			PD2HOOK_LOG_LOG(string("Sigcache hit failed for function ") + funcname);
-		} else if (!hintCorrect) {
+		}
+		else if (!hintCorrect)
+		{
 			PD2HOOK_LOG_WARN(string("Sigcache for function ") + funcname + " incorrect (" + to_string(hint) + " vs " + to_string(hintOut) + ")!");
 		}
 
-		if (!hintCorrect && hintOut != NULL) {
+		if (!hintCorrect && hintOut != NULL)
+		{
 			cache.UpdateAddress(funcname, hintOut);
 			cacheMisses++;
 		}
@@ -252,20 +283,24 @@ void SignatureSearch::Search(){
 	unsigned long ms_end = GetTickCount();
 
 	PD2HOOK_LOG_LOG(string("Scanned for ") + to_string(allSignatures->size()) + string(" signatures in ")
-		+ to_string((int)(ms_end - ms_start)) + string(" milliseconds with ") + to_string(cacheMisses)
-		+ string(" cache misses"));
+	                + to_string((int)(ms_end - ms_start)) + string(" milliseconds with ") + to_string(cacheMisses)
+	                + string(" cache misses"));
 
-	if (cacheMisses > 0) {
+	if (cacheMisses > 0)
+	{
 		PD2HOOK_LOG_LOG("Saving signature cache");
 		cache.Save();
 	}
 }
 
-void* SignatureSearch::GetFunctionByName(const char* name) {
+void* SignatureSearch::GetFunctionByName(const char* name)
+{
 	if (!allSignatures) return NULL;
 
-	for (const auto& sig : *allSignatures) {
-		if (!strcmp(sig.funcname, name)) {
+	for (const auto& sig : *allSignatures)
+	{
+		if (!strcmp(sig.funcname, name))
+		{
 			return *(void**)sig.address;
 		}
 	}

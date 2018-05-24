@@ -23,7 +23,8 @@ using std::to_string;
 	stream.write(reinterpret_cast<const char *>(&bigend), sizeof(bigend)); \
 }
 
-enum MessageType {
+enum MessageType
+{
 	MSGT_Log = 1,
 	MSGT_Init,
 	MCGT_Continue,
@@ -32,39 +33,47 @@ enum MessageType {
 	MSGT_LuaMesage
 };
 
-namespace pd2hook {
+namespace pd2hook
+{
 	static DebugConnection* connection = NULL;
 	static std::map<string, string> parameters;
 
-	static int luaF_isloaded(lua_State* L) {
+	static int luaF_isloaded(lua_State* L)
+	{
 		lua_pushboolean(L, connection != NULL);
 		return 1;
 	}
 
-	static int luaF_send_message(lua_State* L) {
+	static int luaF_send_message(lua_State* L)
+	{
 		connection->SendLuaMessage(lua_tostring(L, 1));
 		return 0;
 	}
 
-	static int luaF_wait(lua_State* L) {
+	static int luaF_wait(lua_State* L)
+	{
 		connection->WaitForMessage();
 		DebugConnection::Update(L);
 		return 0;
 	}
 
-	static int luaF_get_param(lua_State* L) {
+	static int luaF_get_param(lua_State* L)
+	{
 		string name = lua_tostring(L, 1);
-		if (parameters.count(name)) {
+		if (parameters.count(name))
+		{
 			lua_pushstring(L, parameters[name].c_str());
 		}
-		else {
+		else
+		{
 			// TODO add lua_pushnil signature, and use that instead
 			lua_pushboolean(L, false);
 		}
 		return 1;
 	}
 
-	static void startVR() {
+	static void startVR()
+	{
 		char exe[] = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\PAYDAY 2\\payday2_win32_release_vr.exe";
 		LPSTR args = GetCommandLineA(); // Leave the original EXE name in there. PD2 doesn't seem to care. Was: "payday2_win32_release_vr.exe";
 		PD2HOOK_LOG_LOG("Exec: Starting " + string(exe));
@@ -82,18 +91,18 @@ namespace pd2hook {
 		// start the program up
 		CreateProcessA
 		(
-			exe,   // the path
-			args,                // Command line
-			NULL,                   // Process handle not inheritable
-			NULL,                   // Thread handle not inheritable
-			FALSE,                  // Set handle inheritance to FALSE
-			CREATE_NEW_CONSOLE,     // Opens file in a separate console
-			NULL,           // Use parent's environment block
-			NULL,           // Use parent's starting directory 
-			&si,            // Pointer to STARTUPINFO structure
-			&pi           // Pointer to PROCESS_INFORMATION structure
+		    exe,   // the path
+		    args,                // Command line
+		    NULL,                   // Process handle not inheritable
+		    NULL,                   // Thread handle not inheritable
+		    FALSE,                  // Set handle inheritance to FALSE
+		    CREATE_NEW_CONSOLE,     // Opens file in a separate console
+		    NULL,           // Use parent's environment block
+		    NULL,           // Use parent's starting directory
+		    &si,            // Pointer to STARTUPINFO structure
+		    &pi           // Pointer to PROCESS_INFORMATION structure
 		);
-		// Close process and thread handles. 
+		// Close process and thread handles.
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 
@@ -101,11 +110,13 @@ namespace pd2hook {
 		ExitProcess(0);
 	}
 
-	bool DebugConnection::IsLoaded() {
+	bool DebugConnection::IsLoaded()
+	{
 		return connection != NULL;
 	}
 
-	void DebugConnection::Initialize() {
+	void DebugConnection::Initialize()
+	{
 		LPWSTR *szArglist;
 		int nArgs;
 		int i;
@@ -113,7 +124,8 @@ namespace pd2hook {
 		PD2HOOK_LOG_LOG("Command line: " + string(GetCommandLineA()));
 
 		szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-		if (NULL == szArglist) {
+		if (NULL == szArglist)
+		{
 			PD2HOOK_LOG_WARN("Debug: Could not read command line!");
 			return;
 		}
@@ -122,10 +134,13 @@ namespace pd2hook {
 		int port;
 		string key;
 
-		for (i = 0; i < nArgs; i++) {
+		for (i = 0; i < nArgs; i++)
+		{
 			// Really, Windows? Can't we just use UTF-8 and be done already?
-			if (!lstrcmpW(L"--debug-params", szArglist[i])) {
-				if (i == nArgs - 1) {
+			if (!lstrcmpW(L"--debug-params", szArglist[i]))
+			{
+				if (i == nArgs - 1)
+				{
 					PD2HOOK_LOG_WARN("Debug: --debug-params supplied as last parameter!");
 					break;
 				}
@@ -135,8 +150,10 @@ namespace pd2hook {
 
 				// PD2HOOK_LOG_LOG("debug params: '" + host + "' . '" + port + "' . '" + key + "'");
 			}
-			else if (!StrCmpW(L"--debug-lua-param", szArglist[i])) {
-				if (i >= nArgs - 2) {
+			else if (!StrCmpW(L"--debug-lua-param", szArglist[i]))
+			{
+				if (i >= nArgs - 2)
+				{
 					PD2HOOK_LOG_WARN("Debug: --debug-lua-param requires two further arguments!");
 					break;
 				}
@@ -149,7 +166,8 @@ namespace pd2hook {
 
 		const string debugfile_name = "remote-debug.conf";
 		std::ifstream infile(debugfile_name);
-		if (infile.good()) {
+		if (infile.good())
+		{
 			string line;
 			getline(infile, line);
 			infile.close();
@@ -165,7 +183,8 @@ namespace pd2hook {
 		LocalFree(szArglist);
 	}
 
-	void DebugConnection::Update(void* state) {
+	void DebugConnection::Update(void* state)
+	{
 		if (!connection) return;
 		lua_State* L = (lua_State*)state;
 
@@ -173,16 +192,19 @@ namespace pd2hook {
 		connection->ReadMessage(0);
 
 		auto &mq = connection->luaMessageQueue;
-		if (!mq.empty()) {
+		if (!mq.empty())
+		{
 			lua_getglobal(L, "blt_debugger");
 			lua_getfield(L, -1, "lua_msg_callback");
 
 			// If there's anything to listen for messages, process them
-			if (lua_isfunction(L, -1)) {
+			if (lua_isfunction(L, -1))
+			{
 				// Add each available message to a table
 				int num = mq.size();
 				lua_createtable(L, num, 0);
-				for (size_t i = 0; i < num; i++) {
+				for (size_t i = 0; i < num; i++)
+				{
 					string &msg = mq[i];
 					lua_pushlstring(L, msg.c_str(), msg.length());
 					lua_rawseti(L, -2, i + 1);
@@ -195,7 +217,8 @@ namespace pd2hook {
 				// Call the function, popping it and it's argument off
 				lua_call(L, 1, 0);
 			}
-			else {
+			else
+			{
 				PD2HOOK_LOG_WARN("Debug message received, blt_debugger.lua_msg_callback missing");
 
 				// Since we're not calling the function, remove the value ourselves
@@ -210,10 +233,12 @@ namespace pd2hook {
 		}
 	}
 
-	void DebugConnection::AddGlobals(void* state) {
+	void DebugConnection::AddGlobals(void* state)
+	{
 		lua_State* L = (lua_State*)state;
 
-		luaL_Reg vrLib[] = {
+		luaL_Reg vrLib[] =
+		{
 			{ "is_loaded", luaF_isloaded },
 			{ "send_message", luaF_send_message },
 			{ "wait", luaF_wait },
@@ -223,7 +248,8 @@ namespace pd2hook {
 		luaL_openlib(L, "blt_debugger", vrLib, 0);
 	}
 
-	void DebugConnection::Log(std::string message) {
+	void DebugConnection::Log(std::string message)
+	{
 		if (!connection) return;
 
 		stringstream data;
@@ -236,7 +262,8 @@ namespace pd2hook {
 		// TODO check result
 	}
 
-	void DebugConnection::SendLuaMessage(std::string message) {
+	void DebugConnection::SendLuaMessage(std::string message)
+	{
 		if (!connection) return;
 
 		stringstream data;
@@ -249,7 +276,8 @@ namespace pd2hook {
 		// TODO check result
 	}
 
-	void DebugConnection::WaitForMessage() {
+	void DebugConnection::WaitForMessage()
+	{
 		// Switch to blocking mode
 		u_long mode = 0;  // 0 to disable non-blocking socket
 		ioctlsocket(sock, FIONBIO, &mode);
@@ -262,28 +290,31 @@ namespace pd2hook {
 		ioctlsocket(sock, FIONBIO, &mode);
 	}
 
-	DebugConnection::DebugConnection(string host, int port, string key) {
+	DebugConnection::DebugConnection(string host, int port, string key)
+	{
 		PD2HOOK_LOG_LOG("Connecting to " + host + " on " + to_string(port));
 		WSADATA wsaData;
 		int iResult;
 
 		// Initialize Winsock
 		iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-		if (iResult != 0) {
+		if (iResult != 0)
+		{
 			throw string("WSAStartup failed with error: ") + to_string(iResult);
 		}
 
 		// Create a SOCKET for connecting to server
 		sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-		if (sock == INVALID_SOCKET) {
+		if (sock == INVALID_SOCKET)
+		{
 			string msg = "socket failed with error: " + WSAGetLastError();
 			WSACleanup();
 			throw msg;
 		}
 
 		struct addrinfo *result = NULL,
-			*ptr = NULL,
-			hints;
+			                 *ptr = NULL,
+			                  hints;
 
 		ZeroMemory(&hints, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
@@ -293,18 +324,21 @@ namespace pd2hook {
 		// Resolve the server address and port
 		string port_str = to_string(port);
 		iResult = getaddrinfo(host.c_str(), port_str.c_str(), &hints, &result);
-		if (iResult != 0) {
+		if (iResult != 0)
+		{
 			WSACleanup();
 			throw "getaddrinfo failed with error: %d\n" + to_string(iResult);
 		}
 
 		// Attempt to connect to an address until one succeeds
-		for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+		for (ptr = result; ptr != NULL; ptr = ptr->ai_next)
+		{
 
 			// Create a SOCKET for connecting to server
 			sock = socket(ptr->ai_family, ptr->ai_socktype,
-				ptr->ai_protocol);
-			if (sock == INVALID_SOCKET) {
+			              ptr->ai_protocol);
+			if (sock == INVALID_SOCKET)
+			{
 				string msg = "socket failed with error: " + WSAGetLastError();
 				WSACleanup();
 				throw msg;
@@ -312,7 +346,8 @@ namespace pd2hook {
 
 			// Connect to server.
 			iResult = connect(sock, ptr->ai_addr, (int)ptr->ai_addrlen);
-			if (iResult == SOCKET_ERROR) {
+			if (iResult == SOCKET_ERROR)
+			{
 				closesocket(sock);
 				sock = INVALID_SOCKET;
 				continue;
@@ -322,7 +357,8 @@ namespace pd2hook {
 
 		freeaddrinfo(result);
 
-		if (sock == INVALID_SOCKET) {
+		if (sock == INVALID_SOCKET)
+		{
 			WSACleanup();
 			throw string("Unable to connect to server!");
 		}
@@ -337,7 +373,8 @@ namespace pd2hook {
 
 		string str = data.str();
 		iResult = send(sock, str.c_str(), str.length(), 0);
-		if (iResult == SOCKET_ERROR) {
+		if (iResult == SOCKET_ERROR)
+		{
 			string msg = "send failed with error: " + WSAGetLastError();
 			closesocket(sock);
 			WSACleanup();
@@ -354,10 +391,12 @@ namespace pd2hook {
 		ioctlsocket(sock, FIONBIO, &mode);
 	}
 
-	DebugConnection::~DebugConnection() {
+	DebugConnection::~DebugConnection()
+	{
 		// shutdown the connection since no more data will be sent
 		int iResult = shutdown(sock, SD_SEND);
-		if (iResult == SOCKET_ERROR) {
+		if (iResult == SOCKET_ERROR)
+		{
 			string msg = "shutdown failed with error: " + WSAGetLastError();
 			closesocket(sock);
 			WSACleanup();
@@ -369,44 +408,54 @@ namespace pd2hook {
 		WSACleanup();
 	}
 
-	void DebugConnection::ReadMessage(int min) {
+	void DebugConnection::ReadMessage(int min)
+	{
 		char recvbuf[DEFAULT_BUFLEN];
 		int res;
 
 		int processed = 0;
 
 		// Receive until the peer closes the connection
-		do {
+		do
+		{
 			res = recv(sock, recvbuf, DEFAULT_BUFLEN, 0);
-			if (res > 0) {
+			if (res > 0)
+			{
 				// TODO do we need to change the put pointer?
-				for (auto i = 0; i < res; i++) {
+				for (auto i = 0; i < res; i++)
+				{
 					buffer.push_back(recvbuf[i]);
 				}
 				//printf("Bytes received: %d into %d\n", res, buffer.size());
 			}
-			else if (res == 0) {
+			else if (res == 0)
+			{
 				printf("Debugging connection closed\n");
 				exit(1);
 				break;
 			}
-			else if (WSAGetLastError() == WSAEWOULDBLOCK) {
+			else if (WSAGetLastError() == WSAEWOULDBLOCK)
+			{
 				// We're in non-blocking mode and ran out of data to process, don't enter an infinite loop
 				return;
 			}
-			else {
+			else
+			{
 				printf("recv failed with error: %d\n", WSAGetLastError());
 				break;
 			}
 
 			// TODO argument to disable this
-			while (ProcessMessageQueue()) {
+			while (ProcessMessageQueue())
+			{
 				processed++;
 			}
-		} while (res > 0 && (min == 0 || processed < min));
+		}
+		while (res > 0 && (min == 0 || processed < min));
 	}
 
-	bool DebugConnection::ProcessMessageQueue() {
+	bool DebugConnection::ProcessMessageQueue()
+	{
 		if (buffer.size() == 0)
 			return false;
 
@@ -435,7 +484,8 @@ return true
 
 		// std::cout << "Typeinfo: " << value << std::endl;
 
-		switch (type) {
+		switch (type)
+		{
 		case MCGT_Continue:
 			// Everything's fine
 			APPLY;
@@ -473,7 +523,8 @@ return true
 		return false;
 	}
 
-	void DebugConnection::ConnectFromParameters(std::string params) {
+	void DebugConnection::ConnectFromParameters(std::string params)
+	{
 		auto i = 0;
 		auto pos = params.find(":");
 		string host = params.substr(0, pos);
@@ -481,15 +532,18 @@ return true
 		string port = params.substr(pos + 1, npos - pos - 1);
 		string key = params.substr(npos + 1);
 
-		try {
+		try
+		{
 			Connect(host, std::stoi(port), key);
 		}
-		catch (string msg) {
+		catch (string msg)
+		{
 			PD2HOOK_LOG_ERROR("While initializing debug connection: " + msg);
 		}
 	}
 
-	void DebugConnection::Connect(string host, int port, string key) {
+	void DebugConnection::Connect(string host, int port, string key)
+	{
 		connection = new DebugConnection(host, port, key);
 	}
 }

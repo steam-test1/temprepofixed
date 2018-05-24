@@ -1,0 +1,8 @@
+style=allman
+indent=tab
+lineend=linux
+indent-col1-comments
+pad-comma
+
+indent-namespaces
+

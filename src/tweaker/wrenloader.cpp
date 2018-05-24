@@ -29,11 +29,13 @@ static void log(WrenVM* vm)
 	PD2HOOK_LOG_LOG(string("[WREN] ") + text);
 }
 
-static string file_to_string(ifstream &in) {
+static string file_to_string(ifstream &in)
+{
 	return string((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
 }
 
-void io_listDirectory(WrenVM* vm) {
+void io_listDirectory(WrenVM* vm)
+{
 	string filename = wrenGetSlotString(vm, 1);
 	bool dir = wrenGetSlotBool(vm, 2);
 	vector<string> files = Util::GetDirectoryContents(filename, dir);
@@ -49,27 +51,33 @@ void io_listDirectory(WrenVM* vm) {
 	}
 }
 
-void io_info(WrenVM* vm) {
+void io_info(WrenVM* vm)
+{
 	const char* path = wrenGetSlotString(vm, 1);
 
 	Util::FileType type = Util::GetFileType(path);
 
-	if (type == Util::FileType_None) {
+	if (type == Util::FileType_None)
+	{
 		wrenSetSlotString(vm, 0, "none");
 	}
-	else if (type == Util::FileType_Directory) {
+	else if (type == Util::FileType_Directory)
+	{
 		wrenSetSlotString(vm, 0, "dir");
 	}
-	else {
+	else
+	{
 		wrenSetSlotString(vm, 0, "file");
 	}
 }
 
-void io_read(WrenVM *vm) {
+void io_read(WrenVM *vm)
+{
 	string file = wrenGetSlotString(vm, 1);
 
 	ifstream handle(file);
-	if (!handle.good()) {
+	if (!handle.good())
+	{
 		PD2HOOK_LOG_ERROR("Wren IO.read: Could not load file " + file);
 		exit(1);
 	}
@@ -78,7 +86,8 @@ void io_read(WrenVM *vm) {
 	wrenSetSlotString(vm, 0, contents.c_str());
 }
 
-void io_dynamic_import(WrenVM *vm) {
+void io_dynamic_import(WrenVM *vm)
+{
 	// TODO do this properly
 	string module = wrenGetSlotString(vm, 1);
 
@@ -87,7 +96,8 @@ void io_dynamic_import(WrenVM *vm) {
 	printf("Module Load: %d\n", compileResult);
 }
 
-void io_idstring_hash(WrenVM *vm) {
+void io_idstring_hash(WrenVM *vm)
+{
 	blt::idstring hash = idstring_hash(wrenGetSlotString(vm, 1));
 
 	char hex[17]; // 16-chars long +1 for the null
@@ -102,18 +112,19 @@ static void io_load_plugin(WrenVM* vm)
 }
 
 static WrenForeignClassMethods bindForeignClass(
-	WrenVM* vm, const char* module, const char* class_name) {
+    WrenVM* vm, const char* module, const char* class_name)
+{
 	WrenForeignClassMethods methods = wrenxml::get_XML_class_def(vm, module, class_name);
 
 	return methods;
 }
 
 static WrenForeignMethodFn bindForeignMethod(
-	WrenVM* vm,
-	const char* module,
-	const char* className,
-	bool isStatic,
-	const char* signature)
+    WrenVM* vm,
+    const char* module,
+    const char* className,
+    bool isStatic,
+    const char* signature)
 {
 	WrenForeignMethodFn wxml_method = wrenxml::bind_wxml_method(vm, module, className, isStatic, signature);
 	if (wxml_method) return wxml_method;
@@ -169,7 +180,8 @@ static char* getModulePath(WrenVM* vm, const char* name_c)
 	string file = name.substr(name.find_first_of('/') + 1);
 
 	ifstream handle("mods/" + mod + "/wren/" + file + ".wren");
-	if (!handle.good()) {
+	if (!handle.good())
+	{
 		return NULL;
 	}
 
@@ -186,8 +198,10 @@ static bool available = true;
 
 const char* tweaker::transform_file(const char* text)
 {
-	if (vm == NULL) {
-		if (available) {
+	if (vm == NULL)
+	{
+		if (available)
+		{
 			// If the main file doesn't exist, do nothing
 			Util::FileType ftyp = Util::GetFileType("mods/base/wren/base.wren");
 			if (ftyp == Util::FileType_None) available = false;
@@ -227,9 +241,12 @@ const char* tweaker::transform_file(const char* text)
 
 	// TODO give a reasonable amount of information on what happened.
 	WrenInterpretResult result2 = wrenCall(vm, sig);
-	if(result2 == WREN_RESULT_COMPILE_ERROR) {
+	if(result2 == WREN_RESULT_COMPILE_ERROR)
+	{
 		PD2HOOK_LOG_ERROR("Wren tweak file failed: compile error!");
-	} else if(result2 == WREN_RESULT_RUNTIME_ERROR) {
+	}
+	else if(result2 == WREN_RESULT_RUNTIME_ERROR)
+	{
 		PD2HOOK_LOG_ERROR("Wren tweak file failed: compile error!");
 	}
 

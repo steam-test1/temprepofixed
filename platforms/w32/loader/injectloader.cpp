@@ -5,8 +5,10 @@
 #include <windows.h>
 #include "InitState.h"
 
-BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID) {
-	if (reason == DLL_PROCESS_ATTACH) {
+BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
+{
+	if (reason == DLL_PROCESS_ATTACH)
+	{
 		pd2hook::InitiateStates();
 	}
 

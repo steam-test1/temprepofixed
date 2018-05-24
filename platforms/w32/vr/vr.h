@@ -5,24 +5,25 @@
 
 namespace pd2hook
 {
-class VRManager {
-private:
-	VRManager();
+	class VRManager
+	{
+	private:
+		VRManager();
 
-public:
-	~VRManager();
+	public:
+		~VRManager();
 
-	bool IsLoaded();
+		bool IsLoaded();
 
-	std::string GetHMDBrand();
+		std::string GetHMDBrand();
 
-	uint64_t GetButtonsStatus(int hand);
+		uint64_t GetButtonsStatus(int hand);
 
-	static VRManager* VRManager::GetInstance();
+		static VRManager* VRManager::GetInstance();
 
-	static void CheckAndLoad();
-private:
-};
+		static void CheckAndLoad();
+	private:
+	};
 }
 
 #endif // __VR_HEADER__

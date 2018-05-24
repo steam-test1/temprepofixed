@@ -156,8 +156,8 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		if (Util::GetFileType("IPHLPAPI.dll") == Util::FileType_File)
 		{
 			MessageBoxA(NULL, "You have both SuperBLT DLLs installed - IPHLPAPI.dll and \nWSOCK32.dll. "
-				"Please delete one (preferrably, delete IPHLPAPI.dll). Currently, the WSOCK32.dll loader will\n"
-				"be deactivated until IPHLPAPI.dll is removed.", "Both SuperBLT DLLs installed!", MB_OK);
+			            "Please delete one (preferrably, delete IPHLPAPI.dll). Currently, the WSOCK32.dll loader will\n"
+			            "be deactivated until IPHLPAPI.dll is removed.", "Both SuperBLT DLLs installed!", MB_OK);
 			return 1;
 		}
 

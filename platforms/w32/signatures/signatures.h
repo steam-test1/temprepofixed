@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 
-struct SignatureF {
+struct SignatureF
+{
 	const char* funcname;
 	const char* signature;
 	const char* mask;
@@ -12,7 +13,8 @@ struct SignatureF {
 	void* address;
 };
 
-class SignatureSearch {
+class SignatureSearch
+{
 public:
 	SignatureSearch(const char* funcname, void* address, const char* signature, const char* mask, int offset);
 	static void Search();

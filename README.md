@@ -158,5 +158,8 @@ work fine.
 - Please use `git patch`, don't commit multiple unrelated or loosely related things in a
 single commit. Likewise, please don't commit whitespace-only changes. `git blame` is a valuable
 tool.
+- Please run the source code though `astyle` to ensure stuff like brace positions and whitespace
+are consistent. Later, this will be put into a Continuous Intergration task to mark offending
+commits, along with testing stuff like compiling in GCC.
 - Please ensure your code doesn't cause any compiler warnings (not counting libraries). This is
 enforced for GCC, please watch your output if you're using Visual Studio.

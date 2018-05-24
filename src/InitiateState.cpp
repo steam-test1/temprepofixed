@@ -80,9 +80,11 @@ namespace pd2hook
 		}
 	}
 
-	void handled_pcall(lua_State *L, int nargs, int nresults) {
+	void handled_pcall(lua_State *L, int nargs, int nresults)
+	{
 		int err = lua_pcall(L, nargs, nresults, 0);
-		if (err == LUA_ERRRUN) {
+		if (err == LUA_ERRRUN)
+		{
 			size_t len;
 			PD2HOOK_LOG_LOG(lua_tolstring(L, -1, &len));
 		}
@@ -109,7 +111,8 @@ namespace pd2hook
 
 	bool vrMode = false;
 
-	int luaF_getvrstate(lua_State* L) {
+	int luaF_getvrstate(lua_State* L)
+	{
 		lua_pushboolean(L, vrMode);
 		return 1;
 	}
@@ -294,11 +297,11 @@ namespace pd2hook
 	{
 		int funcRef
 #ifdef __GNUC__
-			// Prevent crashes on GNU+Linux when compiled with Clang due to alignment issues surrounding SSE
-			// See https://github.com/blt4linux/blt4l/pull/90
-			__attribute__((aligned(16))) // Why, Clang, Why! Using misaligned floating point ops for ints!
+		// Prevent crashes on GNU+Linux when compiled with Clang due to alignment issues surrounding SSE
+		// See https://github.com/blt4linux/blt4l/pull/90
+		__attribute__((aligned(16))) // Why, Clang, Why! Using misaligned floating point ops for ints!
 #endif
-			;
+		;
 
 		int progressRef;
 		int requestIdentifier;
@@ -340,8 +343,10 @@ namespace pd2hook
 		lua_pcall(ourData->L, 3, 0, 0);
 	}
 
-	void call_hash_result(lua_State *L, int ref, std::string filename, std::string result) {
-		if (!check_active_state(L)) {
+	void call_hash_result(lua_State *L, int ref, std::string filename, std::string result)
+	{
+		if (!check_active_state(L))
+		{
 			return;
 		}
 
@@ -359,12 +364,14 @@ namespace pd2hook
 		const char* filename = lua_tolstring(L, 1, &length);
 
 		Util::FileType type = Util::GetFileType(filename);
-		if (Util::GetFileType(filename) != Util::FileType_Directory) {
+		if (Util::GetFileType(filename) != Util::FileType_Directory)
+		{
 			luaL_error(L, "Invalid directory %s: type=%d (none=%d,file=%d,dir=%d)", filename, type,
-				Util::FileType_None, Util::FileType_File, Util::FileType_Directory);
+			           Util::FileType_None, Util::FileType_File, Util::FileType_Directory);
 		}
 
-		if (!lua_isnoneornil(L, 2)) {
+		if (!lua_isnoneornil(L, 2))
+		{
 			lua_pushvalue(L, 2);
 			int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 			Util::RunAsyncHash(L, callback, filename, Util::GetDirectoryHash, call_hash_result);
@@ -384,12 +391,14 @@ namespace pd2hook
 		const char * filename = lua_tolstring(L, 1, &l);
 
 		Util::FileType type = Util::GetFileType(filename);
-		if (Util::GetFileType(filename) != Util::FileType_File) {
+		if (Util::GetFileType(filename) != Util::FileType_File)
+		{
 			luaL_error(L, "Invalid file %s: type=%d (file=%d,dir=%d,none=%d)", filename, type,
-				Util::FileType_File, Util::FileType_Directory, Util::FileType_None);
+			           Util::FileType_File, Util::FileType_Directory, Util::FileType_None);
 		}
 
-		if (!lua_isnoneornil(L, 2)) {
+		if (!lua_isnoneornil(L, 2))
+		{
 			lua_pushvalue(L, 2);
 			int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 			Util::RunAsyncHash(L, callback, filename, Util::GetFileHash, call_hash_result);
@@ -520,8 +529,10 @@ namespace pd2hook
 		// Add all the child nodes
 		mxml_node_t *child = mxmlGetFirstChild(node);
 		int i = 1;
-		while (child != NULL) {
-			if (strncmp(mxmlGetElement(child), "!--", 3) != 0) {
+		while (child != NULL)
+		{
+			if (strncmp(mxmlGetElement(child), "!--", 3) != 0)
+			{
 				build_xml_tree(L, child);
 				lua_rawseti(L, -2, i++);
 			}
@@ -566,7 +577,8 @@ namespace pd2hook
 
 		void *value_ptr = NULL;
 
-		typedef struct {
+		typedef struct
+		{
 			uint32_t gcptr32;     /* Pseudo 32 bit pointer. */
 			uint32_t it;      /* Internal object tag. Must overlap MSW of number. */
 		} TValue;
@@ -599,7 +611,8 @@ namespace pd2hook
 		return 1;
 	}
 
-	int luaF_ignoretweak(lua_State* L) {
+	int luaF_ignoretweak(lua_State* L)
+	{
 		blt::idfile file;
 
 		file.name = luaX_toidstring(L, 1);
@@ -610,27 +623,32 @@ namespace pd2hook
 		return 0;
 	}
 
-	int luaF_load_native(lua_State* L) {
+	int luaF_load_native(lua_State* L)
+	{
 		std::string file(lua_tostring(L, 1));
 
-		try {
+		try
+		{
 			blt::plugins::PluginLoadResult result = blt::plugins::LoadPlugin(file);
 
 			// TODO some kind of UUID system to prevent issues with multiple mods having the same DLL
-			if (result == blt::plugins::plr_AlreadyLoaded) {
+			if (result == blt::plugins::plr_AlreadyLoaded)
+			{
 				lua_pushstring(L, "Already loaded");
 				return 1;
 			}
 
 		}
-		catch (std::string err) {
+		catch (std::string err)
+		{
 			luaL_error(L, err.c_str());
 		}
 
 		return 0;
 	}
 
-	int luaF_blt_info(lua_State* L) {
+	int luaF_blt_info(lua_State* L)
+	{
 		lua_newtable(L);
 
 		blt::platform::GetPlatformInformation(L);
@@ -640,7 +658,8 @@ namespace pd2hook
 
 	void load_vr_globals(lua_State *L)
 	{
-		luaL_Reg vrLib[] = {
+		luaL_Reg vrLib[] =
+		{
 			{ "getvrstate", luaF_getvrstate },
 			/*{ "isvrhookloaded", luaF_isvrhookloaded }, // TODO enable me
 			{ "gethmdbrand", luaF_gethmdbrand },
@@ -677,13 +696,17 @@ namespace pd2hook
 
 using namespace pd2hook;
 
-namespace blt {
-	namespace lua_functions {
+namespace blt
+{
+	namespace lua_functions
+	{
 
-		void perform_lua_pcall(lua_State* L, int args, int returns) {
+		void perform_lua_pcall(lua_State* L, int args, int returns)
+		{
 			// https://stackoverflow.com/questions/30021904/lua-set-default-error-handler/30022216#30022216
 			lua_getglobal(L, "debug");
-			if(lua_isnil(L, -1)) {
+			if(lua_isnil(L, -1))
+			{
 				// Debug isn't available, use normal call
 				lua_remove(L, -1);
 				return lua_call(L, args, returns);
@@ -696,7 +719,8 @@ namespace blt {
 			lua_insert(L, errorhandler);
 
 			int result = lua_pcall(L, args, returns, errorhandler);
-			if (result != 0) {
+			if (result != 0)
+			{
 				size_t len;
 				const char* message = lua_tolstring(L, -1, &len);
 				PD2HOOK_LOG_ERROR(message);
@@ -716,16 +740,19 @@ namespace blt {
 		// Random dude who wrote what's his face?
 		// I 'unno, I stole this method from the guy who wrote the 'underground-light-lua-hook'
 		// Mine worked fine, but this seems more elegant.
-		void initiate_lua(lua_State *L) {
+		void initiate_lua(lua_State *L)
+		{
 			add_active_state(L);
 
-			if (!setup_check_done) {
+			if (!setup_check_done)
+			{
 				setup_check_done = true;
 
 #ifdef _WIN32 // TODO GNU+Linux support
-				if (!(Util::DirectoryExists("mods") && Util::DirectoryExists("mods/base"))) {
+				if (!(Util::DirectoryExists("mods") && Util::DirectoryExists("mods/base")))
+				{
 					int result = MessageBox(NULL, "Do you want to download the PAYDAY 2 BLT basemod?\n"
-						"This is required for using mods", "BLT 'mods/base' folder missing", MB_YESNO);
+					                        "This is required for using mods", "BLT 'mods/base' folder missing", MB_YESNO);
 					if (result == IDYES) download_blt();
 
 					return;
@@ -748,29 +775,32 @@ namespace blt {
 			lua_pushcclosure(L, luaF_dohttpreq, 0);
 			lua_setfield(L, LUA_GLOBALSINDEX, "dohttpreq");
 
-			luaL_Reg consoleLib[] = {
+			luaL_Reg consoleLib[] =
+			{
 				/*{ "CreateConsole", luaF_createconsole }, // TODO reenable
 				{ "DestroyConsole", luaF_destroyconsole },*/
 				{ NULL, NULL }
 			};
 			luaL_openlib(L, "console", consoleLib, 0);
 
-			luaL_Reg fileLib[] = {
+			luaL_Reg fileLib[] =
+			{
 				{ "GetDirectories", luaF_getdir },
-			{ "GetFiles", luaF_getfiles },
-			{ "RemoveDirectory", luaF_removeDirectory },
-			{ "DirectoryExists", luaF_directoryExists },
-			{ "DirectoryHash", luaF_directoryhash },
-			{ "FileExists", luaF_fileExists },
-			{ "FileHash", luaF_filehash },
-			{ "MoveDirectory", luaF_moveDirectory },
-			{ "CreateDirectory", luaF_createDirectory },
-			{ NULL, NULL }
+				{ "GetFiles", luaF_getfiles },
+				{ "RemoveDirectory", luaF_removeDirectory },
+				{ "DirectoryExists", luaF_directoryExists },
+				{ "DirectoryHash", luaF_directoryhash },
+				{ "FileExists", luaF_fileExists },
+				{ "FileHash", luaF_filehash },
+				{ "MoveDirectory", luaF_moveDirectory },
+				{ "CreateDirectory", luaF_createDirectory },
+				{ NULL, NULL }
 			};
 			luaL_openlib(L, "file", fileLib, 0);
 
 			// Keeping everything in lowercase since IspcallForced / IsPCallForced and Forcepcalls / ForcePCalls look rather weird anyway
-			luaL_Reg bltLib[] = {
+			luaL_Reg bltLib[] =
+			{
 				{ "ispcallforced", luaF_ispcallforced },
 				{ "forcepcalls", luaF_forcepcalls },
 				{ "parsexml", luaF_parsexml },
@@ -782,18 +812,20 @@ namespace blt {
 			};
 			luaL_openlib(L, "blt", bltLib, 0);
 
-			if (vrMode) {
+			if (vrMode)
+			{
 				load_vr_globals(L);
 			}
 
 #ifdef ENABLE_DEBUG
 			DebugConnection::AddGlobals(L);
 #endif
-	#ifdef ENABLE_XAUDIO
+#ifdef ENABLE_XAUDIO
 			XAudio::Register(L);
-	#endif
+#endif
 
-			for (plugins::Plugin *plugin : plugins::GetPlugins()) {
+			for (plugins::Plugin *plugin : plugins::GetPlugins())
+			{
 				plugin->AddToState(L);
 			}
 
@@ -801,13 +833,15 @@ namespace blt {
 			PD2HOOK_LOG_LOG("Initiating Hook");
 
 			result = luaL_loadfilex(L, "mods/base/base.lua", nullptr);
-			if (result == LUA_ERRSYNTAX) {
+			if (result == LUA_ERRSYNTAX)
+			{
 				size_t len;
 				PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
 				return;
 			}
 			result = lua_pcall(L, 0, 1, 0);
-			if (result == LUA_ERRRUN) {
+			if (result == LUA_ERRRUN)
+			{
 				size_t len;
 				PD2HOOK_LOG_LOG(lua_tolstring(L, -1, &len));
 				return;
@@ -821,12 +855,15 @@ namespace blt {
 			remove_active_state(L);
 		}
 
-		void update(lua_State *L) {
-			if (updates == 0) {
+		void update(lua_State *L)
+		{
+			if (updates == 0)
+			{
 				HTTPManager::GetSingleton()->init_locks();
 			}
 
-			if (updates > 1) {
+			if (updates > 1)
+			{
 				EventQueueMaster::GetSingleton().ProcessEvents();
 			}
 
@@ -834,7 +871,8 @@ namespace blt {
 			DebugConnection::Update(L);
 #endif
 
-			for (plugins::Plugin *plugin : plugins::GetPlugins()) {
+			for (plugins::Plugin *plugin : plugins::GetPlugins())
+			{
 				plugin->Update(L);
 			}
 
@@ -842,8 +880,10 @@ namespace blt {
 		}
 	};
 
-	void plugins::RegisterPluginForActiveStates(Plugin * plugin) {
-		for (lua_State *&state : activeStates) {
+	void plugins::RegisterPluginForActiveStates(Plugin * plugin)
+	{
+		for (lua_State *&state : activeStates)
+		{
 			plugin->AddToState(state);
 		}
 	}

@@ -12,13 +12,15 @@ typedef void(*init_func_t)(lua_access_func_t get_lua_func_by_name);
 typedef void(*setup_state_func_t)(lua_State *L);
 typedef void(*update_func_t)(lua_State *L);
 
-static void pd2_log(const char* message, int level, const char* file, int line) {
+static void pd2_log(const char* message, int level, const char* file, int line)
+{
 	using LT = pd2hook::Logging::LogType;
 
 	char buffer[256];
 	sprintf_s(buffer, sizeof(buffer), "ExtModDLL %s", file);
 
-	switch ((LT)level) {
+	switch ((LT)level)
+	{
 	case LT::LOGGING_FUNC:
 	case LT::LOGGING_LOG:
 	case LT::LOGGING_LUA:
@@ -33,24 +35,29 @@ static void pd2_log(const char* message, int level, const char* file, int line) 
 	}
 }
 
-static bool is_active_state(lua_State *L) {
+static bool is_active_state(lua_State *L)
+{
 	return pd2hook::check_active_state(L);
 }
 
-static void * get_func(const char* name) {
+static void * get_func(const char* name)
+{
 	string str = name;
 
-	if (str == "pd2_log") {
+	if (str == "pd2_log")
+	{
 		return &pd2_log;
 	}
-	else if (str == "is_active_state") {
+	else if (str == "is_active_state")
+	{
 		return &is_active_state;
 	}
 
 	return blt::platform::win32::get_lua_func(name);
 }
 
-blt::plugins::Plugin::Plugin(std::string file) : file(file) {
+blt::plugins::Plugin::Plugin(std::string file) : file(file)
+{
 	module = LoadLibraryA(file.c_str());
 
 	if (!module) throw string("Failed to load module: ERR") + to_string(GetLastError());
@@ -71,11 +78,13 @@ blt::plugins::Plugin::Plugin(std::string file) : file(file) {
 	// TODO add updating (game update call)
 }
 
-void blt::plugins::Plugin::AddToState(lua_State * L) {
+void blt::plugins::Plugin::AddToState(lua_State * L)
+{
 	((setup_state_func_t)setup_state)(L);
 }
 
-void blt::plugins::Plugin::Update(lua_State * L) {
+void blt::plugins::Plugin::Update(lua_State * L)
+{
 	if (update_func)
 		((update_func_t)update_func)(L);
 }

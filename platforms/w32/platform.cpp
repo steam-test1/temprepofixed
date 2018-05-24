@@ -26,10 +26,12 @@ blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::
 
 static subhook::Hook gameUpdateDetour, newStateDetour, newStateDetourVr, luaCloseDetour, node_from_xmlDetour;
 
-static void init_idstring_pointers() {
+static void init_idstring_pointers()
+{
 	char *tmp;
 
-	if (try_open_base_vr) {
+	if (try_open_base_vr)
+	{
 		tmp = (char*)try_open_base_vr;
 		tmp += 0x3D;
 		blt::platform::last_loaded_name = *((blt::idstring**)tmp);
@@ -38,7 +40,8 @@ static void init_idstring_pointers() {
 		tmp += 0x23;
 		blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
 	}
-	else {
+	else
+	{
 		tmp = (char*)try_open_base;
 		tmp += 0x26;
 		blt::platform::last_loaded_name = *((blt::idstring**)tmp);
@@ -77,7 +80,8 @@ void* __fastcall do_game_update_new(void* thislol, int edx, int* a, int* b)
 	// If someone has a better way of doing this, I'd like to know about it.
 	// I could save the this pointer?
 	// I'll check if it's even different at all later.
-	if (std::this_thread::get_id() != main_thread_id) {
+	if (std::this_thread::get_id() != main_thread_id)
+	{
 		return do_game_update(thislol, a, b);
 	}
 
@@ -88,7 +92,8 @@ void* __fastcall do_game_update_new(void* thislol, int edx, int* a, int* b)
 	return do_game_update(thislol, a, b);
 }
 
-void lua_close_new(lua_State* L) {
+void lua_close_new(lua_State* L)
+{
 	subhook::ScopedHookRemove scoped_remove(&luaCloseDetour);
 
 	blt::lua_functions::close(L);
@@ -98,7 +103,8 @@ void lua_close_new(lua_State* L) {
 
 #include "tweaker/xmltweaker_internal.h"
 void __stdcall edit_node_from_xml_hook(int arg);
-static void __declspec(naked) node_from_xml_new() {
+static void __declspec(naked) node_from_xml_new()
+{
 	__asm
 	{
 		push ecx
@@ -167,7 +173,8 @@ static void __declspec(naked) node_from_xml_new() {
 
 void __stdcall edit_node_from_xml_hook(int arg)
 {
-	if (arg) {
+	if (arg)
+	{
 		node_from_xmlDetour.Install(node_from_xml, node_from_xml_new);
 	}
 	else
@@ -177,7 +184,8 @@ void __stdcall edit_node_from_xml_hook(int arg)
 }
 
 
-void blt::platform::InitPlatform() {
+void blt::platform::InitPlatform()
+{
 	main_thread_id = std::this_thread::get_id();
 
 	// Set up logging first, so we can see messages from the signature search process
@@ -186,11 +194,13 @@ void blt::platform::InitPlatform() {
 #else
 	ifstream infile("mods/developer.txt");
 	string debug_mode;
-	if (infile.good()) {
+	if (infile.good())
+	{
 		debug_mode = "post"; // default value
 		infile >> debug_mode;
 	}
-	else {
+	else
+	{
 		debug_mode = "disabled";
 	}
 
@@ -216,13 +226,15 @@ void blt::platform::InitPlatform() {
 	init_idstring_pointers();
 }
 
-void blt::platform::ClosePlatform() {
+void blt::platform::ClosePlatform()
+{
 	// Okay... let's not do that.
 	// I don't want to keep this in memory, but it CRASHES THE SHIT OUT if you delete this after all is said and done.
 	if (console) delete console;
 }
 
-void blt::platform::GetPlatformInformation(lua_State * L) {
+void blt::platform::GetPlatformInformation(lua_State * L)
+{
 	lua_pushstring(L, "mswindows");
 	lua_setfield(L, -2, "platform");
 
@@ -230,13 +242,16 @@ void blt::platform::GetPlatformInformation(lua_State * L) {
 	lua_setfield(L, -2, "x86");
 }
 
-void blt::platform::win32::OpenConsole() {
-	if (!console) {
+void blt::platform::win32::OpenConsole()
+{
+	if (!console)
+	{
 		console = new CConsole();
 	}
 }
 
-void * blt::platform::win32::get_lua_func(const char* name) {
+void * blt::platform::win32::get_lua_func(const char* name)
+{
 	// Only allow getting the Lua functions
 	if (strncmp(name, "lua", 3)) return NULL;
 
@@ -248,19 +263,23 @@ void * blt::platform::win32::get_lua_func(const char* name) {
 
 subhook::Hook luaCallDetour;
 
-bool blt::platform::lua::GetForcePCalls() {
+bool blt::platform::lua::GetForcePCalls()
+{
 	return luaCallDetour.IsInstalled();
 }
 
-void blt::platform::lua::SetForcePCalls(bool state) {
+void blt::platform::lua::SetForcePCalls(bool state)
+{
 	// Don't change if already set up
 	if (state == GetForcePCalls()) return;
 
-	if (state) {
+	if (state)
+	{
 		luaCallDetour.Install((void**)&lua_call, blt::lua_functions::perform_lua_pcall);
 		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
 	}
-	else {
+	else
+	{
 		luaCallDetour.Remove();
 		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
 	}

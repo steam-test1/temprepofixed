@@ -41,7 +41,8 @@ struct lua_State;
 typedef const char * (*lua_Reader) (lua_State *L, void *ud, size_t *sz);
 typedef int(*lua_CFunction) (lua_State *L);
 typedef void * (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
-typedef struct luaL_Reg {
+typedef struct luaL_Reg
+{
 	const char* name;
 	lua_CFunction func;
 } luaL_Reg;
@@ -53,7 +54,7 @@ typedef struct luaL_Reg {
 // type of numbers in Lua
 typedef LUA_NUMBER lua_Number;
 typedef struct lua_Debug lua_Debug;	// activation record
-									// Functions to be called by the debuger in specific events
+// Functions to be called by the debuger in specific events
 typedef void(*lua_Hook) (lua_State* L, lua_Debug* ar);
 
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_call, void, "\x8B\x44\x24\x08\x8B\x54\x24\x04\xFF\x44\x24\x0C\x8D\x0C\xC5\x00", "xxxxxxxxxxxxxxxx", 0, lua_State*, int, int)

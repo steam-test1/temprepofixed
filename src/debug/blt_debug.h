@@ -10,8 +10,10 @@
 #include <string>
 #include <vector>
 
-namespace pd2hook {
-	class DebugConnection {
+namespace pd2hook
+{
+	class DebugConnection
+	{
 	public:
 		static bool IsLoaded();
 		static void Initialize();

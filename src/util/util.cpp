@@ -55,10 +55,12 @@ namespace pd2hook
 			return ss.str();
 		}
 
-		void RecurseDirectoryPaths(std::vector<std::string>& paths, std::string directory, bool ignore_versioning) {
+		void RecurseDirectoryPaths(std::vector<std::string>& paths, std::string directory, bool ignore_versioning)
+		{
 			std::vector<std::string> dirs = pd2hook::Util::GetDirectoryContents(directory, true);
 			std::vector<std::string> files = pd2hook::Util::GetDirectoryContents(directory);
-			for (auto it = files.begin(); it < files.end(); it++) {
+			for (auto it = files.begin(); it < files.end(); it++)
+			{
 				std::string fpath = directory + *it;
 
 				// Put all the paths to lower case
@@ -71,7 +73,8 @@ namespace pd2hook
 				// Add the path on the list
 				paths.push_back(fpath);
 			}
-			for (auto it = dirs.begin(); it < dirs.end(); it++) {
+			for (auto it = dirs.begin(); it < dirs.end(); it++)
+			{
 				if (*it == "." || *it == "..") continue;
 				if (ignore_versioning && (*it == ".hg" || *it == ".git")) continue;
 				RecurseDirectoryPaths(paths, directory + *it + "/", false);
@@ -86,7 +89,8 @@ namespace pd2hook
 
 			std::string hashconcat;
 
-			for (auto it = paths.begin(); it < paths.end(); it++) {
+			for (auto it = paths.begin(); it < paths.end(); it++)
+			{
 				std::string hashstr = sha256(pd2hook::Util::GetFileContents(*it));
 				hashconcat += hashstr;
 			}

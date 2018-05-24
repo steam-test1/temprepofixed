@@ -9,17 +9,24 @@ extern "C" {
 #include "wren.h"
 }
 
-namespace pd2hook {
-	namespace tweaker {
-		namespace wrenxml {
+namespace pd2hook
+{
+	namespace tweaker
+	{
+		namespace wrenxml
+		{
 			class WXMLNode;
 
-			class WXMLDocument {
+			class WXMLDocument
+			{
 			public:
 				WXMLDocument(const char *text);
 				WXMLDocument(WXMLNode *clone_from);
 				~WXMLDocument();
-				WXMLNode *GetRootNode() { return GetNode(root_node); }
+				WXMLNode *GetRootNode()
+				{
+					return GetNode(root_node);
+				}
 				WXMLNode *GetNode(mxml_node_t *node);
 				void MergeInto(WXMLDocument *other);
 			private:
@@ -32,11 +39,15 @@ namespace pd2hook {
 			};
 
 			// Note that having nodes open does not prevent the main object from being GC'd
-			class WXMLNode {
+			class WXMLNode
+			{
 			public:
 				WXMLDocument *root;
 				mxml_node_t *handle;
-				void Use() { usages++; }
+				void Use()
+				{
+					usages++;
+				}
 				void Release();
 				WXMLDocument* MoveToNewDocument();
 			private:
@@ -48,16 +59,16 @@ namespace pd2hook {
 			};
 
 			WrenForeignMethodFn bind_wxml_method(
-				WrenVM* vm,
-				const char* module,
-				const char* className,
-				bool isStatic,
-				const char* signature);
+			    WrenVM* vm,
+			    const char* module,
+			    const char* className,
+			    bool isStatic,
+			    const char* signature);
 
 			WrenForeignClassMethods get_XML_class_def(
-				WrenVM* vm,
-				const char* module,
-				const char* class_name);
+			    WrenVM* vm,
+			    const char* module,
+			    const char* class_name);
 		};
 	};
 };

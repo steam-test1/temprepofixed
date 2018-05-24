@@ -33,17 +33,17 @@ mxml_node_t *handle = wxml->handle; \
 
 static char *					/* O - Allocated string */
 mxmlToAllocStringSafe(
-	mxml_node_t    *node,		/* I - Node to write */
-	mxml_save_cb_t cb)			/* I - Whitespace callback or @code MXML_NO_CALLBACK@ */
+    mxml_node_t    *node,		/* I - Node to write */
+    mxml_save_cb_t cb)			/* I - Whitespace callback or @code MXML_NO_CALLBACK@ */
 {
 	int	bytes;				/* Required bytes */
 	char	buffer[8192];			/* Temporary buffer */
 	char	*s;				/* Allocated string */
 
 
-							/*
-							* Write the node to the temporary buffer...
-							*/
+	/*
+	* Write the node to the temporary buffer...
+	*/
 
 	bytes = mxmlSaveString(node, buffer, sizeof(buffer), cb);
 
@@ -65,7 +65,8 @@ mxmlToAllocStringSafe(
 	* new buffer...
 	*/
 
-	if ((s = (char*)malloc(bytes + 1)) == NULL) {
+	if ((s = (char*)malloc(bytes + 1)) == NULL)
+	{
 		const char *message = "[WREN/WXML] XML.string: Cannot allocate enough space for XML string";
 		PD2HOOK_LOG_ERROR(message);
 #ifdef _WIN32
@@ -86,7 +87,8 @@ mxmlToAllocStringSafe(
 static const char *last_loaded_xml = NULL;
 static char *mxml_last_error = NULL;
 
-static void handle_mxml_error_crash(const char* error) {
+static void handle_mxml_error_crash(const char* error)
+{
 	PD2HOOK_LOG_ERROR("Could not load XML: Error and original file below");
 	PD2HOOK_LOG_ERROR(error);
 	PD2HOOK_LOG_ERROR("Input XML:");
@@ -100,11 +102,13 @@ static void handle_mxml_error_crash(const char* error) {
 	exit(1);
 }
 
-static void handle_mxml_error_note(const char* error) {
+static void handle_mxml_error_note(const char* error)
+{
 	mxml_last_error = strdup(error);
 }
 
-static mxml_node_t* recursive_clone(mxml_node_t *dest_parent, mxml_node_t *src) {
+static mxml_node_t* recursive_clone(mxml_node_t *dest_parent, mxml_node_t *src)
+{
 	mxml_node_t *dest = mxmlNewElement(dest_parent, mxmlGetElement(src));
 	for (int i = 0; i < mxmlElementGetAttrCount(src); i++)
 	{
@@ -114,7 +118,8 @@ static mxml_node_t* recursive_clone(mxml_node_t *dest_parent, mxml_node_t *src) 
 	}
 
 	mxml_node_t *src_child = mxmlGetFirstChild(src);
-	while (src_child != NULL) {
+	while (src_child != NULL)
+	{
 		recursive_clone(dest, src_child);
 
 		src_child = mxmlGetNextSibling(src_child);
@@ -123,22 +128,27 @@ static mxml_node_t* recursive_clone(mxml_node_t *dest_parent, mxml_node_t *src) 
 	return dest;
 }
 
-mxml_type_t remove_whitespace_callback(mxml_node_t *) {
+mxml_type_t remove_whitespace_callback(mxml_node_t *)
+{
 	return MXML_IGNORE;
 }
 
-WXMLDocument::WXMLDocument(const char *text) {
+WXMLDocument::WXMLDocument(const char *text)
+{
 	root_node = mxmlLoadString(NULL, text, remove_whitespace_callback);
 }
 
-WXMLDocument::WXMLDocument(WXMLNode *clone_from) {
+WXMLDocument::WXMLDocument(WXMLNode *clone_from)
+{
 	root_node = recursive_clone(MXML_NO_PARENT, clone_from->handle);
 }
 
 WXMLDocument::WXMLDocument(mxml_node_t *root_node) : root_node(root_node) {}
 
-WXMLDocument::~WXMLDocument() {
-	for (auto const &node : nodes) {
+WXMLDocument::~WXMLDocument()
+{
+	for (auto const &node : nodes)
+	{
 		node.second->root = NULL;
 		node.second->handle = NULL;
 	}
@@ -146,14 +156,17 @@ WXMLDocument::~WXMLDocument() {
 	mxmlDelete(root_node);
 }
 
-WXMLNode* WXMLDocument::GetNode(mxml_node_t *node) {
+WXMLNode* WXMLDocument::GetNode(mxml_node_t *node)
+{
 	if (nodes.count(node)) return nodes[node];
 
 	return new WXMLNode(this, node);
 }
 
-void WXMLDocument::MergeInto(WXMLDocument *other) {
-	for (auto const &pair : nodes) {
+void WXMLDocument::MergeInto(WXMLDocument *other)
+{
+	for (auto const &pair : nodes)
+	{
 		other->nodes[pair.first] = pair.second;
 		pair.second->root = other;
 	}
@@ -162,17 +175,22 @@ void WXMLDocument::MergeInto(WXMLDocument *other) {
 	// TODO mark ourselves for deletion
 }
 
-WXMLNode::WXMLNode(WXMLDocument *root, mxml_node_t *handle) : root(root), handle(handle), usages(0) {
+WXMLNode::WXMLNode(WXMLDocument *root, mxml_node_t *handle) : root(root), handle(handle), usages(0)
+{
 	root->nodes[handle] = this;
 }
 
-void WXMLNode::Release() {
+void WXMLNode::Release()
+{
 	usages--;
-	if (usages <= 0) {
-		if (root != NULL) {
+	if (usages <= 0)
+	{
+		if (root != NULL)
+		{
 			root->nodes.erase(handle);
 
-			if (root->nodes.empty()) {
+			if (root->nodes.empty())
+			{
 				delete root;
 			}
 		}
@@ -183,16 +201,20 @@ void WXMLNode::Release() {
 	}
 }
 
-WXMLDocument* WXMLNode::MoveToNewDocument() {
+WXMLDocument* WXMLNode::MoveToNewDocument()
+{
 	WXMLDocument *old = root;
 	WXMLDocument *doc = new WXMLDocument(handle);
 
 	vector<mxml_node_t*> to_remove;
-	for (auto const &node : old->nodes) {
+	for (auto const &node : old->nodes)
+	{
 		mxml_node_t *nod = node.first;
 		bool is_child = false;
-		while (nod != NULL) {
-			if (nod == handle) {
+		while (nod != NULL)
+		{
+			if (nod == handle)
+			{
 				is_child = true;
 				break;
 			}
@@ -206,7 +228,8 @@ WXMLDocument* WXMLNode::MoveToNewDocument() {
 		doc->nodes[node.first] = node.second;
 	}
 
-	for (mxml_node_t* const &node : to_remove) {
+	for (mxml_node_t* const &node : to_remove)
+	{
 		old->nodes.erase(node);
 	}
 
@@ -215,7 +238,8 @@ WXMLDocument* WXMLNode::MoveToNewDocument() {
 	return doc;
 }
 
-static WXMLNode* attemptParseString(WrenVM* vm) {
+static WXMLNode* attemptParseString(WrenVM* vm)
+{
 	WXMLNode **node = (WXMLNode**)wrenSetSlotNewForeign(vm, 0, 0, sizeof(WXMLNode*));
 
 	const char* text = wrenGetSlotString(vm, 1);
@@ -232,25 +256,30 @@ static WXMLNode* attemptParseString(WrenVM* vm) {
 	return *node;
 }
 
-static void allocateXML(WrenVM* vm) {
+static void allocateXML(WrenVM* vm)
+{
 	mxmlSetErrorCallback(handle_mxml_error_crash);
 	WXMLNode *wxml = attemptParseString(vm);
 
-	if (!wxml->handle) {
+	if (!wxml->handle)
+	{
 		WXML_ERR("Uncaught parse error!");
 	}
 }
 
-static void finalizeXML(void* data) {
+static void finalizeXML(void* data)
+{
 	WXMLNode *wxml = *(WXMLNode**)data;
 	wxml->Release();
 }
 
-static void XMLtry_parse(WrenVM* vm) {
+static void XMLtry_parse(WrenVM* vm)
+{
 	mxmlSetErrorCallback(handle_mxml_error_note);
 	WXMLNode *wxml = attemptParseString(vm);
 
-	if (mxml_last_error) {
+	if (mxml_last_error)
+	{
 		finalizeXML(wxml);
 		wrenSetSlotNull(vm, 0);
 
@@ -259,13 +288,15 @@ static void XMLtry_parse(WrenVM* vm) {
 	}
 }
 
-static void XMLNode_delete(WrenVM* vm) {
+static void XMLNode_delete(WrenVM* vm)
+{
 	// Make sure we don't crash if already freed, so don't use THIS_WXML
 	WXMLNode *wxml = *(WXMLNode**)wrenGetSlotForeign(vm, 0);
 	if (wxml->root != NULL) delete wxml->root;
 }
 
-static WXMLNode* XMLNode_create(WrenVM *vm, WXMLDocument *root, mxml_node_t *xnode, int slot) {
+static WXMLNode* XMLNode_create(WrenVM *vm, WXMLDocument *root, mxml_node_t *xnode, int slot)
+{
 	if (xnode == NULL) WXML_ERR("Cannot create null XML Node");
 
 	wrenGetVariable(vm, MODULE, "XML", slot);
@@ -277,7 +308,8 @@ static WXMLNode* XMLNode_create(WrenVM *vm, WXMLDocument *root, mxml_node_t *xno
 	return *node;
 }
 
-static void XMLNode_type(WrenVM* vm) {
+static void XMLNode_type(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	wrenSetSlotDouble(vm, 0, mxmlGetType(handle));
@@ -287,7 +319,8 @@ static void XMLNode_type(WrenVM* vm) {
 if (mxmlGetType(handle) != type) \
 WXML_ERR("Can only perform ." #name " on " #type " nodes - ID:" + to_string(mxmlGetType(handle)));
 
-static void XMLNode_text(WrenVM* vm) {
+static void XMLNode_text(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	XMLNODE_REQUIRE_TYPE(MXML_TEXT, name);
@@ -295,7 +328,8 @@ static void XMLNode_text(WrenVM* vm) {
 	wrenSetSlotString(vm, 0, mxmlGetText(handle, NULL));
 }
 
-static void XMLNode_text_set(WrenVM* vm) {
+static void XMLNode_text_set(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	XMLNODE_REQUIRE_TYPE(MXML_TEXT, name);
@@ -303,7 +337,8 @@ static void XMLNode_text_set(WrenVM* vm) {
 	mxmlSetText(handle, 0, wrenGetSlotString(vm, 1));
 }
 
-static void XMLNode_string(WrenVM* vm) {
+static void XMLNode_string(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, string);
@@ -314,7 +349,8 @@ static void XMLNode_string(WrenVM* vm) {
 	free(str);
 }
 
-static void XMLNode_name(WrenVM* vm) {
+static void XMLNode_name(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
@@ -322,7 +358,8 @@ static void XMLNode_name(WrenVM* vm) {
 	wrenSetSlotString(vm, 0, mxmlGetElement(handle));
 }
 
-static void XMLNode_name_set(WrenVM* vm) {
+static void XMLNode_name_set(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
@@ -330,7 +367,8 @@ static void XMLNode_name_set(WrenVM* vm) {
 	mxmlSetElement(handle, wrenGetSlotString(vm, 1));
 }
 
-static void XMLNode_attribute(WrenVM* vm) {
+static void XMLNode_attribute(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
@@ -342,23 +380,27 @@ static void XMLNode_attribute(WrenVM* vm) {
 		wrenSetSlotNull(vm, 0);
 }
 
-static void XMLNode_attribute_set(WrenVM* vm) {
+static void XMLNode_attribute_set(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
 
 	const char *name = wrenGetSlotString(vm, 1);
 
-	if (wrenGetSlotType(vm, 2) == WREN_TYPE_NULL) {
+	if (wrenGetSlotType(vm, 2) == WREN_TYPE_NULL)
+	{
 		mxmlElementDeleteAttr(handle, name);
 	}
-	else {
+	else
+	{
 		const char *value = wrenGetSlotString(vm, 2);
 		mxmlElementSetAttr(handle, name, value);
 	}
 }
 
-static void XMLNode_attribute_names(WrenVM* vm) {
+static void XMLNode_attribute_names(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
@@ -366,7 +408,8 @@ static void XMLNode_attribute_names(WrenVM* vm) {
 	wrenEnsureSlots(vm, 2);
 
 	wrenSetSlotNewList(vm, 0);
-	for (int i = 0; i < mxmlElementGetAttrCount(handle); i++) {
+	for (int i = 0; i < mxmlElementGetAttrCount(handle); i++)
+	{
 		const char *name;
 		mxmlElementGetAttrByIndex(handle, i, &name);
 		wrenSetSlotString(vm, 1, name);
@@ -374,7 +417,8 @@ static void XMLNode_attribute_names(WrenVM* vm) {
 	}
 }
 
-static void XMLNode_create_element(WrenVM* vm) {
+static void XMLNode_create_element(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	XMLNODE_REQUIRE_TYPE(MXML_ELEMENT, name);
@@ -384,7 +428,8 @@ static void XMLNode_create_element(WrenVM* vm) {
 	XMLNode_create(vm, wxml->root, node, 0);
 }
 
-static void XMLNode_detach(WrenVM* vm) {
+static void XMLNode_detach(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	// Don't do anything if we're already at the top of a tree
@@ -393,18 +438,21 @@ static void XMLNode_detach(WrenVM* vm) {
 	wxml->MoveToNewDocument();
 }
 
-static void XMLNode_clone(WrenVM* vm) {
+static void XMLNode_clone(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 
 	WXMLDocument *doc = new WXMLDocument(wxml);
 	XMLNode_create(vm, doc, doc->GetRootNode()->handle, 0);
 }
 
-static void XMLNode_attach(WrenVM* vm, int where, mxml_node_t *child) {
+static void XMLNode_attach(WrenVM* vm, int where, mxml_node_t *child)
+{
 	THIS_WXML_NODE(vm);
 	GET_WXML_NODE(vm, 1, new_child);
 
-	if (mxmlGetParent(new_child->handle) != NULL) {
+	if (mxmlGetParent(new_child->handle) != NULL)
+	{
 		WXML_ERR("Cannot attach a node that already has a parent");
 	}
 
@@ -415,18 +463,22 @@ static void XMLNode_attach(WrenVM* vm, int where, mxml_node_t *child) {
 	delete old_root;
 }
 
-static void XMLNode_attach(WrenVM* vm) {
+static void XMLNode_attach(WrenVM* vm)
+{
 	XMLNode_attach(vm, MXML_ADD_AFTER, MXML_ADD_TO_PARENT);
 }
 
-static void XMLNode_attach_pos(WrenVM* vm) {
+static void XMLNode_attach_pos(WrenVM* vm)
+{
 	THIS_WXML_NODE(vm);
 	GET_WXML_NODE(vm, 1, new_child);
 
-	if (wrenGetSlotType(vm, 2) == WREN_TYPE_NULL) {
+	if (wrenGetSlotType(vm, 2) == WREN_TYPE_NULL)
+	{
 		XMLNode_attach(vm, MXML_ADD_BEFORE, MXML_ADD_TO_PARENT);
 	}
-	else {
+	else
+	{
 		GET_WXML_NODE(vm, 2, prev_child);
 
 		XMLNode_attach(vm, MXML_ADD_AFTER, prev_child->handle);
@@ -455,19 +507,21 @@ func(LastChild, last_child)
 XMLNODE_FUNC_SET(XMLNODE_ACTION_FUNC)
 
 WrenForeignMethodFn wrenxml::bind_wxml_method(
-	WrenVM* vm,
-	const char* module,
-	const char* class_name_s,
-	bool is_static,
-	const char* signature_c)
+    WrenVM* vm,
+    const char* module,
+    const char* class_name_s,
+    bool is_static,
+    const char* signature_c)
 {
 	if (strcmp(module, MODULE) != 0) return NULL;
 
 	string class_name = class_name_s;
 	string signature = signature_c;
 
-	if (class_name == "XML") {
-		if (is_static && signature == "try_parse(_)") {
+	if (class_name == "XML")
+	{
+		if (is_static && signature == "try_parse(_)")
+		{
 			return XMLtry_parse;
 		}
 
@@ -512,14 +566,17 @@ WrenForeignMethodFn wrenxml::bind_wxml_method(
 	return NULL;
 }
 
-WrenForeignClassMethods wrenxml::get_XML_class_def(WrenVM* vm, const char* module, const char* class_name) {
-	if (string(module) == "base/native") {
-		if (string(class_name) == "XML") {
+WrenForeignClassMethods wrenxml::get_XML_class_def(WrenVM* vm, const char* module, const char* class_name)
+{
+	if (string(module) == "base/native")
+	{
+		if (string(class_name) == "XML")
+		{
 			WrenForeignClassMethods def;
 			def.allocate = allocateXML;
 			def.finalize = finalizeXML;
 			return def;
 		}
 	}
-	return { NULL,NULL };
+	return { NULL, NULL };
 }

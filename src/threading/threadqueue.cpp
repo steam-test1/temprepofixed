@@ -3,19 +3,22 @@
 
 namespace pd2hook
 {
-EventQueueMaster& EventQueueMaster::GetSingleton()
-{
-	static EventQueueMaster instance;
-	return instance;
-}
+	EventQueueMaster& EventQueueMaster::GetSingleton()
+	{
+		static EventQueueMaster instance;
+		return instance;
+	}
 
-void EventQueueMaster::ProcessEvents()
-{
-	std::for_each(queues.begin(), queues.end(), [](IEventQueue *q) { q->ProcessEvents(); });
-}
+	void EventQueueMaster::ProcessEvents()
+	{
+		std::for_each(queues.begin(), queues.end(), [](IEventQueue *q)
+		{
+			q->ProcessEvents();
+		});
+	}
 
-void EventQueueMaster::registerQueue(IEventQueue *q)
-{
-	queues.push_back(q);
-}
+	void EventQueueMaster::registerQueue(IEventQueue *q)
+	{
+		queues.push_back(q);
+	}
 }

@@ -6,9 +6,11 @@
 typedef struct ALCdevice_struct ALCdevice;
 typedef struct ALCcontext_struct ALCcontext;
 
-namespace pd2hook {
+namespace pd2hook
+{
 
-	class XAudio {
+	class XAudio
+	{
 	public:
 		static void Register(void *state);
 

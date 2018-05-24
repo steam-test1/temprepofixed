@@ -7,9 +7,12 @@
 #include <windows.h>
 #endif
 
-namespace blt {
-	namespace plugins {
-		class Plugin {
+namespace blt
+{
+	namespace plugins
+	{
+		class Plugin
+		{
 		public:
 			Plugin(std::string file);
 			Plugin(Plugin&) = delete;
@@ -18,7 +21,10 @@ namespace blt {
 
 			void Update(lua_State *L);
 
-			const std::string GetFile() const { return file; }
+			const std::string GetFile() const
+			{
+				return file;
+			}
 		private:
 			std::string file;
 
@@ -30,7 +36,8 @@ namespace blt {
 #endif
 		};
 
-		enum PluginLoadResult {
+		enum PluginLoadResult
+		{
 			plr_Success,
 			plr_AlreadyLoaded
 		};
