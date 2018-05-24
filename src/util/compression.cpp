@@ -61,7 +61,7 @@ std::string DecompressData(const DataPair_t& compressedData)
 	stream.avail_in = 0;
 	stream.next_in = Z_NULL;
 
-	auto ret = inflateInit2(&stream, -MAX_WBITS);
+	inflateInit2(&stream, -MAX_WBITS);
 
 	stream.avail_in = compressedData.second.size();
 	stream.next_in = reinterpret_cast<unsigned char*>(const_cast<char *>(compressedData.second.data()));
@@ -71,7 +71,7 @@ std::string DecompressData(const DataPair_t& compressedData)
 	stream.avail_out = compressedData.first;
 	stream.next_out = out.get();
 
-	ret = inflate(&stream, Z_NO_FLUSH);
+	inflate(&stream, Z_NO_FLUSH);
 	inflateEnd(&stream);
 
 	return std::string(reinterpret_cast<const char *>(out.get()), compressedData.first);
@@ -82,7 +82,8 @@ std::unique_ptr<ZIPFileData> ReadFile(ByteStream& mainStream)
 	auto fileHeader = mainStream.readType<int32_t>();
 	if (fileHeader != MagicFileHeader) return nullptr;
 
-	auto versionNeeded = mainStream.readType<int16_t>();
+	// version needed
+	mainStream.readType<int16_t>();
 
 	// Ignore 'general purpose bit flag'
 	mainStream.readType<int16_t>();
@@ -92,7 +93,8 @@ std::unique_ptr<ZIPFileData> ReadFile(ByteStream& mainStream)
 	// Ignore modified file times.
 	mainStream.readType<int32_t>();
 
-	auto crc32 = mainStream.readType<int32_t>();
+	// crc32
+	mainStream.readType<int32_t>();
 
 	std::unique_ptr<ZIPFileData> newFile(new ZIPFileData());
 	newFile->compressedSize = mainStream.readType<int32_t>();

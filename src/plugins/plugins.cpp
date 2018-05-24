@@ -19,7 +19,9 @@ namespace blt {
 			// obtaining the plugin source code.
 
 			for (const Plugin* plugin : plugins_list) {
-				return plr_AlreadyLoaded;
+				// TODO use some kind of ID or UUID embedded into the binary for identification, not filename
+				if(file == plugin->GetFile())
+					return plr_AlreadyLoaded;
 			}
 
 			PD2HOOK_LOG_LOG(string("Loading binary extension ") + file);
@@ -38,7 +40,7 @@ namespace blt {
 			return plr_Success;
 		}
 
-		const list<Plugin*>& blt::plugins::GetPlugins() {
+		const list<Plugin*>& GetPlugins() {
 			return plugins_list;
 		}
 

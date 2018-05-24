@@ -17,7 +17,7 @@ namespace pd2hook {
 	int xabuffer::lX_loadbuffer(lua_State *L) {
 		ALERR;
 
-		int count = lua_gettop(L);
+		size_t count = lua_gettop(L);
 
 		ALuint buffers[32];
 

@@ -105,7 +105,7 @@ namespace pd2hook {
         bool
         CreateDirectorySingle(const string &path)
         {
-            mkdir(path.c_str(), 0777);
+            return mkdir(path.c_str(), 0777) == 0;
         }
 
         bool

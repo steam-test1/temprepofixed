@@ -5,6 +5,13 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux") # Add other systems, if they get PD2 suppo
 	set(UNIX true)
 endif()
 
+###############################################################################
+## misc. definitions ##########################################################
+###############################################################################
+
+# Use CXX 14
+set(CMAKE_CXX_STANDARD 14)
+
 # Enable XAudio
 add_definitions(-DENABLE_XAUDIO)
 
@@ -73,7 +80,7 @@ if(UNIX)
 	include_directories (platforms/gnu/include)
 
 	# Use modern C++, and show all warnings
-	target_compile_options(SuperBLT PUBLIC -std=c++1y -Wall -fPIC)
+	target_compile_options(SuperBLT PUBLIC -Wall -Werror -fPIC)
 
 	# Enable this to see missing references:
 	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
@@ -150,7 +157,7 @@ macro(Add_Loader library_name)
 	target_link_libraries(${library_name} LINK_PRIVATE SuperBLT)
 	if(UNIX)
 		# Use modern C++, and show all warnings
-		target_compile_options(${library_name} PUBLIC -std=c++1y -Wall)
+		target_compile_options(${library_name} PUBLIC -Wall -Werror)
 
 		# Use a custom link script, to ensure the correct initialization order
 		target_link_libraries(${library_name} LINK_PRIVATE "-Wl,-T,${gnu_link_script}") # Use the link script

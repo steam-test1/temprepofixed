@@ -252,9 +252,6 @@ namespace pd2hook
 
 	int luaF_dofile(lua_State* L)
 	{
-
-		int n = lua_gettop(L);
-
 		size_t length = 0;
 		const char* filename = lua_tolstring(L, 1, &length);
 		int error = luaL_loadfilex(L, filename, nullptr);
@@ -480,7 +477,6 @@ namespace pd2hook
 
 	int luaF_moveDirectory(lua_State * L)
 	{
-		int top = lua_gettop(L);
 		size_t lf = 0;
 		const char * fromStr = lua_tolstring(L, 1, &lf);
 		size_t ld = 0;
@@ -588,7 +584,7 @@ namespace pd2hook
 		}
 		else if ((*value)->it > (~13u)) // Boiled down from lua_topointer in LuaJIT
 		{
-			value_ptr = (void*) (*value)->gcptr32;
+			value_ptr = (void*) (uint64_t) (*value)->gcptr32;
 		}
 		else
 		{

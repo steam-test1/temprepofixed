@@ -99,24 +99,6 @@ void pd2hook::tweaker::ignore_file(idfile file) {
 	ignored_files.insert(file);
 }
 
-static void convert_block(const char* str, uint64_t* var, int* start_ptr, int len, int val) {
-	int start = *start_ptr;
-	*start_ptr -= len;
-
-	uint64_t alt = *var;
-
-	int i = 0;
-	for (int possibleVal = start; possibleVal > start - len; possibleVal--) {
-		i++;
-
-		if (!(val >= possibleVal)) continue;
-
-		int pow = 8 * (8 - i);
-
-		*var += (uint64_t)(uint8_t)str[possibleVal - 1] << pow;
-	}
-}
-
 typedef  unsigned long  long ub8;   /* unsigned 8-byte quantities */
 typedef  unsigned long  int  ub4;   /* unsigned 4-byte quantities */
 typedef  unsigned       char ub1;
@@ -140,7 +122,7 @@ typedef  unsigned       char ub1;
   c -= a; c -= b; c ^= (b>>22); \
 }
 
-idstring Hash64(const ub1* k, ub8 length, ub8 level)
+static idstring Hash64(const ub1* k, ub8 length, ub8 level)
 {
 	register ub8 a, b, c, len;
 

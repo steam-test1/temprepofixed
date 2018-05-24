@@ -28,7 +28,8 @@ if(name->root == NULL) { \
 
 #define THIS_WXML_NODE(vm) \
 GET_WXML_NODE(vm, 0, wxml) \
-mxml_node_t *handle = wxml->handle
+mxml_node_t *handle = wxml->handle; \
+(void)(handle) /* cast our handle to void to eliminate GCC's unused variable errors */
 
 static char *					/* O - Allocated string */
 mxmlToAllocStringSafe(
@@ -299,7 +300,7 @@ static void XMLNode_text_set(WrenVM* vm) {
 
 	XMLNODE_REQUIRE_TYPE(MXML_TEXT, name);
 
-	mxmlSetText(handle, NULL, wrenGetSlotString(vm, 1));
+	mxmlSetText(handle, 0, wrenGetSlotString(vm, 1));
 }
 
 static void XMLNode_string(WrenVM* vm) {

@@ -225,7 +225,13 @@ const char* tweaker::transform_file(const char* text)
 
 	wrenSetSlotString(vm, 3, text);
 
+	// TODO give a reasonable amount of information on what happened.
 	WrenInterpretResult result2 = wrenCall(vm, sig);
+	if(result2 == WREN_RESULT_COMPILE_ERROR) {
+		PD2HOOK_LOG_ERROR("Wren tweak file failed: compile error!");
+	} else if(result2 == WREN_RESULT_RUNTIME_ERROR) {
+		PD2HOOK_LOG_ERROR("Wren tweak file failed: compile error!");
+	}
 
 	wrenReleaseHandle(vm, tweakerClass);
 	wrenReleaseHandle(vm, sig);

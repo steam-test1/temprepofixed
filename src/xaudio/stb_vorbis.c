@@ -551,7 +551,8 @@ static int error(vorb *f, enum STBVorbisError e)
 #ifdef dealloca
 #define temp_free(f,p)                  (f->alloc.alloc_buffer ? 0 : dealloca(size))
 #else
-#define temp_free(f,p)                  0
+// Modified by ZNix: use '(void)0' rather than '0', to avoid GCC's empty statement warning
+#define temp_free(f,p)                  (void)0
 #endif
 #define temp_alloc_save(f)              ((f)->temp_offset)
 #define temp_alloc_restore(f,p)         ((f)->temp_offset = (p))

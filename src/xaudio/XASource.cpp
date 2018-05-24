@@ -25,7 +25,7 @@ namespace pd2hook {
 	int xasource::lX_new_source(lua_State *L) {
 		ALERR;
 
-		int count = lua_gettop(L) == 0 ? 1 : lua_tointeger(L, 1);
+		size_t count = lua_gettop(L) == 0 ? 1 : lua_tointeger(L, 1);
 		lua_settop(L, 0);
 
 		ALuint sources[32];
