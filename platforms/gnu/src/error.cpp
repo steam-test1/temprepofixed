@@ -75,6 +75,10 @@ namespace blt {
                 traceback(L, crashlog);
                 info.close();
 
+                // Also print the error into the console
+                log::log("Fatal Runtime Error, Aborting: " + string(lua_tolstring(L, 1, &len)), log::LOG_ERROR);
+                traceback(L, errlog);
+
                 exit(1); // Does not return
             }
 
