@@ -75,9 +75,23 @@ namespace blt {
         hook_remove(luaCallDetour);
 
         if(forcepcalls)
+        {
             return blt::lua_functions::perform_lua_pcall(state, argCount, resultCount);
+        }
         else
-            return lua_call(state, argCount, resultCount);
+        {
+            const int target = 1; // Push our handler to the start of the stack
+
+            // Get the value onto the stack, as pcall can't accept indexes
+            lua_rawgeti(state, LUA_REGISTRYINDEX, error::check_callback(state));
+            lua_insert(state, target);
+
+            // Run the function, and any errors are handled for us.
+            lua_pcall(state, argCount, resultCount, target);
+
+            // Done with our error handler
+            lua_remove(state, target);
+        }
     }
 
     void*
