@@ -108,7 +108,14 @@ void io_idstring_hash(WrenVM *vm)
 static void io_load_plugin(WrenVM* vm)
 {
 	const char *plugin_filename = wrenGetSlotString(vm, 1);
-	blt::plugins::LoadPlugin(plugin_filename);
+	try {
+		blt::plugins::LoadPlugin(plugin_filename);
+	}
+	catch (string err) {
+		string msg = string("LoadPlugin: ") + string(plugin_filename) + string(" : ") + err;
+		wrenSetSlotString(vm, 0, msg.c_str());
+		wrenAbortFiber(vm, 0);
+	}
 }
 
 static WrenForeignClassMethods bindForeignClass(
