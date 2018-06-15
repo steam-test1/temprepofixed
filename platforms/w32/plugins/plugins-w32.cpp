@@ -9,6 +9,8 @@ using namespace std;
 // any kind of getter function because the PD2 binary isn't stripped
 typedef void*(*lua_access_func_t)(const char*);
 typedef void(*init_func_t)(lua_access_func_t get_lua_func_by_name);
+
+// Do port these
 typedef void(*setup_state_func_t)(lua_State *L);
 typedef void(*update_func_t)(lua_State *L);
 
@@ -62,9 +64,44 @@ blt::plugins::Plugin::Plugin(std::string file) : file(file)
 
 	if (!module) throw string("Failed to load module: ERR") + to_string(GetLastError());
 
-	// TODO verify signature
-	// We MUST do this before publicly releasing a version, as there are major security implications
+	// Version compatibility.
+	uint64_t *SBLT_API_REVISION = (uint64_t*)GetProcAddress(module, "SBLT_API_REVISION");
+	if (!SBLT_API_REVISION) throw string("Missing export SBLT_API_REVISION");
 
+	switch (*SBLT_API_REVISION) {
+	case 1:
+		// Nothing special for now.
+		break;
+	default:
+		throw string("Unsupported revision ") + to_string(*SBLT_API_REVISION) + " - you probably need to update SuperBLT";
+	}
+
+	// Verify the licence compliance.
+	const char * const *MODULE_LICENCE_DECLARATION = (const char * const *)GetProcAddress(module, "MODULE_LICENCE_DECLARATION");
+	if (!MODULE_LICENCE_DECLARATION) throw string("Licence error: Missing export MODULE_LICENCE_DECLARATION");
+
+	const char * const *MODULE_SOURCE_CODE_LOCATION = (const char * const *)GetProcAddress(module, "MODULE_SOURCE_CODE_LOCATION");
+	if (!MODULE_SOURCE_CODE_LOCATION) throw string("Licence error: Missing export MODULE_SOURCE_CODE_LOCATION");
+
+	const char * const *MODULE_SOURCE_CODE_REVISION = (const char * const *)GetProcAddress(module, "MODULE_SOURCE_CODE_REVISION");
+	if (!MODULE_SOURCE_CODE_REVISION) throw string("Licence error: Missing export MODULE_SOURCE_CODE_REVISION");
+
+	const char *required_declaration = "This module is licenced under the GNU GPL version 2 or later, or another compatible licence";
+
+	if (strcmp(required_declaration, *MODULE_LICENCE_DECLARATION)) {
+		throw string("Invalid licence declaration '") + string(*MODULE_LICENCE_DECLARATION) + string("'");
+	}
+
+	bool developer = false;
+	if (*MODULE_SOURCE_CODE_LOCATION) {
+		// TODO handle this, put it somewhere accessable by Lua.
+	}
+	else {
+		// TODO also make Lua aware of this.
+		developer = true;
+	}
+
+	// Start loading everything
 	init_func_t init = (init_func_t)GetProcAddress(module, "SuperBLT_Plugin_Setup");
 	if (!init) throw "Invalid module - missing initfunc!";
 
