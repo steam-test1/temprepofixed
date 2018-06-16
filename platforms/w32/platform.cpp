@@ -275,7 +275,7 @@ void blt::platform::lua::SetForcePCalls(bool state)
 
 	if (state)
 	{
-		luaCallDetour.Install((void**)&lua_call, blt::lua_functions::perform_lua_pcall);
+		luaCallDetour.Install(lua_call, blt::lua_functions::perform_lua_pcall);
 		//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
 	}
 	else
