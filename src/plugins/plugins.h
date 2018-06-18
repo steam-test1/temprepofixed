@@ -11,6 +11,9 @@ namespace blt
 {
 	namespace plugins
 	{
+		typedef void(*update_func_t)(lua_State *L);
+		typedef void(*setup_state_func_t)(lua_State *L);
+
 		class Plugin
 		{
 		public:
@@ -28,11 +31,14 @@ namespace blt
 		private:
 			std::string file;
 
+			update_func_t update_func;
+			setup_state_func_t setup_state;
+
 			// Native variable storage:
 #ifdef WIN32
 			HMODULE module;
-			FARPROC setup_state;
-			FARPROC update_func;
+#elif __GNUC__
+			void *dlhandle;
 #endif
 		};
 
