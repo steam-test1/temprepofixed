@@ -28,18 +28,17 @@ namespace blt
 			{
 				return file;
 			}
-		private:
-			std::string file;
+
+		protected:
+			void Init();
 
 			update_func_t update_func;
 			setup_state_func_t setup_state;
 
-			// Native variable storage:
-#ifdef WIN32
-			HMODULE module;
-#elif __GNUC__
-			void *dlhandle;
-#endif
+			virtual void *ResolveSymbol(std::string name) const = 0;
+
+		private:
+			std::string file;
 		};
 
 		enum PluginLoadResult
@@ -54,5 +53,9 @@ namespace blt
 		// Implemented in InitiateState
 		// TODO find a cleaner solution
 		void RegisterPluginForActiveStates(Plugin *plugin);
+
+		// Implemented per-platform, creates the correct plugin object
+		// This should NOT be used outside LoadPlugin()
+		Plugin *CreateNativePlugin(std::string);
 	}
 }

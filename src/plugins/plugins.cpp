@@ -1,3 +1,6 @@
+#include <stdint.h>
+#include <string.h>
+
 #include "plugins.h"
 #include "util/util.h"
 
@@ -32,7 +35,7 @@ namespace blt
 
 			try
 			{
-				Plugin *plugin = new Plugin(file);
+				Plugin *plugin = CreateNativePlugin(file);
 				plugins_list.push_back(plugin);
 
 				// Set up the already-running states
@@ -49,6 +52,75 @@ namespace blt
 		const list<Plugin*>& GetPlugins()
 		{
 			return plugins_list;
+		}
+
+		Plugin::Plugin(std::string file) : file(file)
+		{
+		}
+
+		void Plugin::Init()
+		{
+			// Version compatibility.
+			uint64_t *SBLT_API_REVISION = (uint64_t*) ResolveSymbol("SBLT_API_REVISION");
+			if (!SBLT_API_REVISION) throw string("Missing export SBLT_API_REVISION");
+
+			switch (*SBLT_API_REVISION)
+			{
+			case 1:
+				// Nothing special for now.
+				break;
+			default:
+				throw string("Unsupported revision ") + to_string(*SBLT_API_REVISION) + " - you probably need to update SuperBLT";
+			}
+
+			// Verify the licence compliance.
+			const char * const *MODULE_LICENCE_DECLARATION = (const char * const *)ResolveSymbol("MODULE_LICENCE_DECLARATION");
+			if (!MODULE_LICENCE_DECLARATION) throw string("Licence error: Missing export MODULE_LICENCE_DECLARATION");
+
+			const char * const *MODULE_SOURCE_CODE_LOCATION = (const char * const *)ResolveSymbol("MODULE_SOURCE_CODE_LOCATION");
+			if (!MODULE_SOURCE_CODE_LOCATION) throw string("Licence error: Missing export MODULE_SOURCE_CODE_LOCATION");
+
+			const char * const *MODULE_SOURCE_CODE_REVISION = (const char * const *)ResolveSymbol("MODULE_SOURCE_CODE_REVISION");
+			if (!MODULE_SOURCE_CODE_REVISION) throw string("Licence error: Missing export MODULE_SOURCE_CODE_REVISION");
+
+			const char *required_declaration = "This module is licenced under the GNU GPL version 2 or later, or another compatible licence";
+
+			if (strcmp(required_declaration, *MODULE_LICENCE_DECLARATION))
+			{
+				throw string("Invalid licence declaration '") + string(*MODULE_LICENCE_DECLARATION) + string("'");
+			}
+
+			bool developer = false;
+			if (*MODULE_SOURCE_CODE_LOCATION)
+			{
+				// TODO handle this, put it somewhere accessable by Lua.
+			}
+			else
+			{
+				// TODO also make Lua aware of this.
+				developer = true;
+			}
+
+			if(developer)
+			{
+				PD2HOOK_LOG_WARN("Loading development plugin! This should never occur ourside a development enviornment");
+			}
+
+			setup_state = (setup_state_func_t) ResolveSymbol("SuperBLT_Plugin_Init_State");
+			if (!setup_state) throw "Invalid dlhandle - missing setup_state func!";
+
+			update_func = (update_func_t) ResolveSymbol("SuperBLT_Plugin_Update");
+		}
+
+		void Plugin::AddToState(lua_State * L)
+		{
+			setup_state(L);
+		}
+
+		void Plugin::Update(lua_State * L)
+		{
+			if (update_func)
+				update_func(L);
 		}
 
 
