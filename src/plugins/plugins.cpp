@@ -87,7 +87,12 @@ namespace blt
 
 			if (strcmp(required_declaration, *MODULE_LICENCE_DECLARATION))
 			{
-				throw string("Invalid licence declaration '") + string(*MODULE_LICENCE_DECLARATION) + string("'");
+				ostringstream msg;
+				msg << "Invalid licence declaration ";
+				msg << "'" << (*MODULE_LICENCE_DECLARATION) << "'";
+				msg << " (actual) vs ";
+				msg << "'" << required_declaration << "' (correct)";
+				throw msg.str();
 			}
 
 			bool developer = false;
