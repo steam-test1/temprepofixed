@@ -150,7 +150,7 @@ namespace pd2hook
 		std::list<std::unique_ptr<ZIPFileData>> files;
 		{
 			std::unique_ptr<ZIPFileData> file;
-			while (file = ReadFile(mainStream))
+			while ((file = ReadFile(mainStream)))
 			{
 				files.push_back(std::move(file));
 			}

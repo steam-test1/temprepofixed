@@ -132,7 +132,7 @@ typedef  unsigned       char ub1;
 
 static idstring Hash64(const ub1* k, ub8 length, ub8 level)
 {
-	register ub8 a, b, c, len;
+	ub8 a, b, c, len;
 
 	/* Set up the internal state */
 	len = length;
