@@ -10,7 +10,7 @@ endif()
 ###############################################################################
 
 # Use CXX 14
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # Enable XAudio
 add_definitions(-DENABLE_XAUDIO)
