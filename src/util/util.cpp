@@ -63,13 +63,6 @@ namespace pd2hook
 			{
 				std::string fpath = directory + *it;
 
-				// Put all the paths to lower case
-				// Only do this on Windows
-				// TODO some better way to mark if we're case sensitive or not
-#ifdef WIN32
-				std::transform(fpath.begin(), fpath.end(), fpath.begin(), ::tolower);
-#endif
-
 				// Add the path on the list
 				paths.push_back(fpath);
 			}
@@ -81,11 +74,25 @@ namespace pd2hook
 			}
 		}
 
+		static bool CompareStringsCaseInsensitive(std::string a, std::string b)
+		{
+			std::transform(a.begin(), a.end(), a.begin(), ::tolower);
+			std::transform(b.begin(), b.end(), b.begin(), ::tolower);
+
+			return a < b;
+		}
+
 		std::string GetDirectoryHash(std::string directory)
 		{
 			std::vector<std::string> paths;
 			RecurseDirectoryPaths(paths, directory, true);
-			std::sort(paths.begin(), paths.end());
+
+			// Case-insensitive sort, since that's how it was always done.
+			// (on Windows, the filenames were previously downcased in RecurseDirectoryPaths, but that
+			//  obviously won't work with a case-sensitive filesystem)
+			// If I were to rewrite BLT from scratch I'd certainly make this case-sensitive, but there's no good
+			//  way to change this without breaking hashing on previous versions.
+			std::sort(paths.begin(), paths.end(), CompareStringsCaseInsensitive);
 
 			std::string hashconcat;
 
