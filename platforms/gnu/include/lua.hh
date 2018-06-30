@@ -11,14 +11,14 @@
 #define LUAL_BUFFERSIZE (BUFSIZ > 16384 ? 8192 : BUFSIZ)
 
 extern "C" {
-   #define LUA_API extern
-   #define LUALIB_API LUA_API
+#define LUA_API extern
+#define LUALIB_API LUA_API
 
-   #include "pure_lua.h"
-   #include "pure_lauxlib.h"
+#include "pure_lua.h"
+#include "pure_lauxlib.h"
 
-   #undef LUALIB_API
-   #undef LUA_API
+#undef LUALIB_API
+#undef LUA_API
 }
 
 // The windows version of BLT uses lua_State, whereas blt4l uses lua_state. Set up a define to fix that.

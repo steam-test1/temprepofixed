@@ -5,44 +5,49 @@
 #include <string>
 #include <fstream>
 
-namespace blt {
-    namespace zip {
+namespace blt
+{
+	namespace zip
+	{
 
-        struct ZIPFileData {
-            std::string filePath;
-            std::string compressedData;
-            std::string decompressedData;
-            
-            int compressedSize;
-            int uncompressedSize;
-        };
+		struct ZIPFileData
+		{
+			std::string filePath;
+			std::string compressedData;
+			std::string decompressedData;
 
-        class ByteStream {
-            public:
-                ByteStream(std::string);
-                ~ByteStream();
+			int compressedSize;
+			int uncompressedSize;
+		};
 
-                template<typename T> T read_typed();
-                std::string read_string(int);
-            private:
-                std::ifstream mainStream;
-        };
+		class ByteStream
+		{
+		public:
+			ByteStream(std::string);
+			~ByteStream();
 
-        class ZIPArchive {
-            public:
-                ZIPArchive(std::string, std::string);
-                ~ZIPArchive();
+			template<typename T> T read_typed();
+			std::string read_string(int);
+		private:
+			std::ifstream mainStream;
+		};
 
-                void read_archive();
-            private:
-                bool read_file();
-                bool write_file(ZIPFileData*);
-                void decompress_file(ZIPFileData*);
+		class ZIPArchive
+		{
+		public:
+			ZIPArchive(std::string, std::string);
+			~ZIPArchive();
 
-                ByteStream mainStream;
-                std::list<ZIPFileData*> files;
-                std::string extractTo;
-        };
+			void read_archive();
+		private:
+			bool read_file();
+			bool write_file(ZIPFileData*);
+			void decompress_file(ZIPFileData*);
 
-    }
+			ByteStream mainStream;
+			std::list<ZIPFileData*> files;
+			std::string extractTo;
+		};
+
+	}
 }

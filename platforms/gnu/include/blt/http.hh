@@ -3,56 +3,59 @@
 #include <thread>
 #include <string>
 
-namespace blt {
+namespace blt
+{
 
-    typedef void(*HTTPCallback)(void*, std::string);
-    typedef void(*HTTPProgress)(void*, long, long);
+	typedef void(*HTTPCallback)(void*, std::string);
+	typedef void(*HTTPProgress)(void*, long, long);
 
-    struct HTTPItem {
-        HTTPItem();
-        HTTPCallback callback;
-        HTTPProgress progressCallback;
+	struct HTTPItem
+	{
+		HTTPItem();
+		HTTPCallback callback;
+		HTTPProgress progressCallback;
 
-        std::string url;
-        std::string body;
+		std::string url;
+		std::string body;
 
-        void* data;
+		void* data;
 
-        long progressCounter;
-        long dataCounter;
-    };
+		long progressCounter;
+		long dataCounter;
+	};
 
-    class HTTPManager {
-        public: 
-            HTTPManager();
-            ~HTTPManager();
+	class HTTPManager
+	{
+	public:
+		HTTPManager();
+		~HTTPManager();
 
-            // instance
+		// instance
 
-            bool locks_initd();
-            void init_locks();
+		bool locks_initd();
+		void init_locks();
 
-            void SSL_Lock(int);
-            void SSL_Unlock(int);
+		void SSL_Lock(int);
+		void SSL_Unlock(int);
 
-            void launch_request(HTTPItem*);
+		void launch_request(HTTPItem*);
 
-            // static
+		// static
 
-            static HTTPManager* get_instance();
-        private:
-            
-            // instance
+		static HTTPManager* get_instance();
+	private:
 
-            bool lockInitDone;
-            std::mutex* sslLocks;
-            int numLocks;
-            std::list<std::thread*> threads;
+		// instance
 
-            // static
+		bool lockInitDone;
+		std::mutex* sslLocks;
+		int numLocks;
+		std::list<std::thread*> threads;
 
-            static HTTPManager* instance;
-    };
+		// static
+
+		static HTTPManager* instance;
+	};
 
 
 }

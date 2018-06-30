@@ -2,23 +2,26 @@
 
 #include <dsl/idstring.hh>
 
-namespace dsl {
-   struct TransportVT;
+namespace dsl
+{
+	struct TransportVT;
 
-   class Transport {
-      public:
-         // VTable
-         struct TransportVT *vt;
+	class Transport
+	{
+	public:
+		// VTable
+		struct TransportVT *vt;
 
-         // Variables
-   };
+		// Variables
+	};
 
-   struct TransportVT { // VTable
-      void *f1;
-      void *f2;
-      typedef void (*open_func)(dsl::Archive*, dsl::Transport*, unsigned int);
-      open_func f_open;
-   };
+	struct TransportVT   // VTable
+	{
+		void *f1;
+		void *f2;
+		typedef void (*open_func)(dsl::Archive*, dsl::Transport*, unsigned int);
+		open_func f_open;
+	};
 
 };
 
