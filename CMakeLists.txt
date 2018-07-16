@@ -85,11 +85,10 @@ if(UNIX)
 	# Enable this to see missing references:
 	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 
-	# LibCXX / Patches support
+	# Error for anyone using USE_LIBCXX
 	if (USE_LIBCXX)
-		message("Using Clang/LibC++")
-		add_definitions(-DBLT_USING_LIBCXX)
-		set(CMAKE_CXX_COMPILER clang++)
+		message(WARNING "USE_LIBCXX: LibCXX is no longer required for "
+			"the asset system, the flag will be ignored, and the default compiler used.")
 	endif()
 elseif(WIN32)
 	add_library(SuperBLT STATIC ${sources} ${win32_sources})

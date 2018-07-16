@@ -1,13 +1,11 @@
-
-#if defined(BLT_USING_LIBCXX)
+#include <blt/assets.hh>
+#include <blt/libcxxstring.hh>
 
 #include <lua.h>
 #include <subhook.h>
 
 #include <string>
 #include <map>
-
-#include <blt/assets.hh>
 
 #include <dlfcn.h>
 
@@ -82,7 +80,7 @@ func(4);
 	static subhook::Hook dslDbAddMembers; // We need this to add the entries, as we need to do it after the DB table is set up
 
 	static void (*dsl_db_add_members)   (lua_state*);
-	static void (*dsl_fss_open) (Archive *output, FileSystemStack **_this, std::string const*);
+	static void (*dsl_fss_open) (Archive *output, FileSystemStack **_this, libcxxstring const*);
 
 	typedef void* (*try_open_t) (Archive *target, DB *db, idstring *ext, idstring *name, void *template_obj /* Misc depends on the template type */, Transport *transport);
 	typedef void* (*do_resolve_t) (DB *_this, idstring*, idstring*, void *template_obj, void *unknown);
@@ -105,7 +103,8 @@ func(4);
 		if(custom_assets.count(hash))
 		{
 			string str = custom_assets[hash];
-			dsl_fss_open(target, &db->stack, &str);
+			libcxxstring cxxstr = str; // Use a LibCXX-ABI-compatible string thing
+			dsl_fss_open(target, &db->stack, &cxxstr);
 			return target;
 		}
 
@@ -194,16 +193,6 @@ func(4);
 
 	}
 };
-
-#else
-
-// Stub implementation when not using LibC++
-namespace blt
-{
-	void init_asset_hook(void *dlHandle) {}
-}
-
-#endif
 
 /* vim: set ts=4 softtabstop=0 sw=4 expandtab: */
 

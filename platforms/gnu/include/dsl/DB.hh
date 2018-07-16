@@ -2,6 +2,7 @@
 
 #include <dsl/idstring.hh>
 #include <dsl/FileSystem.hh>
+#include <blt/libcxxstring.hh>
 
 namespace dsl
 {
@@ -12,8 +13,8 @@ namespace dsl
 		void *allocator_thingy;
 		void *ptr2;
 		void *another_allocator_thingy;
-		std::string some_str_1;
-		std::string some_str_2;
+		blt::libcxxstring some_str_1;
+		blt::libcxxstring some_str_2;
 		void *ptr4;
 		void *some_map;
 		dsl::FileSystemStack *stack;
