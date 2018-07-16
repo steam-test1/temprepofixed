@@ -9,10 +9,6 @@ extern "C" {
 #include <string>
 #include <subhook.h>
 
-#if defined(BLT_USING_LIBCXX) // not used otherwise, no point in wasting compile time :p
-#   include <vector>
-#endif
-
 #include <lua.h>
 #include <platform.h>
 
@@ -124,20 +120,6 @@ namespace blt
 		hook_remove(luaCloseDetour);
 		lua_close(state);
 	}
-
-#if defined(BLT_USING_LIBCXX)
-
-	/**
-	 * uber-simple and highly effective mod_overrides fix
-	 * Requires libcxx for implementation-level compatibility with PAYDAY
-	 */
-
-	Hook     sh_dsl_dfs_list_all;
-	void        (*dsl_dfs_list_all)(void*, std::vector<std::string>*, std::vector<std::string>*,
-	                                std::string const*);
-
-	// --------------------------
-#endif
 
 	void dt_node_from_xml(void *this_, const char *string, const uint64_t length, void *something)
 	{
