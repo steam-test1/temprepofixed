@@ -185,11 +185,11 @@ func(4);
 #undef setcall
 
 		// Add the 'add_members' hook
-		dslDbAddMembers.Install((void*) dsl_db_add_members, (void*) dt_dsl_db_add_members);
+		dslDbAddMembers.Install((void*) dsl_db_add_members, (void*) dt_dsl_db_add_members, subhook::HookOption64BitOffset);
 
 		// Hook each of the four loading functions
 #define INSTALL_TRY_OPEN_HOOK(id) \
-        dslDbTryOpenDetour ## id.Install((void*) dsl_db_try_open_ ## id, (void*) dt_dsl_db_try_open_hook_ ## id);
+        dslDbTryOpenDetour ## id.Install((void*) dsl_db_try_open_ ## id, (void*) dt_dsl_db_try_open_hook_ ## id, subhook::HookOption64BitOffset);
 		EACH_HOOK(INSTALL_TRY_OPEN_HOOK)
 
 	}
