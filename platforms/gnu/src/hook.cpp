@@ -166,6 +166,10 @@ namespace blt
 	void
 	blt_init_hooks(void* dlHandle)
 	{
+		// First thing to do, install error handlers so if we crash we can generate a nice stacktrace
+		log::log("Installing SuperBLT error handlers", log::LOG_INFO);
+		error::set_global_handlers();
+
 #define setcall(symbol,ptr) *(void**) (&ptr) = dlsym(dlHandle, #symbol);
 		log::log("finding lua functions", log::LOG_INFO);
 
