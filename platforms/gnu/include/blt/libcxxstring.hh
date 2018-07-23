@@ -9,6 +9,9 @@
 
 namespace blt
 {
+	//typedef std::string libcxxstring;
+	//*
+	// Note: PAYDAY 2 was compiled with _LIBCPP_BIG_ENDIAN set, and _LIBCPP_ABI_ALTERNATE_STRING_LAYOUT not set
 	class libcxxstring
 	{
 	public:
@@ -29,9 +32,9 @@ namespace blt
 		const char* c_str() const;
 
 	private:
-		char *str;
+		size_t capacity_and_flags;
 		size_t size;
-		size_t capacity;
+		char *str;
 
 		void set_contents(const char *value, size_t length);
 	};

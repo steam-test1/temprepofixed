@@ -62,7 +62,10 @@ void libcxxstring::set_contents(const char *src, size_t length)
 
 	// Create our text array
 	str = new char[length];
-	size = capacity = length;
+	size = length;
+
+	// Or the length with 1 to mark this as a long string
+	capacity_and_flags = length | 1;
 
 	// Copy it in
 	memcpy(str, src, length);
