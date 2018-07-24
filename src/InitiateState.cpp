@@ -843,13 +843,7 @@ namespace blt
 				PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
 				return;
 			}
-			result = lua_pcall(L, 0, 1, 0);
-			if (result == LUA_ERRRUN)
-			{
-				size_t len;
-				PD2HOOK_LOG_LOG(lua_tolstring(L, -1, &len));
-				return;
-			}
+			lua_call(L, 0, 0);
 
 			return;
 		}
