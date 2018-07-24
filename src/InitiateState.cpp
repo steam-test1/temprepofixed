@@ -667,6 +667,7 @@ namespace pd2hook
 			{ NULL, NULL }
 		};
 		luaL_openlib(L, "blt_vr", vrLib, 0);
+		lua_pop(L, 1);
 	}
 
 	int updates = 0;
@@ -782,6 +783,7 @@ namespace blt
 				{ NULL, NULL }
 			};
 			luaL_openlib(L, "console", consoleLib, 0);
+			lua_pop(L, 1);
 
 			luaL_Reg fileLib[] =
 			{
@@ -797,6 +799,7 @@ namespace blt
 				{ NULL, NULL }
 			};
 			luaL_openlib(L, "file", fileLib, 0);
+			lua_pop(L, 1);
 
 			// Keeping everything in lowercase since IspcallForced / IsPCallForced and Forcepcalls / ForcePCalls look rather weird anyway
 			luaL_Reg bltLib[] =
@@ -811,6 +814,7 @@ namespace blt
 				{ NULL, NULL }
 			};
 			luaL_openlib(L, "blt", bltLib, 0);
+			lua_pop(L, 1);
 
 			if (vrMode)
 			{
