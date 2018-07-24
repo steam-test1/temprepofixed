@@ -148,17 +148,6 @@ namespace blt
 			void SetForcePCalls(bool state)
 			{
 				forcepcalls = state;
-
-				if (state)
-				{
-					luaCallDetour.Install((void*)lua_call, (void*) blt::lua_functions::perform_lua_pcall);
-					//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls will now be forced");
-				}
-				else
-				{
-					luaCallDetour.Remove();
-					//PD2HOOK_LOG_LOG("blt.forcepcalls(): Protected calls are no longer being forced");
-				}
 			}
 		}
 	}
