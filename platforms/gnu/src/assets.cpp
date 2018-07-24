@@ -77,7 +77,8 @@ namespace blt
 func(1); \
 func(2); \
 func(3); \
-func(4);
+func(4); \
+func(5);
 
 	static subhook::Hook dslDbAddMembers; // We need this to add the entries, as we need to do it after the DB table is set up
 
@@ -101,6 +102,8 @@ func(4);
 	static void*
 	dt_dsl_db_try_open_hook(Archive *target, DB* db, idstring *ext, idstring *name, void* misc_object, Transport* transport, try_open_t original, do_resolve_t resolve)
 	{
+		// TODO caching support!
+
 		hash_t hash(name->value, ext->value);
 		if(custom_assets.count(hash))
 		{
@@ -182,6 +185,7 @@ func(4);
 		setcall(dsl_db_try_open_2, _ZN3dsl2DB8try_openIN5sound15EnglishResolverEEENS_7ArchiveENS_8idstringES5_RKT_RKNS_9TransportE);
 		setcall(dsl_db_try_open_3, _ZN3dsl2DB8try_openINS_16LanguageResolverEEENS_7ArchiveENS_8idstringES4_RKT_RKNS_9TransportE);
 		setcall(dsl_db_try_open_4, _ZN3dsl2DB8try_openINS_21PropertyMatchResolverEEENS_7ArchiveENS_8idstringES4_RKT_RKNS_9TransportE);
+		setcall(dsl_db_try_open_5, _ZN3dsl2DB26try_open_from_bottom_layerIFiRKNS_7SortMapINS_5DBExt3KeyEjNSt3__14lessIS4_EENS_9AllocatorEEEiiEEENS_7ArchiveENS_8idstringESE_RKT_RKNS_9TransportE);
 
 		// Ge tthe do_resolve functions
 		setcall(dsl_db_do_resolve_1, _ZNK3dsl2DB10do_resolveIFiRKNS_7SortMapINS_5DBExt3KeyEjNSt3__14lessIS4_EENS_9AllocatorEEEiiEEEiNS_8idstringESD_RKT_PS9_);
