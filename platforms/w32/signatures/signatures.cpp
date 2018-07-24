@@ -21,7 +21,7 @@ class SignatureCacheDB
 public:
 	SignatureCacheDB(string filename) : filename(filename)
 	{
-		std::ifstream infile(filename);
+		std::ifstream infile(filename, std::ios::binary);
 		if (!infile.good())
 		{
 			PD2HOOK_LOG_WARN("Could not open signature cache file");
@@ -92,7 +92,7 @@ public:
 
 	void Save()
 	{
-		std::ofstream outfile(filename);
+		std::ofstream outfile(filename, std::ios::binary);
 		if (!outfile.good())
 		{
 			PD2HOOK_LOG_ERROR("Could not open signature cachefile for saving");
