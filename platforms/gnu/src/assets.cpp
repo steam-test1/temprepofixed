@@ -1,5 +1,6 @@
 #include <blt/assets.hh>
 #include <blt/libcxxstring.hh>
+#include <blt/log.hh>
 
 #include <lua.h>
 #include <subhook.h>
@@ -8,6 +9,7 @@
 #include <map>
 
 #include <dlfcn.h>
+#include <sys/stat.h>
 
 #include <dsl/FileSystem.hh>
 #include <dsl/Archive.hh>
@@ -103,6 +105,15 @@ func(4);
 		if(custom_assets.count(hash))
 		{
 			string str = custom_assets[hash];
+
+			struct stat buffer;
+			if(stat(str.c_str(), &buffer))
+			{
+				string err = "Cannot open registered asset " + str;
+				log::log(err, log::LOG_ERROR);
+				throw err;
+			}
+
 			libcxxstring cxxstr = str; // Use a LibCXX-ABI-compatible string thing
 			dsl_fss_open(target, &db->stack, &cxxstr);
 			return target;
