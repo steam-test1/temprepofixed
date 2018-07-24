@@ -758,6 +758,16 @@ namespace blt
 
 					return;
 				}
+
+				if (!Util::DirectoryExists("mods/base/wren"))
+				{
+					int result = MessageBoxA(NULL, "It appears you have a vanilla BLT basemod. This is incompatible with SuperBLT.\n"
+						"Please delete your 'mods/base' folder, and run PAYDAY 2 again to automatically download a compatible version",
+						"BLT basemod outdated", MB_OK);
+
+					exit(1);
+					return;
+				}
 #endif
 			}
 
