@@ -6,12 +6,12 @@
 #define CREATE_NORMAL_CALLABLE_SIGNATURE(name, retn, signature, mask, offset, ...) \
 	typedef retn(*name ## ptr)(__VA_ARGS__); \
 	name ## ptr name = NULL; \
-	SignatureSearch name ## search(#name, &name, signature, mask, offset);
+	SignatureSearch name ## search(#name, &name, signature, mask, offset, SignatureVR_Both);
 
-#define CREATE_CALLABLE_CLASS_SIGNATURE(name, retn, signature, mask, offset, ...) \
+#define CREATE_CALLABLE_CLASS_SIGNATURE(vr, name, retn, signature, mask, offset, ...) \
 	typedef retn(__thiscall *name ## ptr)(void*, __VA_ARGS__); \
 	name ## ptr name = NULL; \
-	SignatureSearch name ## search(#name, &name, signature, mask, offset);
+	SignatureSearch name ## search(#name, &name, signature, mask, offset, vr);
 
 #else
 
@@ -20,7 +20,7 @@
 	typedef retn(*name ## ptr)(__VA_ARGS__); \
 	extern name ## ptr name;
 
-#define CREATE_CALLABLE_CLASS_SIGNATURE(name, retn, signature, mask, offset, ...) \
+#define CREATE_CALLABLE_CLASS_SIGNATURE(vr, name, retn, signature, mask, offset, ...) \
 	typedef retn(__thiscall *name ## ptr)(void*, __VA_ARGS__); \
 	extern name ## ptr name;
 
@@ -111,16 +111,16 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_newmetatable, int, "\x8B\x54\x24\x08\x53\x
 CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_error, int, "\x8D\x44\x24\x0C\x50\xFF\x74\x24\x0C\xFF\x74\x24\x0C\xE8\x00\x00\x00\x00\x83\xC4\x0C\x50\xFF\x74\x24\x08\xE8", "xxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, const char*, ...)
 
 // TODO: Find address-less signatures
-CREATE_NORMAL_CALLABLE_SIGNATURE(node_from_xml, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x33", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(node_from_xml_vr, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x56\x57\x8B\xDA\x8B\xF9\xC7\x44\x24\x18\x00\x00\x00\x00\xC7\x44\x24\x1C\x00\x00\x00\x00\xC7\x44\x24\x20\x00\x00\x00\x00", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Desktop, node_from_xml, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x33", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_VR,      node_from_xml_vr, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x56\x57\x8B\xDA\x8B\xF9\xC7\x44\x24\x18\x00\x00\x00\x00\xC7\x44\x24\x1C\x00\x00\x00\x00\xC7\x44\x24\x20\x00\x00\x00\x00", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
 
 // FIXME This isn't really actually a function - it's a blob that contains references to some of the variables we want.
-CREATE_NORMAL_CALLABLE_SIGNATURE(try_open_base, int, "\xB8\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x81\xEC\x8C\x00\x00\x00\x8B\x45\x14\xA3\x00\x00\x00\x00\x8B\x45\x18\xA3\x00\x00\x00\x00", "x????x????xxxxxxxxxx????xxxx????", 0)
-CREATE_NORMAL_CALLABLE_SIGNATURE(try_open_base_vr, int, "\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x81\xEC\x90\x00\x00\x00\x8B\x84\x24\xAC\x00", "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Desktop, try_open_base, int, "\xB8\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x81\xEC\x8C\x00\x00\x00\x8B\x45\x14\xA3\x00\x00\x00\x00\x8B\x45\x18\xA3\x00\x00\x00\x00", "x????x????xxxxxxxxxx????xxxx????", 0)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_VR,      try_open_base_vr, int, "\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x81\xEC\x90\x00\x00\x00\x8B\x84\x24\xAC\x00", "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0)
 
-CREATE_CALLABLE_CLASS_SIGNATURE(do_game_update, void*, "\x56\xFF\x74\x24\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxx????xxx", 0, int*, int*)
-CREATE_CALLABLE_CLASS_SIGNATURE(luaL_newstate, int, "\x53\x56\x33\xDB\x57\x8B\xF1\x39\x5C\x24\x18\x0F", "xxxxxxxxxxxx", 0, char, char, int)
-CREATE_CALLABLE_CLASS_SIGNATURE(luaL_newstate_vr, int, "\x8B\x44\x24\x0C\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxx", 0, char, char, int)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, do_game_update, void*, "\x56\xFF\x74\x24\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxx????xxx", 0, int*, int*)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Desktop, luaL_newstate, int, "\x53\x56\x33\xDB\x57\x8B\xF1\x39\x5C\x24\x18\x0F", "xxxxxxxxxxxx", 0, char, char, int)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_VR,      luaL_newstate_vr, int, "\x8B\x44\x24\x0C\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxx", 0, char, char, int)
 
 // lua c-functions
 

@@ -213,7 +213,7 @@ DWORD FindPattern(char* module, const char* funcname, const char* pattern, const
 
 std::vector<SignatureF>* allSignatures = NULL;
 
-SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char* signature, const char* mask, int offset)
+SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char* signature, const char* mask, int offset, SignatureVR vr)
 {
 	// lazy-init, container gets 'emptied' when initialized on compile.
 	if (!allSignatures)
@@ -221,7 +221,7 @@ SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char*
 		allSignatures = new std::vector<SignatureF>();
 	}
 
-	SignatureF ins = { funcname, signature, mask, offset, adress };
+	SignatureF ins = { funcname, signature, mask, offset, adress, vr };
 	allSignatures->push_back(ins);
 }
 
@@ -241,6 +241,12 @@ void SignatureSearch::Search()
 
 	string basename = filename;
 
+	// Check if the user is in VR (EXE ends with _vr)
+	// This is used to only load functions relevant to that version, as
+	//  there are a couple of functions that have different signatures in
+	//  VR as they do in the desktop binary.
+	bool is_in_vr = basename.rfind("_vr") == basename.length() - 3;
+
 	// Add the .exe back on
 	strcat_s(filename, MAX_PATH, ".exe");
 
@@ -252,6 +258,14 @@ void SignatureSearch::Search()
 	std::vector<SignatureF>::iterator it;
 	for (it = allSignatures->begin(); it < allSignatures->end(); it++)
 	{
+		// If the function is desktop-only and we're in VR (or vise-versa), skip it
+		// This *significantly* improves loading times - on my system it cut loading times
+		//  by ~2.5 seconds.
+		if (it->vr == (is_in_vr ? SignatureVR_Desktop : SignatureVR_VR)) {
+			*(void**)it->address = NULL;
+			continue;
+		}
+
 		string funcname = it->funcname;
 		DWORD hint = cache.GetAddress(funcname);
 
