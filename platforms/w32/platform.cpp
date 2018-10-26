@@ -30,26 +30,13 @@ static void init_idstring_pointers()
 {
 	char *tmp;
 
-	if (try_open_base_vr)
-	{
-		tmp = (char*)try_open_base_vr;
-		tmp += 0x3D;
-		blt::platform::last_loaded_name = *((blt::idstring**)tmp);
+	tmp = (char*)try_open_base;
+	tmp += 0x17;
+	blt::platform::last_loaded_name = *((blt::idstring**)tmp);
 
-		tmp = (char*)try_open_base_vr;
-		tmp += 0x23;
-		blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
-	}
-	else
-	{
-		tmp = (char*)try_open_base;
-		tmp += 0x26;
-		blt::platform::last_loaded_name = *((blt::idstring**)tmp);
-
-		tmp = (char*)try_open_base;
-		tmp += 0x14;
-		blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
-	}
+	tmp = (char*)try_open_base;
+	tmp += 0x05;
+	blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
 }
 
 static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char freakin, int clue)
