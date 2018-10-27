@@ -138,14 +138,12 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		GetSystemDirectory(bufd, 200);
 		strcat_s(bufd, "\\WSOCK32.dll");
 
-		State.reset(new DllState());
-		State->hLThis = hInst;
-		State->hL = LoadLibrary(bufd);
-		HMODULE hL = State->hL;
-
-		hL = LoadLibrary(bufd);
+		HMODULE hL = LoadLibrary(bufd);
 		if (!hL) return false;
 
+		State.reset(new DllState());
+		State->hLThis = hInst;
+		State->hL = hL;
 
 		// Load the addresses for all the functions
 #define REGISTER(num, name, ordinal) p[num] = GetProcAddress(hL, #name);
