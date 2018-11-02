@@ -33,11 +33,11 @@ static void init_idstring_pointers()
 	if (try_open_base_vr)
 	{
 		tmp = (char*)try_open_base_vr;
-		tmp += 0x3D;
+		tmp += 0x44;
 		blt::platform::last_loaded_name = *((blt::idstring**)tmp);
 
 		tmp = (char*)try_open_base_vr;
-		tmp += 0x23;
+		tmp += 0x2A;
 		blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
 	}
 	else
