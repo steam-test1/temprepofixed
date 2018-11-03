@@ -76,7 +76,13 @@ so you don't need to make any special efforts to use them.
 
 ### GNU+Linux
 
-First, create and `cd` into a build directory:
+First, pull the git submodules with
+
+```
+git submodule update --init --recursive
+```
+
+Second, create and `cd` into a build directory:
 
 ```
 mkdir build
