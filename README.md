@@ -26,6 +26,11 @@ Documentation for SuperBLT can be found on the [SuperBLT Website](https://superb
 	* [SirWaddlesworth](http://genj.io/)
 	* [Will Donohoe](https://will.io/)
 
+- BLT4L Team
+	* [Roman Hargrave](https://github.com/RomanHargrave)
+	* [Campbell Suter](https://znix.xyz)
+	* [Leonard Koenig](https://github.com/LeonardKoenig)
+
 - Contributors, Translators, Testers and more
 	* saltisgood
 	* Kail
@@ -45,6 +50,12 @@ Documentation for SuperBLT can be found on the [SuperBLT Website](https://superb
 	* Kilandor
 	* Joel Juvél
 	* PlayYou
+	* dribbleondo
+	* zekesonxx
+	* TRSGuy
+	* luck3y
+	* Ozymandias
+	* BreakinBenny
 	* and others who haven't been added yet
 
 ## Development
