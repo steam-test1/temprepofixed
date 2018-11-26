@@ -253,6 +253,33 @@ namespace pd2hook
 		return lua_gettop(L);
 	}
 
+	int luaF_pcall_proper(lua_State* L)
+	{
+		luaL_checkany(L, 1);
+		int status = lua_pcall(L, lua_gettop(L) - 1, LUA_MULTRET, 0);
+		lua_pushboolean(L, (status == 0));
+		lua_insert(L, 1);
+		return lua_gettop(L); // return status + all results
+	}
+
+	int luaF_xpcall(lua_State *L)
+	{
+		// Args: func, err, ...
+
+		// Move err from the 2nd index to the 1st index, so we have a continuous range for the function call
+		lua_pushvalue(L, 2); // Copy err to the top
+		lua_remove(L, 2); // Remove err
+		lua_insert(L, 1); // Put error function under function to be called
+
+		int status = lua_pcall(L, lua_gettop(L) - 2, LUA_MULTRET, 1);
+
+		// Replace the error function (1st position) with the result
+		lua_pushboolean(L, (status == 0));
+		lua_replace(L, 1);
+
+		return lua_gettop(L);  // return entire stack - status, possible err + all results
+	}
+
 	int luaF_dofile(lua_State* L)
 	{
 		size_t length = 0;
@@ -821,6 +848,11 @@ namespace blt
 				{ "ignoretweak", luaF_ignoretweak },
 				{ "load_native", luaF_load_native },
 				{ "blt_info", luaF_blt_info },
+
+				// Functions that are supposed to be in Lua, but are either omitted or implemented improperly (pcall)
+				{ "pcall", luaF_pcall_proper }, // Lua pcall shouldn't print errors, however BLT's global pcall does (leave it for compat)
+				{ "xpcall", luaF_xpcall },
+
 				{ NULL, NULL }
 			};
 			luaL_openlib(L, "blt", bltLib, 0);
