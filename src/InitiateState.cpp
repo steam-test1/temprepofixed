@@ -656,22 +656,31 @@ namespace pd2hook
 
 		try
 		{
-			blt::plugins::PluginLoadResult result = blt::plugins::LoadPlugin(file);
+			blt::plugins::Plugin *plugin = NULL;
+			blt::plugins::PluginLoadResult result = blt::plugins::LoadPlugin(file, &plugin);
 
 			// TODO some kind of UUID system to prevent issues with multiple mods having the same DLL
+
+			int count = plugin->PushLuaValue(L);
+
 			if (result == blt::plugins::plr_AlreadyLoaded)
 			{
 				lua_pushstring(L, "Already loaded");
-				return 1;
 			}
+			else
+			{
+				lua_pushboolean(L, true);
+			}
+
+			lua_insert(L, -1 - count);
+			return count + 1;
 
 		}
 		catch (std::string err)
 		{
 			luaL_error(L, err.c_str());
+			return 0; // Fix the no-return compiler warning, but this will never be called
 		}
-
-		return 0;
 	}
 
 	int luaF_blt_info(lua_State* L)

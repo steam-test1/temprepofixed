@@ -13,6 +13,7 @@ namespace blt
 	{
 		typedef void(*update_func_t)(lua_State *L);
 		typedef void(*setup_state_func_t)(lua_State *L);
+		typedef int(*push_lua_func_t)(lua_State *L);
 
 		class Plugin
 		{
@@ -29,11 +30,14 @@ namespace blt
 				return file;
 			}
 
+			int PushLuaValue(lua_State *L);
+
 		protected:
 			void Init();
 
 			update_func_t update_func;
 			setup_state_func_t setup_state;
+			push_lua_func_t push_lua;
 
 			virtual void *ResolveSymbol(std::string name) const = 0;
 
@@ -47,7 +51,7 @@ namespace blt
 			plr_AlreadyLoaded
 		};
 
-		PluginLoadResult LoadPlugin(std::string file);
+		PluginLoadResult LoadPlugin(std::string file, Plugin **out_plugin = NULL);
 		const std::list<Plugin*> &GetPlugins();
 
 		// Implemented in InitiateState

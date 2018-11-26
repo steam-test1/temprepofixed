@@ -13,8 +13,11 @@ namespace blt
 
 		list<Plugin*> plugins_list;
 
-		PluginLoadResult LoadPlugin(string file)
+		PluginLoadResult LoadPlugin(string file, Plugin **out_plugin)
 		{
+			if(out_plugin)
+				*out_plugin = NULL;
+
 			// Major TODO before this is publicly released as stable:
 			// Add some kind of security system to avoid loading untrusted plugins
 			// (particularly those being used for the purpose of hiding a mod's
@@ -24,11 +27,15 @@ namespace blt
 			// plugin authors aware of the license - this could also provide a URL for
 			// obtaining the plugin source code.
 
-			for (const Plugin* plugin : plugins_list)
+			for (Plugin* plugin : plugins_list)
 			{
 				// TODO use some kind of ID or UUID embedded into the binary for identification, not filename
-				if(file == plugin->GetFile())
+				if(file == plugin->GetFile()) {
+					if(out_plugin)
+						*out_plugin = plugin;
+
 					return plr_AlreadyLoaded;
+				}
 			}
 
 			PD2HOOK_LOG_LOG(string("Loading binary extension ") + file);
@@ -40,6 +47,9 @@ namespace blt
 
 				// Set up the already-running states
 				RegisterPluginForActiveStates(plugin);
+
+				if(out_plugin)
+					*out_plugin = plugin;
 			}
 			catch (const char* err)
 			{
@@ -115,6 +125,7 @@ namespace blt
 			if (!setup_state) throw "Invalid dlhandle - missing setup_state func!";
 
 			update_func = (update_func_t) ResolveSymbol("SuperBLT_Plugin_Update");
+			push_lua = (push_lua_func_t) ResolveSymbol("SuperBLT_Plugin_PushLua");
 		}
 
 		void Plugin::AddToState(lua_State * L)
@@ -128,6 +139,13 @@ namespace blt
 				update_func(L);
 		}
 
+		int Plugin::PushLuaValue(lua_State * L)
+		{
+			if(!push_lua)
+				return 0;
+
+			return push_lua(L);
+		}
 
 	}
 }
