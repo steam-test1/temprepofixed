@@ -122,7 +122,7 @@ namespace blt
 			}
 
 			setup_state = (setup_state_func_t) ResolveSymbol("SuperBLT_Plugin_Init_State");
-			if (!setup_state) throw "Invalid dlhandle - missing setup_state func!";
+			if (!setup_state) throw string("Invalid dlhandle - missing setup_state func!");
 
 			update_func = (update_func_t) ResolveSymbol("SuperBLT_Plugin_Update");
 			push_lua = (push_lua_func_t) ResolveSymbol("SuperBLT_Plugin_PushLua");
