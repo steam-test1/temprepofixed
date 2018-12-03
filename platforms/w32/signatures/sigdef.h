@@ -39,10 +39,12 @@ typedef struct luaL_Reg
 
 // From src/luaconf.h
 #define LUA_NUMBER		double
+#define LUA_INTEGER		ptrdiff_t
 
 // From src/lua.h
 // type of numbers in Lua
 typedef LUA_NUMBER lua_Number;
+typedef LUA_INTEGER lua_Integer;
 typedef struct lua_Debug lua_Debug;	// activation record
 // Functions to be called by the debuger in specific events
 typedef void(*lua_Hook) (lua_State* L, lua_Debug* ar);
@@ -177,3 +179,29 @@ CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_VR,      luaL_newstate_vr, int, "\x8
 #define luaL_getmetatable(L,n)		(lua_getfield(L, LUA_REGISTRYINDEX, (n)))
 
 #define luaL_openlib luaI_openlib
+
+// Our own lauxlib functions - see lauxlib.cpp
+int luaL_argerror(lua_State *L, int narg, const char *extramsg);
+int luaL_checkoption(lua_State *L, int narg, const char *def, const char *const lst[]);
+int luaL_typerror(lua_State *L, int narg, const char *tname);
+void luaL_checktype(lua_State *L, int narg, int t);
+void luaL_checkany(lua_State *L, int narg);
+const char *luaL_checklstring(lua_State *L, int narg, size_t *len);
+const char *luaL_optlstring(lua_State *L, int narg, const char *def, size_t *len);
+lua_Number luaL_checknumber(lua_State *L, int narg);
+lua_Number luaL_optnumber(lua_State *L, int narg, lua_Number def);
+lua_Integer luaL_checkinteger(lua_State *L, int narg);
+lua_Integer luaL_optinteger(lua_State *L, int narg, lua_Integer def);
+
+#define lua_isnumber(L,n)		(lua_type(L, (n)) == LUA_TNUMBER)
+
+#define luaL_argcheck(L, cond,numarg,extramsg) ((void)((cond) || luaL_argerror(L, (numarg), (extramsg))))
+#define luaL_checkstring(L,n)   (luaL_checklstring(L, (n), NULL))
+#define luaL_optstring(L,n,d)   (luaL_optlstring(L, (n), (d), NULL))
+#define luaL_checkint(L,n)      ((int)luaL_checkinteger(L, (n)))
+#define luaL_optint(L,n,d)      ((int)luaL_optinteger(L, (n), (d)))
+#define luaL_checklong(L,n)     ((long)luaL_checkinteger(L, (n)))
+#define luaL_optlong(L,n,d)     ((long)luaL_optinteger(L, (n), (d)))
+
+#define luaL_opt(L,f,n,d)       (lua_isnoneornil(L,(n)) ? (d) : f(L,(n)))
+#define luaL_typename(L,i)      lua_typename(L, lua_type(L,(i)))
