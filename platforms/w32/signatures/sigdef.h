@@ -86,7 +86,9 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(lua_close, void, "\x8B\x44\x24\x04\x53\x56\x57\
 //CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawset, void, "\x51\x53\x55\x56\x57\x8B\xF1\xE8\x00\x00\x00\x00", "xxxxxxxx????", 0, lua_State*, int)
 // Reviving lua_settable() since the function exists again, and because the Crimefest 2015 alternative relied upon internal Lua
 // VM functions, which do not apply to LuaJIT
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_gettable, void , "\x56\xFF\x74\x24\x0C\x8B\x74\x24\x0C\x56\xE8\x00\x00\x00\x00\x8B\x4E\x14\x83\xE9\x08\x51\x50\x56\xE8\x00\x00\x00\x00\x8B\xD0\x83", "xxxxxxxxxxx????xxxxxxxxxx????xxx", 0, lua_State*, int)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_settable, void, "\x56\xFF\x74\x24\x0C\x8B\x74\x24\x0C\x56\xE8\x00\x00\x00\x00\x8B\x4E\x14\x83\xE9\x10\x51\x50\x56", "xxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, int)
+//                                                                            that 0x08 vs 0x10 is where gettable and settable differ  ^^^^
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_setmetatable, int, "\x53\x55\x56\x57\xFF\x74\x24\x18\x8B\x7C\x24\x18\x57\xE8\x00\x00\x00\x00\x8B\x77\x14\x83\xC4\x08", "xxxxxxxxxxxxxx????xxxxxx", 0, lua_State*, int)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_getmetatable, int, "\x56\xFF\x74\x24\x0C\x8B\x74\x24\x0C\x56\xE8\x00\x00\x00\x00\x8B\x48\x04\x83\xC4\x08\x83\xF9\xF4\x75\x07\x8B\x00\x8B\x48\x10\xEB", "xxxxxxxxxxx????xxxxxxxxxxxxxxxxx", 0, lua_State*, int)
 
