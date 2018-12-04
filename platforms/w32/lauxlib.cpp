@@ -85,3 +85,105 @@ void luaL_checkstack(lua_State *L, int size, const char *msg) {
 	if (!lua_checkstack(L, size))
 		luaL_error(L, "Could not increase stack size by %d to %d - %s", size, size + top, msg);
 }
+
+typedef union TValue TValue;
+typedef const TValue cTValue;
+
+int lj_obj_equal(cTValue *o1, cTValue *o2);
+
+// Note we have to implement lua_rawequal ourselves, since it's
+// never used in PD2 and thus is eaten by the linker.
+int lua_rawequal(lua_State *L, int idx1, int idx2) {
+	cTValue *tv1 = (TValue*)index2adr(L, idx1);
+	cTValue *tv2 = (TValue*)index2adr(L, idx2);
+
+	// The following code matches this in LuaJIT:
+	// return (o1 == niltv(L) || o2 == niltv(L)) ? 0 : lj_obj_equal(o1, o2);
+
+	const uint8_t *L_d = (const uint8_t*) L;
+	uint32_t glref = *(uint32_t*)(L_d + 8);
+	cTValue *nilref = (cTValue*) (glref + 144);
+
+	if (tv1 == nilref || tv2 == nilref)
+		return false;
+
+	return lj_obj_equal(tv1, tv2);
+}
+
+typedef struct GCRef {
+	uint32_t gcptr32;	/* Pseudo 32 bit pointer. */
+} GCRef;
+
+/* Tagged value. */
+union TValue {
+	uint64_t u64;		// 64 bit pattern overlaps number.
+	lua_Number n;
+	struct {
+		union {
+			GCRef gcr;	// GCobj reference (if any).
+			int32_t i;	// Integer value.
+		};
+		uint32_t it;	// Internal object tag. Must overlap MSW of number.
+	};
+	/* struct {
+		GCRef func;	// Function for next frame (or dummy L).
+		FrameLink tp;	// Link to previous frame.
+	} fr; */
+	struct {
+		uint32_t lo;	// Lower 32 bits of number.
+		uint32_t hi;	// Upper 32 bits of number.
+	} u32;
+};
+
+// AFAIK this is true, may be wrong though
+#define LJ_DUALNUM false
+
+#define LJ_TNIL			(~0u)
+#define LJ_TTRUE		(~2u)
+#define LJ_TLIGHTUD		(~3u)
+#define LJ_TSTR			(~4u)
+#define LJ_TFUNC		(~8u)
+#define LJ_TTRACE		(~9u)
+#define LJ_TCDATA		(~10u)
+#define LJ_TTAB			(~11u)
+#define LJ_TUDATA		(~12u)
+#define LJ_TNUMX		(~13u)
+#define LJ_TISNUM		LJ_TNUMX
+#define LJ_TISPRI		LJ_TTRUE
+
+#define itype(o) ((o)->it)
+#define tvisnil(o)	(itype(o) == LJ_TNIL)
+#define tvislightud(o)	(itype(o) == LJ_TLIGHTUD)
+#define tvisstr(o)	(itype(o) == LJ_TSTR)
+#define tvisfunc(o)	(itype(o) == LJ_TFUNC)
+#define tvisudata(o)	(itype(o) == LJ_TUDATA)
+#define tvisnumber(o)	(itype(o) <= LJ_TISNUM)
+
+#define tvispri(o) (itype(o) >= LJ_TISPRI)
+#define tvisint(o) (LJ_DUALNUM && itype(o) == LJ_TISNUM)
+#define tvisnum(o) (itype(o) < LJ_TISNUM)
+
+#define numV(o) ((o)->n)
+#define intV(o) ((int32_t)(o)->i)
+
+#define gcrefeq(r1, r2) ((r1).gcptr32 == (r2).gcptr32)
+
+static lua_Number numberVnum(cTValue *o) {
+	if (tvisint(o))
+		return (lua_Number)intV(o);
+	else
+		return numV(o);
+}
+
+int lj_obj_equal(cTValue *o1, cTValue *o2) {
+	if (itype(o1) == itype(o2)) {
+		if (tvispri(o1))
+			return 1;
+		if (!tvisnum(o1))
+			return gcrefeq(o1->gcr, o2->gcr);
+	}
+	else if (!tvisnumber(o1) || !tvisnumber(o2)) {
+		return 0;
+	}
+	return numberVnum(o1) == numberVnum(o2);
+}

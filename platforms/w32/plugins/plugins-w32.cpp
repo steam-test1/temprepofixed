@@ -55,6 +55,10 @@ static void * get_func(const char* name)
 	{
 		return &luaL_checkstack;
 	}
+	else if (str == "lua_rawequal")
+	{
+		return &lua_rawequal;
+	}
 
 	return blt::platform::win32::get_lua_func(name);
 }

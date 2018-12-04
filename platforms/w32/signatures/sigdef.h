@@ -224,3 +224,4 @@ lua_Integer luaL_optinteger(lua_State *L, int narg, lua_Integer def);
 #define luaL_typename(L,i)      lua_typename(L, lua_type(L,(i)))
 
 void luaL_checkstack(lua_State *L, int sz, const char *msg);
+int lua_rawequal(lua_State *L, int idx1, int idx2);
