@@ -83,7 +83,6 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(lua_remove, void, "\x8B\x4C\x24\x08\x56\x57\x85
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_newstate, lua_State*, "\x53\x8B\x5C\x24\x0C\x55\x8B\x6C\x24\x0C\x56\x57\x68\x40\x10\x00\x00\x6A\x00\x6A\x00\x53\xFF\xD5\x8B\xF0\x83\xC4\x10\x8D\x7E\x30", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_Alloc, void*)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_close, void, "\x8B\x44\x24\x04\x53\x56\x57\x8B\x78\x08\x8B\x77\x74\x56\xE8", "xxxxxxxxxxxxxxx", 0, lua_State*)
 
-//CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawset, void, "\x51\x53\x55\x56\x57\x8B\xF1\xE8\x00\x00\x00\x00", "xxxxxxxx????", 0, lua_State*, int)
 // Reviving lua_settable() since the function exists again, and because the Crimefest 2015 alternative relied upon internal Lua
 // VM functions, which do not apply to LuaJIT
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_gettable, void , "\x56\xFF\x74\x24\x0C\x8B\x74\x24\x0C\x56\xE8\x00\x00\x00\x00\x8B\x4E\x14\x83\xE9\x08\x51\x50\x56\xE8\x00\x00\x00\x00\x8B\xD0\x83", "xxxxxxxxxxx????xxxxxxxxxx????xxx", 0, lua_State*, int)
@@ -112,6 +111,7 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_ref, int, "\x55\x8B\xEC\x83\xE4\xF8\x8B\x5
 // Reviving lua_rawgeti() since the function exists again, and because the Crimefest 2015 alternative relied upon internal Lua VM
 // functions, which do not apply to LuaJIT
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawget, void, "\x56\x8B\x74\x24\x08\x57\xFF\x74\x24\x10\x56\xE8\x00\x00\x00\x00\x8B\x7E\x14\x83\xC7\xF8\x57\xFF\x30\x56\xE8\x00\x00\x00\x00\x8B", "xxxxxxxxxxxx????xxxxxxxxxxx????x", 0, lua_State*, int);
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawset, void, "\x53\x56\x8B\x74\x24\x0C\x57\xFF\x74\x24\x14\x56\xE8\x00\x00\x00\x00\x8B\x7E\x14\x8B\x18\x83\xEF\x10\x57\x53\x56\xE8", "xxxxxxxxxxxxx????xxxxxxxxxxxx", 0, lua_State*, int);
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawgeti, void, "\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x0C\x56\xFF\x75\x0C\x8B\x75\x08\x56\xE8", "xxxxxxxxxxxxxxxxxx", 0, lua_State*, int, int);
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_rawseti, void, "\x53\x56\x8B\x74\x24\x0C\x57\xFF\x74\x24\x14\x56\xE8\x00\x00\x00\x00\x8B\x38\x8B", "xxxxxxxxxxxxx????xxx", 0, lua_State*, int, int);
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_type, int, "\x56\xFF\x74\x24\x0C\x8B\x74\x24\x0C\x56\xE8\x00\x00\x00\x00\x8B\xD0\x83\xC4\x08\x8B\x4A\x04\x83\xF9\xF2\x77\x07\xB8\x03\x00\x00\x00\x5E\xC3\x8B\x46\x08\x05\x90", "xxxxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int);
@@ -221,6 +221,3 @@ lua_Integer luaL_optinteger(lua_State *L, int narg, lua_Integer def);
 
 #define luaL_opt(L,f,n,d)       (lua_isnoneornil(L,(n)) ? (d) : f(L,(n)))
 #define luaL_typename(L,i)      lua_typename(L, lua_type(L,(i)))
-
-// Reimplemented, since these were inlined:
-void lua_rawset(lua_State *L, int narg);
