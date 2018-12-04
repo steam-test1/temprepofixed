@@ -222,3 +222,5 @@ lua_Integer luaL_optinteger(lua_State *L, int narg, lua_Integer def);
 
 #define luaL_opt(L,f,n,d)       (lua_isnoneornil(L,(n)) ? (d) : f(L,(n)))
 #define luaL_typename(L,i)      lua_typename(L, lua_type(L,(i)))
+
+void luaL_checkstack(lua_State *L, int sz, const char *msg);

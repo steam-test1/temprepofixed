@@ -51,6 +51,10 @@ static void * get_func(const char* name)
 	{
 		return &is_active_state;
 	}
+	else if (str == "luaL_checkstack")
+	{
+		return &luaL_checkstack;
+	}
 
 	return blt::platform::win32::get_lua_func(name);
 }
