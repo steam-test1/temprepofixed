@@ -26,6 +26,13 @@
 
 #endif
 
+#if defined(SIG_INCLUDE_MAIN) || defined(SIG_INCLUDE_LJ_INTERNAL)
+#define CREATE_LUAJIT_CALLABLE_SIGNATURE(name, retn, signature, mask, offset, ...) \
+	CREATE_NORMAL_CALLABLE_SIGNATURE(name, retn, signature, mask, offset, __VA_ARGS__)
+#else
+#define CREATE_LUAJIT_CALLABLE_SIGNATURE(...)
+#endif
+
 struct lua_State;
 
 typedef const char * (*lua_Reader) (lua_State *L, void *ud, size_t *sz);
@@ -124,6 +131,10 @@ CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_VR, try_open_base_vr, int, "\x6A\xFF
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, do_game_update, void*, "\x56\xFF\x74\x24\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxx????xxx", 0, int*, int*)
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Desktop, luaL_newstate, int, "\x53\x56\x33\xDB\x57\x8B\xF1\x39\x5C\x24\x18\x0F", "xxxxxxxxxxxx", 0, char, char, int)
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_VR,      luaL_newstate_vr, int, "\x8B\x44\x24\x0C\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxx", 0, char, char, int)
+
+// Some internal LuaJIT bits and pieces we can use to implement LuaJIT methods inlined by the compiler
+CREATE_LUAJIT_CALLABLE_SIGNATURE(lj_cf_rawset, int, "\x56\x8B\x74\x24\x08\x8B\x46\x10\x8B\x4E\x14\x3B\xC1\x0F\x83\x85\x00\x00\x00\x83\x78\x04\xF4\x75\x7F\x8D\x50\x08\x3B\xD1\x73\x5E", "xxxxxxxxxxxxxxxx", 0, lua_State*)
+CREATE_LUAJIT_CALLABLE_SIGNATURE(index2adr, int, "\x8B\x4C\x24\x08\x85\xC9\x7E\x1F\x8B\x54\x24\x04\x8B\x42\x10\x8D\x04\xC8\x83\xC0\xF8\x3B\x42\x14\x0F\x82\x98\x00\x00\x00\x8B\x42", "xxxxxxxxxxxxxxxx", 0, lua_State*, int)
 
 // lua c-functions
 
