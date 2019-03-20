@@ -13,6 +13,7 @@
 #include "xaudio/XAudio.h"
 #include "tweaker/xmltweaker.h"
 #include "plugins/plugins.h"
+#include "scriptdata/ScriptData.h"
 
 #include <thread>
 #include <list>
@@ -706,6 +707,55 @@ namespace pd2hook
 		lua_pop(L, 1);
 	}
 
+	int luaF_sd_identify(lua_State *L)
+	{
+		size_t len;
+		const char *data = lua_tolstring(L, 1, &len);
+
+		bool is32bit = pd2hook::scriptdata::determine_is_32bit(len, (const uint8_t*) data);
+
+		lua_newtable(L);
+
+		lua_pushboolean(L, is32bit);
+		lua_setfield(L, -2, "is32bit");
+
+		return 1;
+	}
+
+	int luaF_sd_recode(lua_State *L)
+	{
+		size_t len;
+		const char *data = lua_tolstring(L, 1, &len);
+
+		if(lua_type(L, 2) != LUA_TTABLE)
+		{
+			luaL_error(L, "Second argument to blt.scriptdata.recode must be a table");
+		}
+
+		lua_getfield(L, 2, "is32bit");
+		bool is32bit = lua_toboolean(L, -1);
+		lua_pop(L, 1);
+
+		pd2hook::scriptdata::ScriptData sd(len, (const uint8_t*) data);
+		std::string out = sd.GetRoot()->Serialise(is32bit);
+
+		lua_pushlstring(L, out.c_str(), out.length());
+		return 1;
+	}
+
+	void load_scriptdata_library(lua_State *L)
+	{
+		luaL_Reg items[] =
+		{
+			{ "identify", luaF_sd_identify },
+			{ "recode", luaF_sd_recode },
+			{ NULL, NULL }
+		};
+		lua_newtable(L); // create the scriptdata table
+		luaL_openlib(L, nullptr, items, 0); // name is null, so register everything onto the table on top of the stack
+		lua_setfield(L, -2, "scriptdata"); // save it into the blt table
+	}
+
 	int updates = 0;
 
 	void luaF_close(lua_State* L)
@@ -865,6 +915,9 @@ namespace blt
 				{ NULL, NULL }
 			};
 			luaL_openlib(L, "blt", bltLib, 0);
+
+			load_scriptdata_library(L);
+
 			lua_pop(L, 1);
 
 			if (vrMode)
