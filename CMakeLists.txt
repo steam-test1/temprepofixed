@@ -159,7 +159,7 @@ macro(Add_Loader library_name)
 		target_compile_options(${library_name} PUBLIC -Wall -Werror)
 
 		# Use a custom link script, to ensure the correct initialization order
-		target_link_libraries(${library_name} LINK_PRIVATE "-Wl,-T,${gnu_link_script}") # Use the link script
+		target_link_libraries(${library_name} LINK_PRIVATE "-Wl,-T,\"${gnu_link_script}\"") # Use the link script
 		set_target_properties(${library_name} PROPERTIES LINK_DEPENDS ${gnu_link_script}) # Relink if the script is edited
 
 		# Print the build script for debugging - comment out the custom link script and you can use this
