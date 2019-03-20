@@ -30,7 +30,8 @@ namespace blt
 			for (Plugin* plugin : plugins_list)
 			{
 				// TODO use some kind of ID or UUID embedded into the binary for identification, not filename
-				if(file == plugin->GetFile()) {
+				if(file == plugin->GetFile())
+				{
 					if(out_plugin)
 						*out_plugin = plugin;
 
