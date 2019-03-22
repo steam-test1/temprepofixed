@@ -1,4 +1,7 @@
 #pragma once
+
+#include "FormatTools.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -7,8 +10,6 @@ namespace pd2hook::scriptdata
 {
 
 	bool determine_is_32bit(size_t length, const uint8_t *data);
-
-	class write_block;
 
 	class SItem
 	{
@@ -24,7 +25,7 @@ namespace pd2hook::scriptdata
 		// For internal use, don't actually use this
 		class write_info;
 	protected:
-		virtual void Serialise(write_block &out, write_info &info) const = 0;
+		virtual void Serialise(tools::write_block &out, write_info &info) const = 0;
 	};
 
 	class SNil : public SItem
@@ -38,7 +39,7 @@ namespace pd2hook::scriptdata
 		static const SNil INSTANCE;
 
 	protected:
-		virtual void Serialise(write_block &out, write_info &info) const override
+		virtual void Serialise(tools::write_block &out, write_info &info) const override
 		{
 			throw std::exception();
 		};
@@ -62,7 +63,7 @@ namespace pd2hook::scriptdata
 		static const SBool FALSE;
 
 	protected:
-		virtual void Serialise(write_block &out, write_info &info) const override
+		virtual void Serialise(tools::write_block &out, write_info &info) const override
 		{
 			throw std::exception();
 		};
@@ -83,7 +84,7 @@ namespace pd2hook::scriptdata
 		static const int ID = 3;
 
 	protected:
-		virtual void Serialise(write_block &out, write_info &info) const override;
+		virtual void Serialise(tools::write_block &out, write_info &info) const override;
 	};
 
 	class SString : public SItem
@@ -106,7 +107,7 @@ namespace pd2hook::scriptdata
 		static const int ID = 4;
 
 	protected:
-		virtual void Serialise(write_block &out, write_info &info) const override;
+		virtual void Serialise(tools::write_block &out, write_info &info) const override;
 	};
 
 	class SVector : public SItem
@@ -124,7 +125,7 @@ namespace pd2hook::scriptdata
 		static const int ID = 5;
 
 	protected:
-		virtual void Serialise(write_block &out, write_info &info) const override;
+		virtual void Serialise(tools::write_block &out, write_info &info) const override;
 	};
 
 	class SQuaternion : public SItem
@@ -142,7 +143,7 @@ namespace pd2hook::scriptdata
 		static const int ID = 6;
 
 	protected:
-		virtual void Serialise(write_block &out, write_info &info) const override;
+		virtual void Serialise(tools::write_block &out, write_info &info) const override;
 	};
 
 	class SIdstring : public SItem
@@ -160,7 +161,7 @@ namespace pd2hook::scriptdata
 		static const int ID = 7;
 
 	protected:
-		virtual void Serialise(write_block &out, write_info &info) const override;
+		virtual void Serialise(tools::write_block &out, write_info &info) const override;
 	};
 
 	class STable : public SItem
@@ -177,7 +178,7 @@ namespace pd2hook::scriptdata
 		static const int ID = 8;
 
 	protected:
-		virtual void Serialise(write_block &out, write_info &info) const override;
+		virtual void Serialise(tools::write_block &out, write_info &info) const override;
 	};
 
 	class ScriptData
