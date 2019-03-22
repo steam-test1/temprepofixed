@@ -58,8 +58,8 @@ namespace blt
 			void setup(lua_state *L)
 			{
 #define func(name) \
-                lua_pushcclosure(L, name, 0); \
-                lua_setfield(L, -2, #name);
+				lua_pushcclosure(L, name, 0); \
+				lua_setfield(L, -2, #name);
 
 				func(create_entry);
 
@@ -91,9 +91,9 @@ func(5);
 	// Create variables for each of the functions
 	// A detour, and a pointer to the correspoinding try_open and do_resolve functions
 #define HOOK_VARS(id) \
-    static try_open_t dsl_db_try_open_ ## id = NULL; \
-    static do_resolve_t dsl_db_do_resolve_ ## id = NULL; \
-    static subhook::Hook dslDbTryOpenDetour ## id;
+	static try_open_t dsl_db_try_open_ ## id = NULL; \
+	static do_resolve_t dsl_db_do_resolve_ ## id = NULL; \
+	static subhook::Hook dslDbTryOpenDetour ## id;
 
 	EACH_HOOK(HOOK_VARS)
 
@@ -126,27 +126,27 @@ func(5);
 
 		/* // Code for doing the same thing as the original function (minus mod_override support):
 		int result = resolve(
-		    db,
-		    ext,
-		    name,
-		    misc_object,
-		    (void*) ((char*)db->ptr4 + 40)
+			db,
+			ext,
+			name,
+			misc_object,
+			(void*) ((char*)db->ptr4 + 40)
 		);
 
 		if ( result < 0 )
 		{
-		    // Couldn't find the asset
-		    *target = Archive("", 0LL, 0LL, 0LL, 1, 0LL);
+			// Couldn't find the asset
+			*target = Archive("", 0LL, 0LL, 0LL, 1, 0LL);
 		}
 		else
 		{
-		    char *ptr = (char*) db;
+			char *ptr = (char*) db;
 		#define add_and_dereference(value) ptr = *(char**)(ptr + value)
-		    add_and_dereference(80);
-		    add_and_dereference(56);
+			add_and_dereference(80);
+			add_and_dereference(56);
 		#undef add_and_dereference
-		    unsigned int val = *(unsigned int*) (ptr + 24 + result * 32);
-		    transport->vt->f_open(target, transport, val);
+			unsigned int val = *(unsigned int*) (ptr + 24 + result * 32);
+			transport->vt->f_open(target, transport, val);
 		}
 		return target;
 		*/
@@ -155,12 +155,12 @@ func(5);
 	// Create hook functions for each of the original functions
 	// These just call the hook function above, passing in the correct function values
 #define HOOK_TRY_OPEN(id) \
-    static void* \
-    dt_dsl_db_try_open_hook_ ## id(Archive *target, DB* db, idstring* ext, idstring* name, void* misc_object, Transport* transport) \
-    { \
-        hook_remove(dslDbTryOpenDetour ## id); \
-        return dt_dsl_db_try_open_hook(target, db, ext, name, misc_object, transport, dsl_db_try_open_ ## id, dsl_db_do_resolve_ ## id); \
-    }
+	static void* \
+	dt_dsl_db_try_open_hook_ ## id(Archive *target, DB* db, idstring* ext, idstring* name, void* misc_object, Transport* transport) \
+	{ \
+		hook_remove(dslDbTryOpenDetour ## id); \
+		return dt_dsl_db_try_open_hook(target, db, ext, name, misc_object, transport, dsl_db_try_open_ ## id, dsl_db_do_resolve_ ## id); \
+	}
 	EACH_HOOK(HOOK_TRY_OPEN)
 
 	// When the members are being added to the DB table, add our own in
@@ -203,11 +203,11 @@ func(5);
 
 		// Hook each of the four loading functions
 #define INSTALL_TRY_OPEN_HOOK(id) \
-        dslDbTryOpenDetour ## id.Install((void*) dsl_db_try_open_ ## id, (void*) dt_dsl_db_try_open_hook_ ## id, subhook::HookOption64BitOffset);
+		dslDbTryOpenDetour ## id.Install((void*) dsl_db_try_open_ ## id, (void*) dt_dsl_db_try_open_hook_ ## id, subhook::HookOption64BitOffset);
 		EACH_HOOK(INSTALL_TRY_OPEN_HOOK)
 
 	}
 };
 
-/* vim: set ts=4 softtabstop=0 sw=4 expandtab: */
+/* vim: set ts=4 sw=4 noexpandtab: */
 
