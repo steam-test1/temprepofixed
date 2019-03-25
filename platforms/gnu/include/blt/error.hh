@@ -6,7 +6,7 @@ namespace blt
 {
 	namespace error
 	{
-		int check_callback(lua_state*);
+		void push_callback(lua_state*);
 		void set_global_handlers();
 	}
 }

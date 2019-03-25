@@ -19,8 +19,6 @@ namespace blt
 		using std::string;
 		using std::endl;
 
-		std::map<lua_state*, int> refs;
-
 		// Based off the debug.traceback function
 		static void traceback (lua_state *L, void (print)(string))
 		{
@@ -186,19 +184,20 @@ namespace blt
 		}
 
 
-		int check_callback(lua_state* state)
+		void push_callback(lua_state* state)
 		{
-			if(refs.count(state))
-				return refs[state];
+			const char *key = "mods.superblt.err_handler";
+
+			lua_getfield(state, LUA_REGISTRYINDEX, key);
+			if(!lua_isnil(state, -1)) {
+				return;
+			}
+
+			lua_pop(state, 1); // remove the nil
 
 			lua_pushcclosure(state, &error, 0);
-			int ref = luaL_ref(state, LUA_REGISTRYINDEX);
-			log::log("Type: " + std::to_string(lua_type(state, -1)));
-			log::log("ref: " + std::to_string(ref));
-
-			refs[state] = ref;
-
-			return ref;
+			lua_pushvalue(state, -1);
+			lua_setfield(state, LUA_REGISTRYINDEX, key);
 		}
 
 		void handler(int sig)

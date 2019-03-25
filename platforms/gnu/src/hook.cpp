@@ -80,7 +80,7 @@ namespace blt
 			const int target = 1; // Push our handler to the start of the stack
 
 			// Get the value onto the stack, as pcall can't accept indexes
-			lua_rawgeti(state, LUA_REGISTRYINDEX, error::check_callback(state));
+			error::push_callback(state);
 			lua_insert(state, target);
 
 			// Run the function, and any errors are handled for us.
