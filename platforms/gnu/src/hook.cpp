@@ -110,6 +110,9 @@ namespace blt
 
 		blt::lua_functions::initiate_lua(state);
 
+		// Add our custom Lua members - ie, the blt.create_entry function
+		asset_add_lua_members(state);
+
 		return returnVal;
 	}
 

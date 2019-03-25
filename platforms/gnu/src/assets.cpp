@@ -33,7 +33,7 @@ namespace blt
 	{
 		namespace assets
 		{
-			int create_entry(lua_state *L)
+			int create_entry_ex(lua_state *L)
 			{
 				idstring *extension = (idstring*) lua_touserdata(L, 2);
 				idstring *name = (idstring*) lua_touserdata(L, 3);
@@ -53,6 +53,15 @@ namespace blt
 
 				custom_assets[hash] = filename;
 				return 0;
+			}
+
+			int create_entry(lua_state *L)
+			{
+				// Chop off anything after the 3rd argument
+				if(lua_gettop(L) > 4)
+					lua_settop(L, 4);
+
+				return create_entry_ex(L);
 			}
 
 			void setup(lua_state *L)
@@ -206,6 +215,13 @@ func(5);
 		dslDbTryOpenDetour ## id.Install((void*) dsl_db_try_open_ ## id, (void*) dt_dsl_db_try_open_hook_ ## id, subhook::HookOption64BitOffset);
 		EACH_HOOK(INSTALL_TRY_OPEN_HOOK)
 
+	}
+
+	void asset_add_lua_members(lua_State *L) {
+		lua_getglobal(L, "blt");
+		lua_pushcfunction(L, lapi::assets::create_entry_ex);
+		lua_setfield(L, -2, "db_create_entry");
+		lua_pop(L, 1);
 	}
 };
 
