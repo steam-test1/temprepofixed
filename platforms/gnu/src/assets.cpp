@@ -81,6 +81,23 @@ namespace blt
 		};
 	};
 
+	// A datastore that simply provides the contents of a string
+	class StringDataStore : public CustomDataStore
+	{
+	public:
+		virtual ~StringDataStore() override;
+		virtual size_t write(size_t position_in_file, uint8_t const *data, size_t length) override;
+		virtual size_t read(size_t position_in_file, uint8_t * data, size_t length) override;
+		virtual bool close() override;
+		virtual size_t size() const override;
+		virtual bool is_asynchronous() const override;
+		// virtual void set_asynchronous_completion_callback(void* /*dsl::LuaRef*/) {} // ignore this
+		// virtual uint64_t state() { return 0; } // ignore this
+		virtual bool good() const override;
+
+		std::string contents;
+		StringDataStore(std::string contents) : contents(contents) {}
+	};
 
 	// The acual function hooks
 
@@ -226,6 +243,51 @@ func(5);
 		lua_pushcfunction(L, lapi::assets::create_entry_ex);
 		lua_setfield(L, -2, "db_create_entry");
 		lua_pop(L, 1);
+	}
+
+	// StringDataStore implementation
+	StringDataStore::~StringDataStore()
+	{
+	}
+
+	size_t StringDataStore::write(size_t position_in_file, uint8_t const *data, size_t length)
+	{
+		// simply not supported, TODO handle this better?
+		abort();
+	}
+
+	size_t StringDataStore::read(size_t position_in_file, uint8_t * data, size_t length)
+	{
+		size_t real_len = min(length, size() - position_in_file);
+
+		if(real_len <= 0)
+			return 0;
+
+		std::copy(contents.begin() + position_in_file, contents.begin() + real_len, data);
+		return real_len;
+	}
+
+	bool StringDataStore::close()
+	{
+		// TODO clear out the string and make good() return false
+
+		// afaik we just should always return true?
+		return true;
+	}
+
+	size_t StringDataStore::size() const
+	{
+		return contents.length();
+	}
+
+	bool StringDataStore::is_asynchronous() const
+	{
+		return false;
+	}
+
+	bool StringDataStore::good() const
+	{
+		return true;
 	}
 };
 
