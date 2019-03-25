@@ -7,6 +7,7 @@
 
 #include <string>
 #include <map>
+#include <fstream>
 
 #include <dlfcn.h>
 #include <sys/stat.h>
@@ -16,6 +17,9 @@
 #include <dsl/DB.hh>
 #include <dsl/Transport.hh>
 
+#include <scriptdata/ScriptData.h>
+#include <scriptdata/FontData.h>
+
 #define hook_remove(hookName) subhook::ScopedHookRemove _sh_remove_raii(&hookName)
 
 using namespace std;
@@ -24,8 +28,29 @@ using namespace dsl;
 namespace blt
 {
 
+	// Represents a single custom asset
+	class asset_t
+	{
+	public:
+		// What's the type of the asset - should it be loaded as it is on disk (PLAIN, for most stuff, such
+		// as like images, text files, models and so on), or is it a Diesel engine object that needs to be recoded
+		// from a 32-bit file (as made on Windows) to a 64-bit one.
+		enum asset_type
+		{
+			PLAIN,
+			SCRIPTDATA,
+			FONT,
+		};
+
+		// The path to the file
+		std::string filename;
+
+		// the type, as mentioned above
+		asset_type type = PLAIN;
+	};
+
 	typedef pair<idstring_t, idstring_t> hash_t;
-	static std::map<hash_t, std::string> custom_assets;
+	static std::map<hash_t, asset_t> custom_assets;
 
 	// LAPI stuff
 
@@ -55,7 +80,34 @@ namespace blt
 					// luaL_error(L, buff);
 				}
 
-				custom_assets[hash] = filename;
+				asset_t asset;
+				asset.filename = filename;
+
+				if(lua_type(L, 5) == LUA_TTABLE)
+				{
+					lua_getfield(L, 5, "recode_type");
+
+					if(lua_isstring(L, -1))
+					{
+						std::string type = lua_tostring(L, -1);
+
+						if(type == "scriptdata")
+						{
+							asset.type = asset_t::SCRIPTDATA;
+						}
+						else if(type == "font")
+						{
+							asset.type = asset_t::FONT;
+						}
+						else
+						{
+							luaL_error(L, "Unknown recode type '%s'", type.c_str());
+						}
+					}
+					lua_pop(L, 1);
+				}
+
+				custom_assets[hash] = asset;
 				return 0;
 			}
 
@@ -115,6 +167,8 @@ func(5);
 	static void (*dsl_db_add_members)   (lua_state*);
 	static void (*dsl_fss_open) (Archive *output, FileSystemStack **_this, libcxxstring const*);
 
+	static void (*archive_ctor) (Archive *_this, libcxxstring const *name, dsl::CustomDataStore *datastore, size_t start_pos, size_t size, bool probably_write_flag, void* ukn);
+
 	typedef void* (*try_open_t) (Archive *target, DB *db, idstring *ext, idstring *name, void *template_obj /* Misc depends on the template type */, Transport *transport);
 	typedef void* (*do_resolve_t) (DB *_this, idstring*, idstring*, void *template_obj, void *unknown);
 
@@ -137,17 +191,66 @@ func(5);
 		hash_t hash(name->value, ext->value);
 		if(custom_assets.count(hash))
 		{
-			string str = custom_assets[hash];
+			const asset_t &asset = custom_assets[hash];
 
 			struct stat buffer;
-			if(stat(str.c_str(), &buffer))
+			if(stat(asset.filename.c_str(), &buffer))
 			{
-				string err = "Cannot open registered asset " + str;
+				string err = "Cannot open registered asset " + asset.filename;
 				log::log(err, log::LOG_ERROR);
 				throw err;
 			}
 
-			libcxxstring cxxstr = str; // Use a LibCXX-ABI-compatible string thing
+			libcxxstring cxxstr = asset.filename; // Use a LibCXX-ABI-compatible string thing
+
+			// Some assets are different on the 32-bit (Windows) and 64-bit (Linux) versions of PAYDAY, so we need to recode them
+			if(asset.type != asset_t::PLAIN)
+			{
+				// Create a datastore. This is what you might call a backing object, which the archive will refer to.
+				// Note that the archive will delete the datastore when it's done, so this isn't a memory leak.
+				StringDataStore *datastore = new StringDataStore("");
+
+				// Read the file in question
+				std::ifstream in(asset.filename, std::ios::in | std::ios::binary);
+				if (!in)
+				{
+					// TODO error message
+					abort();
+				}
+
+				std::string &contents = datastore->contents;
+				in.seekg(0, std::ios::end);
+				contents.resize(in.tellg());
+				in.seekg(0, std::ios::beg);
+				in.read(&contents[0], contents.size());
+				in.close();
+
+				switch(asset.type)
+				{
+				case asset_t::SCRIPTDATA:
+				{
+					pd2hook::scriptdata::ScriptData sd(contents.size(), (const uint8_t*) contents.c_str());
+					contents = sd.GetRoot()->Serialise(false);
+					break;
+				}
+				case asset_t::FONT:
+				{
+					pd2hook::scriptdata::font::FontData fd(contents);
+					contents = fd.Export(false);
+					break;
+				}
+				default:
+					string msg = "Unknown asset typecode " + to_string(asset.type) + " - this is probably a bug in SuperBLT, please report it";
+					throw msg;
+				}
+
+				// Create an archive using our datastore, in the memory location passed in (this is how
+				// an object is returned in C++ - memory is allocated by the caller, and the pointer is passed
+				// in the first argument, even before "this").
+				archive_ctor(target, &cxxstr, datastore, 0, datastore->size(), false, nullptr);
+				return target;
+			}
+
 			dsl_fss_open(target, &db->stack, &cxxstr);
 			return target;
 		}
@@ -226,6 +329,9 @@ func(5);
 		// The misc. functions
 		setcall(dsl_db_add_members, _ZN3dsl6MainDB11add_membersEP9lua_State);
 		setcall(dsl_fss_open, _ZNK3dsl15FileSystemStack4openERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE);
+
+		// The archive constructor
+		setcall(archive_ctor, _ZN3dsl7ArchiveC1ERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEPNS_9DataStoreExxbx);
 #undef setcall
 
 		// Add the 'add_members' hook
