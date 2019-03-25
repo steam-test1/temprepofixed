@@ -35,6 +35,10 @@ namespace blt
 		{
 			int create_entry_ex(lua_state *L)
 			{
+				luaL_checktype(L, 2, LUA_TUSERDATA);
+				luaL_checktype(L, 3, LUA_TUSERDATA);
+				luaL_checktype(L, 4, LUA_TSTRING);
+
 				idstring *extension = (idstring*) lua_touserdata(L, 2);
 				idstring *name = (idstring*) lua_touserdata(L, 3);
 				hash_t hash(name->value, extension->value);
