@@ -120,6 +120,20 @@ namespace blt
 				return create_entry_ex(L);
 			}
 
+			int remove_entry(lua_state *L)
+			{
+				luaL_checktype(L, 2, LUA_TUSERDATA);
+				luaL_checktype(L, 3, LUA_TUSERDATA);
+
+				idstring *extension = (idstring*) lua_touserdata(L, 2);
+				idstring *name = (idstring*) lua_touserdata(L, 3);
+				hash_t hash(name->value, extension->value);
+
+				custom_assets.erase(hash);
+
+				return 0;
+			}
+
 			void setup(lua_state *L)
 			{
 #define func(name) \
@@ -127,6 +141,7 @@ namespace blt
 				lua_setfield(L, -2, #name);
 
 				func(create_entry);
+				func(remove_entry);
 
 #undef func
 			}
