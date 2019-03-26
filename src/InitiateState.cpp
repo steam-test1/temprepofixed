@@ -14,6 +14,7 @@
 #include "tweaker/xmltweaker.h"
 #include "plugins/plugins.h"
 #include "scriptdata/ScriptData.h"
+#include "luautil/luautil.h"
 
 #include <thread>
 #include <list>
@@ -917,8 +918,9 @@ namespace blt
 			luaL_openlib(L, "blt", bltLib, 0);
 
 			load_scriptdata_library(L);
+			load_lua_utils(L);
 
-			lua_pop(L, 1);
+			lua_pop(L, 1); // pop the BLT library
 
 			if (vrMode)
 			{
