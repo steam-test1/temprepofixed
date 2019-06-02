@@ -14,8 +14,8 @@ namespace pd2hook::scriptdata
 	using namespace tools;
 
 	const SNil SNil::INSTANCE;
-	const SBool SBool::TRUE(true);
-	const SBool SBool::FALSE(false);
+	const SBool SBool::STRUE(true);
+	const SBool SBool::SFALSE(false);
 
 	// static bool is32bit;
 
@@ -258,9 +258,9 @@ namespace pd2hook::scriptdata
 		case SNil::ID:
 			return &SNil::INSTANCE;
 		case SBool::ID_F:
-			return &SBool::FALSE;
+			return &SBool::SFALSE;
 		case SBool::ID_T:
-			return &SBool::TRUE;
+			return &SBool::STRUE;
 		case SNum::ID:
 			return &numbers[index];
 		case SString::ID:

@@ -59,8 +59,8 @@ namespace pd2hook::scriptdata
 
 		static const int ID_T = 1;
 		static const int ID_F = 2;
-		static const SBool TRUE;
-		static const SBool FALSE;
+		static const SBool STRUE;
+		static const SBool SFALSE;
 
 	protected:
 		virtual void Serialise(tools::write_block &out, write_info &info) const override
