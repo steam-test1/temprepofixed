@@ -44,14 +44,14 @@ static int vmlua_load(lua_State *L)
 static int vmlua_loadfile (lua_State *L)
 {
 	const char *fname = luaL_checklstring(L, 1, nullptr);
-	return load_aux(L, luaL_loadfile(L, fname));
+	return load_aux(L, luaL_loadfilex(L, fname, "t"));
 }
 
 static int vmlua_dofile (lua_State *L)
 {
 	const char *fname = luaL_checklstring(L, 1, nullptr);
 	int n = lua_gettop(L);
-	if (luaL_loadfile(L, fname) != 0) lua_error(L);
+	if (luaL_loadfilex(L, fname, "t") != 0) lua_error(L);
 	lua_call(L, 0, LUA_MULTRET);
 	return lua_gettop(L) - n;
 }
