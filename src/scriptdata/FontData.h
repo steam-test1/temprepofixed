@@ -9,6 +9,7 @@
 namespace pd2hook::scriptdata::font
 {
 
+#pragma pack(push,1)
 	struct glyph
 	{
 		//uint8_t zero_1;
@@ -19,7 +20,8 @@ namespace pd2hook::scriptdata::font
 
 		// doesn't matter, this is consistent between 32- and 64-bit
 		char ukn[10];
-	} __attribute__((packed));
+	};
+#pragma pack(pop)
 
 	struct kerning
 	{
