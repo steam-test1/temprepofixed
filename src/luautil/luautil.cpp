@@ -23,8 +23,23 @@ static int vmlua_load(lua_State *L)
 	const char *s = lua_tolstring(L, 1, &l);
 	if (s != NULL)    /* loading a string? */
 	{
+		struct readdata {
+			const char *s;
+			size_t l;
+		} data;
+		data.s = s;
+		data.l = l;
+
 		const char *chunkname = luaL_optstring(L, 2, s);
-		status = luaL_loadbufferx(L, s, l, chunkname, "t");
+		auto reader = [](lua_State *L, void *ud, size_t *sz)->const char* {
+			readdata *data = (readdata*) ud;
+			*sz = data->l;
+			const char *c = data->s;
+			data->s = nullptr;
+			data->l = 0;
+			return c;
+		};
+		status = lua_loadx(L, reader, &data, chunkname, "t");
 	}
 	else    /* loading from a reader function */
 	{
