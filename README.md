@@ -9,8 +9,10 @@ This is the developer repository, and should only be used if you know what you'r
 The Lua component of the BLT which controls mod loading can be found in it's own repository, [payday2-superblt-lua](https://gitlab.com/znixian/payday2-superblt-lua).
 
 ## Download
-Visit [superblt.znix.xyz](https://superblt.znix.xyz/) to get the latest stable download for windows, or see below for building
-GNU+Linux binaries.
+Visit [The SuperBLT Site](https://superblt.znix.xyz/) to get the latest stable download for Windows. 
+Dribbleondo maintains a Linux download that is primarily for Debian-based Distro's, 
+which [can be accessed here](https://drive.google.com/open?id=1qcZ3-FFTbmI075pzNyY2h_XtRdnnTTDl). See below for building
+GNU+Linux binaries for yourself if you have no success with any other option.
 
 ## Documentation
 Documentation for the BLT can be found on the [GitHub Wiki](https://github.com/JamesWilko/Payday-2-BLT/wiki) for the project.
@@ -50,7 +52,7 @@ Documentation for SuperBLT can be found on the [SuperBLT Website](https://superb
 	* Kilandor
 	* Joel Juvél
 	* PlayYou
-	* dribbleondo
+	* Dribbleondo
 	* zekesonxx
 	* TRSGuy
 	* luck3y
@@ -76,10 +78,10 @@ so you don't need to make any special efforts to use them.
 
 ### GNU+Linux
 
-First, pull the git submodules with
+First, clone this repository:
 
 ```
-git submodule update --init --recursive
+git clone --recursive https://gitlab.com/znixian/payday2-superblt.git
 ```
 
 Second, create and `cd` into a build directory:
@@ -101,20 +103,34 @@ Alternatively, if you want debug symbols for GDB, add it as an argument:
 cmake .. -DCMAKE_BUILD_TYPE=Release
 ```
 
-If the previous step told you that you're missing some libraries, install them (and be
-sure to install their development headers) via your package manager.
+If the previous step told you that you're missing some libraries (which is quite likely), install them, and be
+sure to install their development headers too. This can be done via your package manager.
 
-These packages should be something along the lines of `libcurl4-openssl-dev`,
-`zlib1g-dev`, and `libopenal-dev` depending on your distribution.
+These packages are normally as follows: `libcurl4-openssl-dev`, `libssl-dev`, 
+`zlib1g-dev`, and `libopenal-dev`. This is distribution-dependant, naturally.
 
-Next, compile it:
+Next, compile the loader. You can speed up the compile process by replacing the number
+"4" with the amount of threads your CPU has (generally it's twice the core count, so
+for example: 2 cores will have 4 threads, 4 cores will have 8 threads, and so on):
 
 ```
 make -j 4
 ```
 
-Now add the resulting `libsuperblt_loader.so` to your `LD_PRELOAD` enviornment
-variable when you run PAYDAY.
+Go into the build folder and copy the resulting `libsuperblt_loader.so` into the root directory
+of PAYDAY 2's install folder (the same folder as the binary executable; `payday2_release`).
+
+And finally, add the `LD_PRELOAD` enviornment variable to the Launch Options
+
+```
+env LD_PRELOAD="$LD_PRELOAD ./libsuperblt_loader.so" %command%
+```
+
+This environment variable will tell the game to look for the SuperBLT loader when you run PAYDAY 2.
+
+A known issue is that, depending on how new your distributions' packages are, Steam has an annoying tendancy to use an outdated version of
+libcurl4 that it packages in with the client, which the loader cannot use. Some distributions may require manually looking for the latest version of this library.
+More detailed instructions on how to do this [can be found here](https://steamcommunity.com/sharedfiles/filedetails/?id=801187233)
 
 Be sure to install the basemod from [GitLab:znixian/payday2-superblt-lua](https://gitlab.com/znixian/payday2-superblt-lua),
 as the automatic installer isn't currently implemented on GNU+Linux.
