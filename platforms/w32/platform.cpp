@@ -19,44 +19,30 @@ using namespace pd2hook;
 
 static CConsole* console = NULL;
 
-static bool vrMode;
 static std::thread::id main_thread_id;
 
 blt::idstring *blt::platform::last_loaded_name = idstring_none, *blt::platform::last_loaded_ext = idstring_none;
 
-static subhook::Hook gameUpdateDetour, newStateDetour, newStateDetourVr, luaCloseDetour, node_from_xmlDetour;
+static subhook::Hook gameUpdateDetour, newStateDetour, luaCloseDetour, node_from_xmlDetour;
 
 static void init_idstring_pointers()
 {
 	char *tmp;
 
-	if (try_open_base_vr)
-	{
-		tmp = (char*)try_open_base_vr;
-		tmp += 0x44;
-		blt::platform::last_loaded_name = *((blt::idstring**)tmp);
+	tmp = (char*)try_open_base;
+	tmp += 0x44;
+	blt::platform::last_loaded_name = *((blt::idstring**)tmp);
 
-		tmp = (char*)try_open_base_vr;
-		tmp += 0x2A;
-		blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
-	}
-	else
-	{
-		tmp = (char*)try_open_base;
-		tmp += 0x17;
-		blt::platform::last_loaded_name = *((blt::idstring**)tmp);
-
-		tmp = (char*)try_open_base;
-		tmp += 0x05;
-		blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
-	}
+	tmp = (char*)try_open_base;
+	tmp += 0x2A;
+	blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
 }
 
 static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char freakin, int clue)
 {
-	subhook::ScopedHookRemove scoped_remove(vrMode ? &newStateDetourVr : &newStateDetour);
+	subhook::ScopedHookRemove scoped_remove(&newStateDetour);
 
-	int ret = (vrMode ? luaL_newstate_vr : luaL_newstate)(thislol, no, freakin, clue);
+	int ret = luaL_newstate(thislol, no, freakin, clue);
 
 	lua_State* L = (lua_State*)*((void**)thislol);
 	printf("Lua State: %p\n", (void*)L);
@@ -65,12 +51,6 @@ static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char fr
 	blt::lua_functions::initiate_lua(L);
 
 	return ret;
-}
-
-static int __fastcall luaL_newstate_new_vr(void* thislol, int edx, char no, char freakin, int clue)
-{
-	vrMode = true;
-	return luaL_newstate_new(thislol, edx, no, freakin, clue);
 }
 
 void* __fastcall do_game_update_new(void* thislol, int edx, int* a, int* b)
@@ -210,13 +190,8 @@ void blt::platform::InitPlatform()
 
 	SignatureSearch::Search();
 
-	if (node_from_xml == NULL) node_from_xml = node_from_xml_vr;
-
 	gameUpdateDetour.Install(do_game_update, do_game_update_new);
-	if(luaL_newstate)
-		newStateDetour.Install(luaL_newstate, luaL_newstate_new);
-	else
-		newStateDetourVr.Install(luaL_newstate_vr, luaL_newstate_new_vr);
+	newStateDetour.Install(luaL_newstate, luaL_newstate_new);
 	luaCloseDetour.Install(lua_close, lua_close_new);
 
 	edit_node_from_xml_hook(true);

@@ -125,17 +125,18 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_checkudata, int, "\x56\x8B\x74\x24\x08\x57
 CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_error, int, "\x8D\x44\x24\x0C\x50\xFF\x74\x24\x0C\xFF\x74\x24\x0C\xE8\x00\x00\x00\x00\x83\xC4\x0C\x50\xFF\x74\x24\x08\xE8", "xxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, const char*, ...)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_error, int, "\x56\x8B\x74\x24\x08\x57\x56\xE8\x00\x00\x00\x00\x83\xC4\x04\x85\xC0\x74\x4A\x8B\x4E\x1C\x8B\x7E\x14\x03\xC8\x8B\x46\x08\x83\xA0", "xxxxxxxx????xxxxxxxxxxxxxxxxxxxx", 0, lua_State*)
 
-// TODO: Find address-less signatures
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Desktop, node_from_xml, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x33", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_VR,      node_from_xml_vr, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x56\x57\x8B\xDA\x8B\xF9\xC7\x44\x24\x18\x00\x00\x00\x00\xC7\x44\x24\x1C\x00\x00\x00\x00\xC7\x44\x24\x20\x00\x00\x00\x00", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
+// Note that previously the desktop and VR binaries were built differently, for example the normal binary (IIRC)
+// used cdecl as the default calling convention (/Gd), while the VR version used fastcall by default (/Gr).
+// In update 199 (or 199.3?) they switched the desktop binary to use the VR signatures. While it broke SBLT at
+// the time, it means we don't have to maintain two sets of signatures.
+// (previously these were node_from_xml, try_open_base and luaL_newstate)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, node_from_xml, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x56", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
 
 // FIXME This isn't really actually a function - it's a blob that contains references to some of the variables we want.
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Desktop, try_open_base, int, "\x8B\x44\x24\x04\xA3\x00\x00\x00\x00\x8B\x44\x24\x08\xA3\x00\x00\x00\x00\x8B\x44\x24\x0C\xA3\x00\x00\x00\x00\x8B\x44\x24\x10\xA3\x00\x00\x00\x00\xC6\x05\x00\x00\x00\x00\x01\x8B\xC1\xC2\x10\x00", "xxxxx????xxxxx????xxxxx????xxxxx????xx????xxxxxx", 0)
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_VR, try_open_base_vr, int, "\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x81\xEC\x50\x01\x00\x00\xC7\x04\x24\x00\x00", "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, try_open_base, int, "\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x81\xEC\x50\x01\x00\x00\xC7\x04\x24\x00\x00", "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0)
 
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, do_game_update, void*, "\x56\xFF\x74\x24\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxx????xxx", 0, int*, int*)
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Desktop, luaL_newstate, int, "\x53\x56\x33\xDB\x57\x8B\xF1\x39\x5C\x24\x18\x0F", "xxxxxxxxxxxx", 0, char, char, int)
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_VR,      luaL_newstate_vr, int, "\x8B\x44\x24\x0C\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxx", 0, char, char, int)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, luaL_newstate, int, "\x8B\x44\x24\x0C\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxx", 0, char, char, int)
 
 // Some internal LuaJIT bits and pieces we can use to implement LuaJIT methods inlined by the compiler
 CREATE_LUAJIT_CALLABLE_SIGNATURE(lj_cf_rawset, int, "\x56\x8B\x74\x24\x08\x8B\x46\x10\x8B\x4E\x14\x3B\xC1\x0F\x83\x85\x00\x00\x00\x83\x78\x04\xF4\x75\x7F\x8D\x50\x08\x3B\xD1\x73\x5E", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*)
