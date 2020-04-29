@@ -130,7 +130,7 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(lua_error, int, "\x56\x8B\x74\x24\x08\x57\x56\x
 // In update 199 (or 199.3?) they switched the desktop binary to use the VR signatures. While it broke SBLT at
 // the time, it means we don't have to maintain two sets of signatures.
 // (previously these were node_from_xml, try_open_base and luaL_newstate)
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, node_from_xml, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x56", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, node_from_xml, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x56\x57\x8B\xDA\x8B\xF9\xC7\x44\x24\x18\x00\x00\x00\x00\xC7\x44\x24\x1C\x00\x00\x00\x00\xC7\x44\x24\x20\x00\x00\x00\x00", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
 
 // FIXME This isn't really actually a function - it's a blob that contains references to some of the variables we want.
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, try_open_base, int, "\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x81\xEC\x50\x01\x00\x00\xC7\x04\x24\x00\x00", "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0)

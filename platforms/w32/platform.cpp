@@ -80,78 +80,50 @@ void lua_close_new(lua_State* L)
 	lua_close(L);
 }
 
+//////////// Start of XML tweaking stuff
 
-#include "tweaker/xmltweaker_internal.h"
-void __stdcall edit_node_from_xml_hook(int arg);
+// Fastcall wrapper
+static void __fastcall edit_node_from_xml_hook(int arg);
+static void __fastcall node_from_xml_new_fastcall(void *node, char *data, int *len);
+
 static void __declspec(naked) node_from_xml_new()
 {
+	// PD2 seems to be using some weird calling convention, that's like MS fastcall but
+	// with a caller-restored stack. Thus we have to use assembly to bridge to it.
+	// TODO what do we have to clean up?
 	__asm
 	{
-		push ecx
-
-		// Push on, as the last argument, the value of a pointer passed as the last function argument
-		// This appears to be a length value, however it will often have a huge (and fixed) value.
-		push[esp + 12]
-
-		push edx
-
-		// Run the intercept method
-		call pd2hook::tweaker::tweak_pd2_xml
-
-		pop edx
-
-		add esp, 4 // Remove the last argument
-
-		pop ecx
-
-		// Move across our string
-		mov edx, eax
-
-		// Save our value for later, so we can free it
-		push eax
-
-		// Bring the old top-of-the-stack back up
-		mov eax, [esp + 4]
-		push eax
-
-		// Disarm the hook
-		// (wouldn't it be great if subhook had reliable trampolines? Sometime I should add and PR that)
-		push eax
-		push ecx
-		push edx
-		push 0
-		call edit_node_from_xml_hook
-		pop edx
-		pop ecx
-		pop eax
-
-		// Call the original function
-		call node_from_xml
-
-		// Rearm the hook
-		push eax
-		push ecx
-		push edx
-		push 1
-		call edit_node_from_xml_hook
-		pop edx
-		pop ecx
-		pop eax
-
-		add esp, 4 // Remove our temporary value from the stack
-
-		// Currently, the stack is: [ arg3, txt
-		// Call the free function, which uses the txt arg
-		call pd2hook::tweaker::free_tweaked_pd2_xml
-
-		// Clear off the txt argument, and the stack is back to how we left it
-		add esp, 4
-
+		push[esp] // since the caller is not expecting us to pop, duplicate the top of the stack
+		call node_from_xml_new_fastcall
 		retn
 	}
 }
 
-void __stdcall edit_node_from_xml_hook(int arg)
+static void __fastcall do_xmlload_invoke(void *node, char *data, int *len)
+{
+	__asm
+	{
+		call node_from_xml
+	}
+	// The stack gets cleaned up by the MSVC-generated assembly, since we're not using __declspec(naked)
+}
+
+static void __fastcall node_from_xml_new_fastcall(void *node, char *data, int *len) {
+	char *modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
+	int modLen = *len;
+
+	if (modded != data) {
+		modLen = strlen(modded);
+	}
+
+	edit_node_from_xml_hook(false);
+	do_xmlload_invoke(node, modded, &modLen);
+	edit_node_from_xml_hook(true);
+
+	pd2hook::tweaker::free_tweaked_pd2_xml(modded);
+}
+
+static void __fastcall edit_node_from_xml_hook(int arg)
 {
 	if (arg)
 	{
@@ -163,6 +135,7 @@ void __stdcall edit_node_from_xml_hook(int arg)
 	}
 }
 
+//////////// End of XML tweaking stuff
 
 void blt::platform::InitPlatform()
 {

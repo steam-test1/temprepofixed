@@ -24,7 +24,7 @@ static set<idfile> ignored_files;
 // once, nothing should happen as a file from the filesystem is being loaded.
 idfile last_parsed;
 
-void* tweaker::tweak_pd2_xml(char* text, int text_length)
+char* tweaker::tweak_pd2_xml(char* text, int text_length)
 {
 	idfile file = idfile(*blt::platform::last_loaded_name, *blt::platform::last_loaded_ext);
 
