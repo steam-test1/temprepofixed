@@ -51,7 +51,7 @@ Documentation for SuperBLT can be found on the [SuperBLT Website](https://superb
 	* cjur3
 	* Kilandor
 	* Joel Juvél
-	* PlayYou
+	* Brskt
 	* Dribbleondo
 	* zekesonxx
 	* TRSGuy
