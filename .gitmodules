@@ -7,15 +7,3 @@
 [submodule "lib/subhook"]
 	path = lib/subhook
 	url = https://github.com/Zeex/subhook.git
-[submodule "lib/zlib"]
-    path = lib/zlib
-    url = https://github.com/madler/zlib.git
-[submodule "lib/curl"]
-    path = lib/curl
-    url = https://github.com/curl/curl.git
-[submodule "lib/openssl"]
-    path = lib/openssl
-    url = https://github.com/openssl/openssl.git
-[submodule "lib/openal"]
-    path = lib/openal
-    url = https://github.com/kcat/openal-soft.git
