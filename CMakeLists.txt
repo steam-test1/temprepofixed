@@ -1,4 +1,12 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.2)
+
+# HUNTER dependencency manager
+include("cmake/HunterGate.cmake")
+HunterGate(
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.257.tar.gz"
+    SHA1 "52203b35dfc2f975f4c22fc89f055476726e4288"
+)
+
 project(SuperBLT)
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux") # Add other systems, if they get PD2 support
@@ -117,32 +125,22 @@ target_link_libraries(SuperBLT mxml)
 target_link_libraries(SuperBLT wren)
 target_link_libraries(SuperBLT subhook)
 
-if(WIN32)
-	set(ZLIB_ROOT $ENV{ZLIB_ROOT} $ENV{ZLIB_ROOT}/Release)
-	set(ZLIB_LIBRARY $ENV{ZLIB_ROOT}/Release/zlibstatic.lib) # Force the static version of ZLib
-	set(CURL_INCLUDE_DIR $ENV{CURL_INCLUDE_DIR})
-	set(CURL_LIBRARY $ENV{CURL_LIBRARY})
-	set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR})
-	set(OPENAL_LIBRARY $ENV{OpenALSoft_ROOT}/build/Release/OpenAL32.lib)
-	set(OPENAL_INCLUDE_DIR $ENV{OpenALSoft_ROOT}/include)
-
-	# Use static libs on Windows
-	set(OPENSSL_USE_STATIC_LIBS true)
-endif()
-
-find_package(ZLIB REQUIRED)
+hunter_add_package(ZLIB)
+find_package(ZLIB CONFIG REQUIRED)
 include_directories (${ZLIB_INCLUDE_DIRS})
 target_link_libraries(SuperBLT ${ZLIB_LIBRARIES})
 
-find_package (CURL REQUIRED)
+hunter_add_package(CURL)
+find_package(CURL CONFIG REQUIRED)
 include_directories (${CURL_INCLUDE_DIRS})
 target_link_libraries(SuperBLT ${CURL_LIBRARY})
 
-find_package (OpenSSL REQUIRED)
+hunter_add_package(OpenSSL)
+find_package(OpenSSL REQUIRED)
 include_directories (${OPENSSL_INCLUDE_DIR})
 target_link_libraries(SuperBLT ${OPENSSL_LIBRARIES})
 
-find_package (OpenAL REQUIRED)
+hunter_add_package(OpenAL)
 include_directories (${OPENAL_INCLUDE_DIR})
 target_link_libraries(SuperBLT ${OPENAL_LIBRARY})
 
